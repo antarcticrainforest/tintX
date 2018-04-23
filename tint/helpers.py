@@ -8,7 +8,8 @@ import string
 
 import numpy as np
 import pandas as pd
-
+from datetime import datetime, timedelta
+from netCDF4 import num2date, date2num
 from .grid_utils import parse_grid_datetime, get_grid_size
 
 
