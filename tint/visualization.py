@@ -363,6 +363,6 @@ def embed_mp4_as_gif(filename):
 
     try:
         with open(newname, 'rb') as f:
-            display(Image(f.read()), format='png')
+            display(Image(f.read()))
     finally:
         os.remove(newname)
