@@ -1,5 +1,6 @@
-from distutils.core import setup, Extension
+from setuptools import setup
 import numpy.distutils.misc_util, os
+
 meta = dict(\
         description="Module to apply tracking algorithm of rainfall data",
         url = 'https://github.com/antarcticrainforest/tintV2',
