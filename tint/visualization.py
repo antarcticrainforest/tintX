@@ -17,7 +17,7 @@ from mpl_toolkits.basemap import Basemap
 from IPython.display import display, Image
 from matplotlib import pyplot as plt
 from datetime import timedelta
-
+import sys
 from .grid_utils import get_grid_alt
 
 
@@ -82,7 +82,9 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
     ax = fig.add_subplot(111)
 
     for nframe, grid in enumerate(grids):
-        print('Frame:', nframe)
+        sys.stdout.flush()
+        sys.stdout.write('\rFrame: %s       ' %nframe)
+        sys.stdout.flush()
         #display.plot_crosshairs(lon=radar_lon, lat=radar_lat)
         if nframe == 0:
             X = grid['x']
@@ -101,7 +103,7 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
                 im.set_array(grid['data'][0].filled(np.nan).ravel())
             except AttributeError:
                 im.set_array(grid['data'][0].ravel())
-        ax.set_title('CPOL estimated rain-rate at %s'\
+        ax.set_title('Rain-rate at %s'\
                      %((grid['time']+timedelta(hours=dt)).strftime('%Y-%m-%d %H:%M')))
         ann = []
         if nframe in tobj.tracks.index.levels[0]:
@@ -125,11 +127,111 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
             except ValueError:
                 pass
 
-        #plt.close()
-        #del grid, display, ax
         gc.collect()
+    plt.close()
+    del grid, ax
+
+def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
+              superimpose=None, cmap=None, ax=None, t_column=None,
+              pos_columns=None, plot_style={}, **kwargs):
+
+    """This code is a fork of plot_traj method in the plot module from the
+    trackpy project see http://soft-matter.github.io/trackpy fro more details
+
+    Plot traces of trajectories for each particle.
+    Optionally superimpose it on a frame from the video.
+    Parameters
+    ----------
+    tobj : trajectory containing the tracking object
+    X : 1D array of the X vector
+    Y : 1D array of the Y vector
+    colorby : {'particle', 'frame'}, optional
+    mpp : float, optional
+        Microns per pixel. If omitted, the labels will have units of pixels.
+    label : boolean, optional
+        Set to True to write particle ID numbers next to trajectories.
+    basemap_res: str
+        Set the resolution of the basemap
+    superimpose : ndarray, optional
+        Background image, default None
+    cmap : colormap, optional
+        This is only used in colorby='frame' mode. Default = mpl.cm.winter
+    ax : matplotlib axes object, optional
+        Defaults to current axes
+    t_column : string, optional
+        DataFrame column name for time coordinate. Default is 'frame'.
+    pos_columns : list of strings, optional
+        Dataframe column names for spatial coordinates. Default is ['x', 'y'].
+    plot_style : dictionary
+        Keyword arguments passed through to the `Axes.plot(...)` command
+    Returns
+    -------
+    Axes object
+    
+    """
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import LineCollection
+    if ax is None:
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(111)
+
+    m = Basemap(llcrnrlat=min(Y), llcrnrlon=min(X), urcrnrlat=max(Y),
+                urcrnrlon=max(X), resolution=basemap_res, ax=ax)
+    m.drawcoastlines()
 
 
+    if cmap is None:
+        cmap = plt.cm.winter
+    if t_column is None:
+        t_column = 'scan'
+    if pos_columns is None:
+        pos_columns = ['lon', 'lat']
+    if len(traj) == 0:
+        raise ValueError("DataFrame of trajectories is empty.")
+    _plot_style = dict(linewidth=1)
+    _plot_style.update(**_normalize_kwargs(plot_style, 'line2d'))
+
+    # Axes labels
+    if mpp is None:
+        #_set_labels(ax, '{} [px]', pos_columns)
+        mpp = 1.  # for computations of image extent below
+    else:
+        if mpl.rcParams['text.usetex']:
+            _set_labels(ax, r'{} [\textmu m]', pos_columns)
+        else:
+            _set_labels(ax, r'{} [\xb5m]', pos_columns)
+    # Background image
+    if superimpose is not None:
+        ax.imshow(superimpose, cmap=plt.cm.gray,
+                  origin='lower', interpolation='nearest',
+                  vmin=kwargs.get('vmin'), vmax=kwargs.get('vmax'))
+        ax.set_xlim(-0.5 * mpp, (superimpose.shape[1] - 0.5) * mpp)
+        ax.set_ylim(-0.5 * mpp, (superimpose.shape[0] - 0.5) * mpp)
+    # Trajectories
+    # Read http://www.scipy.org/Cookbook/Matplotlib/MulticoloredLine
+    y = traj['lat']
+    x = traj['lon']
+    uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
+    color_numbers = uid.max()
+    uid.sort()
+    for particle in uid.astype(str):
+        points = np.array(
+                [x[:,particle].values, y[:,particle].values]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        if segments.shape[0] > 1:
+            m.plot(x[:,particle].values,y[:,particle].values, lw=2)
+            if label:
+                x1 = x[:,particle].values
+                y1 = y[:,particle].values
+                if len(x1) > 1:
+                    cx, cy = m(x1[int(x1.size/2)], y1[int(y1.size/2)])
+                    dx,dy =m(((x1[1]-x1[0])/8.),((y1[1]-y1[0])/8.))
+                    ax.annotate('%s'%str(particle), xy=(cx, cy), xytext=(cx+dx,cy+dy),
+                                fontsize=16, horizontalalignment='center',
+                                verticalalignment='center')
+
+    return ax
 
 '''def lagrangian_view(tobj, grids, tmp_dir, uid=None, vmin=-8, vmax=64,
                     cmap=None, alt=None, basemap_res='l', box_rad=25):
@@ -366,3 +468,47 @@ def embed_mp4_as_gif(filename):
             display(Image(f.read()))
     finally:
         os.remove(newname)
+
+
+def _normalize_kwargs(kwargs, kind='patch'):
+    """Convert matplotlib keywords from short to long form."""
+    # Source:
+    # github.com/tritemio/FRETBursts/blob/fit_experim/fretbursts/burst_plot.py
+    if kind == 'line2d':
+        long_names = dict(c='color', ls='linestyle', lw='linewidth',
+                          mec='markeredgecolor', mew='markeredgewidth',
+                          mfc='markerfacecolor', ms='markersize',)
+    elif kind == 'patch':
+        long_names = dict(c='color', ls='linestyle', lw='linewidth',
+                          ec='edgecolor', fc='facecolor',)
+    for short_name in long_names:
+        if short_name in kwargs:
+            kwargs[long_names[short_name]] = kwargs.pop(short_name)
+    return kwargs
+
+def _set_labels(ax, label_format, pos_columns):
+    """This sets axes labels according to a label format and position column
+    names. Applicable to 2D and 3D plotting.
+    Parameters
+    ----------
+    ax : Axes object
+        The axes object on which the plot will be called
+    label_format : string
+        Format that is compatible with ''.format (e.g.: '{} px')
+    pos_columns : list of strings
+        List of column names in x, y(, z) order.
+    Returns
+    -------
+    None
+    """
+    ax.set_xlabel(label_format.format(pos_columns[0]))
+    ax.set_ylabel(label_format.format(pos_columns[1]))
+    if hasattr(ax, 'set_zlabel') and len(pos_columns) > 2:
+        ax.set_zlabel(label_format.format(pos_columns[2]))
+def invert_yaxis(ax):
+    """Inverts the y-axis of an axis object."""
+    bottom, top = ax.get_ylim()
+    if top > bottom:
+        ax.set_ylim(top, bottom, auto=None)
+    return ax
+
