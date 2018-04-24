@@ -133,7 +133,7 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
 
 def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
               superimpose=None, cmap=None, ax=None, t_column=None,
-              pos_columns=None, plot_style={}, **kwargs):
+              pos_columns=None, plot_style={}, mintrace=1, **kwargs):
 
     """This code is a fork of plot_traj method in the plot module from the
     trackpy project see http://soft-matter.github.io/trackpy fro more details
@@ -164,6 +164,8 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
         Dataframe column names for spatial coordinates. Default is ['x', 'y'].
     plot_style : dictionary
         Keyword arguments passed through to the `Axes.plot(...)` command
+    mintrace : int
+        Minimum length of a trace to be plotted
     Returns
     -------
     Axes object
@@ -216,20 +218,20 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     color_numbers = uid.max()
     uid.sort()
     for particle in uid.astype(str):
-        points = np.array(
-                [x[:,particle].values, y[:,particle].values]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        if segments.shape[0] > 1:
-            m.plot(x[:,particle].values,y[:,particle].values, lw=2)
+        x1 = x[:,particle].values
+        y1 = y[:,particle].values
+        if x1.shape[0] > int(mintrace):
+            m.plot(x1,y1, lw=2)
             if label:
-                x1 = x[:,particle].values
-                y1 = y[:,particle].values
                 if len(x1) > 1:
                     cx, cy = m(x1[int(x1.size/2)], y1[int(y1.size/2)])
                     dx,dy =m(((x1[1]-x1[0])/8.),((y1[1]-y1[0])/8.))
-                    ax.annotate('%s'%str(particle), xy=(cx, cy), xytext=(cx+dx,cy+dy),
-                                fontsize=16, horizontalalignment='center',
-                                verticalalignment='center')
+                else:
+                    cx, cy = m(x1[0], y1[0])
+                    dx, dy = 0, 0
+                ax.annotate('%s'%str(particle), xy=(cx, cy), xytext=(cx+dx,cy+dy),
+                            fontsize=16, horizontalalignment='center',
+                            verticalalignment='center')
 
     return ax
 
