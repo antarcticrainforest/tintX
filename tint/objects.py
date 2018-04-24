@@ -9,7 +9,7 @@ Functions for managing and recording object properties.
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-
+import sys
 from .grid_utils import get_filtered_frame
 
 
@@ -210,7 +210,9 @@ def get_object_prop(image1, grid1, field, record, params):
 
 def write_tracks(old_tracks, record, current_objects, obj_props):
     """ Writes all cell information to tracks dataframe. """
-    print('Writing tracks for scan', record.scan)
+    sys.stdout.flush()
+    sys.stdout.write('\rWriting tracks for scan %s '%(record.scan))
+    sys.stdout.flush()
 
     nobj = len(obj_props['id1'])
     scan_num = [record.scan] * nobj

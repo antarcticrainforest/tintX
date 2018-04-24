@@ -8,7 +8,7 @@ Cell_tracks class.
 
 import copy
 import datetime
-
+import sys
 import numpy as np
 import pandas as pd
 
@@ -194,7 +194,10 @@ class Cell_tracks(object):
 
             if np.nanmax(frame1) == 0:
                 newRain = True
-                print('No cells found in scan', self.record.scan)
+
+                sys.stdout.flush()
+                sys.stdout.write('\rNo cells found in scan %s     '%(self.record.scan))
+                sys.stdout.flush()
                 self.current_objects = None
                 continue
             ncells += 1
