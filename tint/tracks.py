@@ -225,12 +225,15 @@ class Cell_tracks(object):
                     self.current_objects,
                     self.counter
                 )
-
+            #try:
             obj_props = get_object_prop(frame1, grid_obj1, self.field,
-                                        self.record, self.params)
+                                            self.record, self.params)
+            
             self.record.add_uids(self.current_objects)
             self.tracks = write_tracks(self.tracks, self.record,
                                        self.current_objects, obj_props)
+            #except IndexError:
+            #obj_props = None
             del grid_obj1, raw1, frame1, global_shift, pairs, obj_props
             # scan loop end
         self.__load()
