@@ -168,33 +168,39 @@ def get_object_prop(image1, grid1, field, record, params):
     unit_vol = (unit_dim[0]*unit_dim[1]*unit_dim[2])/(1000**3)
 
     raw3D = grid1['data']
-
+    get_items = []
     for obj in np.arange(nobj) + 1:
-        obj_index = np.argwhere(image1 == obj)
-        id1.append(obj)
+        try:
 
-        # 2D frame stats
-        center.append(np.median(obj_index, axis=0))
-        this_centroid = np.round(np.mean(obj_index, axis=0), 3)
-        grid_x.append(this_centroid[1])
-        grid_y.append(this_centroid[0])
-        area.append(obj_index.shape[0] * unit_area)
+            obj_index = np.argwhere(image1 == obj)
+            this_centroid = np.round(np.mean(obj_index, axis=0), 3)
+            rounded = np.round(this_centroid).astype('i')
+            c_x = grid1['x'][rounded[1]]
+            c_y = grid1['y'][rounded[0]]
+            longitude.append(np.round(grid1['x'][rounded[1]], 4))
+            latitude.append(np.round(grid1['y'][rounded[0]], 4))
 
-        rounded = np.round(this_centroid).astype('i')
 
-        longitude.append(np.round(grid1['x'][rounded[1]], 4))
-        latitude.append(np.round(grid1['y'][rounded[0]], 4))
+            id1.append(obj)
 
-        # raw 3D grid stats
-        obj_slices = [raw3D[:, ind[0], ind[1]] for ind in obj_index]
-        field_max.append(np.nanmax(obj_slices))
-        field_mean.append(np.nanmean(obj_slices))
-        filtered_slices = [obj_slice > params['FIELD_THRESH']
-                           for obj_slice in obj_slices]
+            # 2D frame stats
+            center.append(np.median(obj_index, axis=0))
+            grid_x.append(this_centroid[1])
+            grid_y.append(this_centroid[0])
+            area.append(obj_index.shape[0] * unit_area)
 
+
+            # raw 3D grid stats
+            obj_slices = [raw3D[:, ind[0], ind[1]] for ind in obj_index]
+            field_max.append(np.nanmax(obj_slices))
+            field_mean.append(np.nanmean(obj_slices))
+            filtered_slices = [obj_slice > params['FIELD_THRESH']
+                               for obj_slice in obj_slices]
+            get_items.append(obj - 1)
+        except IndexError:
+            pass
     # cell isolation
     isolation = check_isolation(raw3D, image1, record.grid_size, params)
-
     objprop = {'id1': id1,
                'center': center,
                'grid_x': grid_x,
@@ -204,7 +210,8 @@ def get_object_prop(image1, grid1, field, record, params):
                'field_mean':field_mean,
                'lon': longitude,
                'lat': latitude,
-               'isolated': isolation}
+               'isolated': isolation,
+               'ok_items': get_items}
     return objprop
 
 
@@ -216,8 +223,8 @@ def write_tracks(old_tracks, record, current_objects, obj_props):
 
     nobj = len(obj_props['id1'])
     scan_num = [record.scan] * nobj
-    uid = current_objects['uid']
-
+    gi = obj_props['ok_items']
+    uid = current_objects['uid'][gi]
     new_tracks = pd.DataFrame({
         'scan': scan_num,
         'uid': uid,
@@ -229,7 +236,7 @@ def write_tracks(old_tracks, record, current_objects, obj_props):
         'area': obj_props['area'],
         'max': obj_props['field_max'],
         'mean': obj_props['field_mean'],
-        'isolated': obj_props['isolated']
+        'isolated': obj_props['isolated'][gi]
     })
     new_tracks.set_index(['scan', 'uid'], inplace=True)
     tracks = old_tracks.append(new_tracks)
