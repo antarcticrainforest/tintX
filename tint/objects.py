@@ -164,7 +164,7 @@ def get_object_prop(image1, grid1, field, record, params):
 
     unit_dim = record.grid_size
     unit_alt = unit_dim[0]/1000
-    unit_area = (unit_dim[1]*unit_dim[2])/(1000**2)
+    unit_area = 1 #(unit_dim[1]*unit_dim[2])/(1000**2)
     unit_vol = (unit_dim[0]*unit_dim[1]*unit_dim[2])/(1000**3)
 
     raw3D = grid1['data']
