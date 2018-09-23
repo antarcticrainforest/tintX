@@ -131,9 +131,46 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
     plt.close()
     del grid, ax
 
+
+
+def get_plotly_traj(traj, label=None, thresh='max', thresh_val=-1,
+                    color='grey', mintrace=1, lw=1, **kwargs):
+    """This method get track information and returns a plotly dict for the 
+        tracks.
+
+        Parameters
+        ----------
+        traj : trajectory containing the tracking object
+    """
+
+    y = traj['lat']
+    x = traj['lon']
+    val = traj[thresh]
+    uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
+    color_numbers = uid.max()
+    uid.sort()
+    paths = []
+    for particle in uid.astype(str):
+        x1 = x[:,particle].values
+        y1 = y[:,particle].values
+        mean1 = val[:,particle].values.mean()
+        if x1.shape[0] > int(mintrace) and mean1 >= thresh_val:
+            paths.append(dict(
+                            type='scattergeo',
+                            lon=list(x1),
+                            lat=list(y1),
+                            mode='lines',
+                            line=dict(width=1, color=color),
+                            opacity=float(mean1/val.max()),
+                            **kwargs))
+    return paths
+
+
+
 def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
               superimpose=None, cmap=None, ax=None, t_column=None,
-              pos_columns=None, plot_style={}, mintrace=1, **kwargs):
+              pos_columns=None, plot_style={}, mintrace=1, lw=1, size=100,
+              thresh='max', thresh_val=-1, color=None, draw_map=True, **kwargs):
 
     """This code is a fork of plot_traj method in the plot module from the
     trackpy project see http://soft-matter.github.io/trackpy fro more details
@@ -177,11 +214,12 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     if ax is None:
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111)
-
-    m = Basemap(llcrnrlat=min(Y), llcrnrlon=min(X), urcrnrlat=max(Y),
+    if draw_map is None :
+        m = Basemap(llcrnrlat=min(Y), llcrnrlon=min(X), urcrnrlat=max(Y),
                 urcrnrlon=max(X), resolution=basemap_res, ax=ax)
-    m.drawcoastlines()
-
+        m.drawcoastlines(linewidth=lw)
+    else:
+        m = draw_map
 
     if cmap is None:
         cmap = plt.cm.winter
@@ -214,14 +252,22 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     # Read http://www.scipy.org/Cookbook/Matplotlib/MulticoloredLine
     y = traj['lat']
     x = traj['lon']
+    val = traj[thresh]
     uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
     color_numbers = uid.max()
     uid.sort()
     for particle in uid.astype(str):
         x1 = x[:,particle].values
         y1 = y[:,particle].values
-        if x1.shape[0] > int(mintrace):
-            m.plot(x1,y1, lw=2)
+        mean1 = val[:,particle].values.mean()
+        if x1.shape[0] > int(mintrace) and mean1 >= thresh_val:
+            alpha=float(mean1/val.max())
+            if color is not None:
+                im = m.plot(x1,y1, color=color, lw=lw)
+            else:
+                im = m.plot(x1,y1, color=color, lw=lw)
+            m.scatter(x1[0], y1[0], marker='o', color=color, s=[size])
+            m.scatter(x1[-1], y1[-1], marker='*', color=color, s=[size])
             if label:
                 if len(x1) > 1:
                     cx, cy = m(x1[int(x1.size/2)], y1[int(y1.size/2)])
@@ -233,7 +279,7 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
                             fontsize=16, horizontalalignment='center',
                             verticalalignment='center')
 
-    return ax
+    return ax, m, im
 
 '''def lagrangian_view(tobj, grids, tmp_dir, uid=None, vmin=-8, vmax=64,
                     cmap=None, alt=None, basemap_res='l', box_rad=25):
