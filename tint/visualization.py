@@ -60,18 +60,22 @@ class Tracer(object):
                 ax.plot(tracer.grid_x, tracer.grid_y, self.cell_color[uid])
 
 
-def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
+def full_domain(tobj, grids, tmp_dir, vmin=0.01, vmax=15, cmap=None, alt=None,
                 basemap_res='f', isolated_only=False, tracers=False,
                 persist=False, m=None, dt=0):
 
     grid_size = tobj.grid_size
     if cmap is None:
-        cmap = 'Blues'
+        cmap = mpl.cm.Blues
+    try :
+        cmap.set_under('w')
+        cmap.set_bad('w')
+    except:
+        pass
     if alt is None:
         alt = tobj.params['GS_ALT']
     if tracers:
         tracer = Tracer(tobj, persist)
-
     radar_lon = tobj.radar_info['radar_lon']
     radar_lat = tobj.radar_info['radar_lat']
     #lon = np.arange(radar_lon-5, radar_lon+5, 0.5)
@@ -214,7 +218,7 @@ def get_plotly_traj(traj, label=None, thresh=('max',-1), particles=None,
 def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
               superimpose=None, cmap=None, ax=None, t_column=None, particles=None,
               pos_columns=None, plot_style={}, mintrace=2, size=100,
-              thresh=('mean', -1), color=None, create_map=True, **kwargs):
+              thresh=('mean', -1), color=None, create_map=None, **kwargs):
 
     """This code is a fork of plot_traj method in the plot module from the
     trackpy project see http://soft-matter.github.io/trackpy fro more details
@@ -268,12 +272,16 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     if ax is None:
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111)
-    if draw_map is None :
+    if create_map is None :
         m = Basemap(llcrnrlat=min(Y), llcrnrlon=min(X), urcrnrlat=max(Y),
                 urcrnrlon=max(X), resolution=basemap_res, ax=ax)
+        try:
+            lw=plot_style['lw']
+        except KeyError:
+            lw=0.5
         m.drawcoastlines(linewidth=lw)
     else:
-        m = draw_map
+        m = create_map
 
     if cmap is None:
         cmap = plt.cm.winter
@@ -493,7 +501,6 @@ def make_mp4_from_frames(tmp_dir, dest_dir, basename, fps, glob='*'):
               + " 'scale=trunc(iw/2)*2:trunc(ih/2)*2' -y "
               + basename)
     try:
-        print(dest_dir, basename, tmp_dir)
         if os.path.isfile(os.path.join(dest_dir, basename)):
             os.remove(os.path.join(dest_dir, basename))
         shutil.move(basename, dest_dir)
