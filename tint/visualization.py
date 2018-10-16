@@ -133,28 +133,72 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.1, vmax=10, cmap=None, alt=None,
 
 
 
-def get_plotly_traj(traj, label=None, thresh='max', thresh_val=-1,
-                    color='grey', mintrace=1, lw=1, **kwargs):
-    """This method get track information and returns a plotly dict for the 
+def get_plotly_traj(traj, label=None, thresh=('max',-1), particles=None,
+                    color='grey', mintrace=2, **kwargs):
+    """This method get track information and returns a plotly dict for the
         tracks.
 
         Parameters
         ----------
-        traj : trajectory containing the tracking object
+        tobj : trajectory containing the tracking object
+        X : 1D array of the X vector
+        Y : 1D array of the Y vector
+        colorby : {'particle', 'frame'}, optional
+        mpp : float, optional
+            Microns per pixel. If omitted, the labels will have units of pixels.
+        label : boolean, optional
+            Set to True to write particle ID numbers next to trajectories.
+        particles : a preset of storms (particles) to be drawn, instead of all
+            (default)
+        size : size of the sctter indicating start and end of the storm
+        color : Color of the storm tracks (default grey)
+        thresh : tuple for thresholds to be applied to the plotted objects. first
+            entry of the tuple is the variable (default 'mean') second one the
+            the minimum value (default -1)
+        kwargs : extra arguments for plotting
+        mintrace : int
+            Minimum length of a trace to be plotted
+        Returns
+        -------
+        Axes object
+        
+
     """
 
     y = traj['lat']
     x = traj['lon']
-    val = traj[thresh]
+    val = traj[thresh[0]]
     uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
     color_numbers = uid.max()
     uid.sort()
     paths = []
+    if particles is None:
+        uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
+        color_numbers = uid.max()
+        uid.sort()
+        particles = uid.astype(str)
+    else:
+        color_numbers = len(particles)
+
+    if particles is None:
+        uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
+        color_numbers = uid.max()
+        uid.sort()
+        particles = uid.astype(str)
+    else:
+        color_numbers = len(particles)
+
+
     for particle in uid.astype(str):
-        x1 = x[:,particle].values
-        y1 = y[:,particle].values
-        mean1 = val[:,particle].values.mean()
-        if x1.shape[0] > int(mintrace) and mean1 >= thresh_val:
+        try:
+            x1 = x[:,particle].values
+            y1 = y[:,particle].values
+            mean1 = val[:,particle].values.mean()
+        except KeyError:
+            x1 = x[:,int(particle)].values
+            y1 = y[:,int(particle)].values
+            mean1 = val[:,int(particle)].values.mean()
+        if x1.shape[0] > int(mintrace) and mean1 >= thresh[1]:
             paths.append(dict(
                             type='scattergeo',
                             lon=list(x1),
@@ -168,9 +212,9 @@ def get_plotly_traj(traj, label=None, thresh='max', thresh_val=-1,
 
 
 def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
-              superimpose=None, cmap=None, ax=None, t_column=None,
-              pos_columns=None, plot_style={}, mintrace=1, lw=1, size=100,
-              thresh='max', thresh_val=-1, color=None, draw_map=True, **kwargs):
+              superimpose=None, cmap=None, ax=None, t_column=None, particles=None,
+              pos_columns=None, plot_style={}, mintrace=2, size=100,
+              thresh=('mean', -1), color=None, create_map=True, **kwargs):
 
     """This code is a fork of plot_traj method in the plot module from the
     trackpy project see http://soft-matter.github.io/trackpy fro more details
@@ -197,6 +241,16 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
         Defaults to current axes
     t_column : string, optional
         DataFrame column name for time coordinate. Default is 'frame'.
+    particles : a preset of stroms (particles) to be drawn, instead of all
+        (default)
+    size : size of the sctter indicating start and end of the storm
+    color : A pre-defined color, if None (default) each track will be assigned
+        a different color
+    thresh : tuple for thresholds to be applied to the plotted objects. first
+        entry of the tuple is the variable (default 'mean') second one the
+        the minimum value (default -1)
+    create_map: boolean, reate a map object, this can be useful for loops where
+        a basemap object has already been created
     pos_columns : list of strings, optional
         Dataframe column names for spatial coordinates. Default is ['x', 'y'].
     plot_style : dictionary
@@ -252,20 +306,30 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     # Read http://www.scipy.org/Cookbook/Matplotlib/MulticoloredLine
     y = traj['lat']
     x = traj['lon']
-    val = traj[thresh]
-    uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
-    color_numbers = uid.max()
-    uid.sort()
-    for particle in uid.astype(str):
-        x1 = x[:,particle].values
-        y1 = y[:,particle].values
-        mean1 = val[:,particle].values.mean()
-        if x1.shape[0] > int(mintrace) and mean1 >= thresh_val:
+    val = traj[thresh[0]]
+    if particles is None:
+        uid = np.unique(x.index.get_level_values('uid')).astype(np.int32)
+        color_numbers = uid.max()
+        uid.sort()
+        particles = uid.astype(str)
+    else:
+        color_numbers = len(particles)
+
+    for particle in particles:
+        try:
+            x1 = x[:,particle].values
+            y1 = y[:,particle].values
+            mean1 = val[:,particle].values.mean()
+        except KeyError:
+            x1 = x[:,int(particle)].values
+            y1 = y[:,int(particle)].values
+            mean1 = val[:,int(particle)].values.mean()
+        if x1.shape[0] > int(mintrace) and mean1 >= thresh[1]:
             alpha=float(mean1/val.max())
             if color is not None:
-                im = m.plot(x1,y1, color=color, lw=lw)
+                im = m.plot(x1,y1, color=color, **plot_style)
             else:
-                im = m.plot(x1,y1, color=color, lw=lw)
+                im = m.plot(x1,y1, color=color, **plot_style)
             m.scatter(x1[0], y1[0], marker='o', color=color, s=[size])
             m.scatter(x1[-1], y1[-1], marker='*', color=color, s=[size])
             if label:
@@ -278,7 +342,8 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
                 ax.annotate('%s'%str(particle), xy=(cx, cy), xytext=(cx+dx,cy+dy),
                             fontsize=16, horizontalalignment='center',
                             verticalalignment='center')
-
+        else:
+            im = None
     return ax, m, im
 
 '''def lagrangian_view(tobj, grids, tmp_dir, uid=None, vmin=-8, vmax=64,
@@ -419,18 +484,22 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
         gc.collect()
 '''
 
-def make_mp4_from_frames(tmp_dir, dest_dir, basename, fps):
+def make_mp4_from_frames(tmp_dir, dest_dir, basename, fps, glob='*'):
+    cur_dir = os.path.abspath(os.path.curdir)
     os.chdir(tmp_dir)
     os.system(" ffmpeg -framerate " + str(fps)
-              + " -pattern_type glob -i '*.png'"
+              + " -pattern_type glob -i '"+glob+".png'"
               + " -movflags faststart -pix_fmt yuv420p -vf"
               + " 'scale=trunc(iw/2)*2:trunc(ih/2)*2' -y "
               + basename)
     try:
+        print(dest_dir, basename, tmp_dir)
+        if os.path.isfile(os.path.join(dest_dir, basename)):
+            os.remove(os.path.join(dest_dir, basename))
         shutil.move(basename, dest_dir)
     except FileNotFoundError:
         print('Make sure ffmpeg is installed properly.')
-
+    os.chdir(cur_dir)
 
 def animate(tobj, grids, outfile_name, style='full', fps=1, keep_frames=False,
             overwrite=False, **kwargs):
