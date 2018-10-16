@@ -334,10 +334,7 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
             mean1 = val[:,int(particle)].values.mean()
         if x1.shape[0] > int(mintrace) and mean1 >= thresh[1]:
             alpha=float(mean1/val.max())
-            if color is not None:
-                im = m.plot(x1,y1, color=color, **plot_style)
-            else:
-                im = m.plot(x1,y1, color=color, **plot_style)
+            im = m.plot(x1,y1, color=color, **plot_style)
             m.scatter(x1[0], y1[0], marker='o', color=color, s=[size])
             m.scatter(x1[-1], y1[-1], marker='*', color=color, s=[size])
             if label:
