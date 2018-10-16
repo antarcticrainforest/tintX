@@ -146,59 +146,6 @@ class Record(object):
         if old_diff is not None:
             self.interval_ratio = self.interval.seconds/old_diff.seconds
 
-def spl(present, time):
-    out = []
-    start = True
-    a = ''.join(list(present.astype(int).astype(str)))
-    b = list(present.astype(int).astype(str))
-    ii = 0
-    for k, g in groupby(a):
-        gg = list(g)
-        if len(gg) == 1:
-            b[ii] = str(1 - int(gg[0]))
-        ii += len(gg)
-    ii = 0
-    for k, g in groupby(''.join(b)):
-        G = list(g)
-        if k == '1':
-            kk = 0
-            for i in G:
-                d1 = time[kk+ii]
-                try:
-                    d2 = time[kk+ii+1]
-                except IndexError:
-                    break
-                if (d2 - d1) > 24*60**2:
-                    break
-                kk+=1
-            if (ii+kk-1) - ii > 5:
-                out.append((ii,ii+kk-1))
-        ii+=len(G)
-    return out
-
-def get_grids(group, slices, lon, lat, varname='rain_rate'):
-    x = group.variables[varname].shape[1]
-    y = group.variables[varname].shape[2]
-
-    for s in range(slices[0], slices[-1]+1):
-        yield {'x': lon, 'y': lat,
-               'data':group.variables[varname][s].reshape(1,x,y),
-               'time': num2date(group.variables['time'][s],
-               group.variables['time'].units)}
-def get_times(time, start=None, end=None, isfile=None):
-    '''Get the start and end index for a given period'''
-    if type(end) == type('a') and type(start) == type('a'):
-        end = datetime.strptime(end, '%Y-%m-%d %H:%M')
-        start = datetime.strptime(start, '%Y-%m-%d %H:%M')
-        start = date2num([start], time.units)
-        end = date2num([end], time.units)
-        e_idx = np.argmin(np.fabs(time[:] - end))+1
-        s_idx = np.argmin(np.fabs(time[:] - start))
-        return [(s_idx,e_idx)]
-    elif type(isfile) == type(None):
-        isifle = np.ones_like(time.shape[0])
-        return spl(isfile, time)
-
 
 def spl(present, time):
     out = []
@@ -224,11 +171,12 @@ def spl(present, time):
                     break
                 if (d2 - d1) > 24*60**2:
                     break
-                kk+=1
+                kk += 1
             if (ii+kk-1) - ii > 5:
-                out.append((ii,ii+kk-1))
-        ii+=len(G)
+                out.append((ii, ii+kk-1))
+        ii += len(G)
     return out
+
 
 def get_grids(group, slices, lon, lat, varname='rain_rate'):
     x = group.variables[varname].shape[1]
@@ -236,9 +184,11 @@ def get_grids(group, slices, lon, lat, varname='rain_rate'):
 
     for s in range(slices[0], slices[-1]+1):
         yield {'x': lon, 'y': lat,
-               'data':group.variables[varname][s].reshape(1,x,y),
+               'data': group.variables[varname][s].reshape(1, x, y),
                'time': num2date(group.variables['time'][s],
-               group.variables['time'].units)}
+                                group.variables['time'].units)}
+
+
 def get_times(time, start=None, end=None, isfile=None):
     '''Get the start and end index for a given period'''
     if type(end) == type('a') and type(start) == type('a'):
@@ -248,117 +198,7 @@ def get_times(time, start=None, end=None, isfile=None):
         end = date2num([end], time.units)
         e_idx = np.argmin(np.fabs(time[:] - end))+1
         s_idx = np.argmin(np.fabs(time[:] - start))
-        return [(s_idx,e_idx)]
+        return [(s_idx, e_idx)]
     elif type(isfile) == type(None):
         isifle = np.ones_like(time.shape[0])
         return spl(isfile, time)
-
-
-def spl(present, time):
-    out = []
-    start = True
-    a = ''.join(list(present.astype(int).astype(str)))
-    b = list(present.astype(int).astype(str))
-    ii = 0
-    for k, g in groupby(a):
-        gg = list(g)
-        if len(gg) == 1:
-            b[ii] = str(1 - int(gg[0]))
-        ii += len(gg)
-    ii = 0
-    for k, g in groupby(''.join(b)):
-        G = list(g)
-        if k == '1':
-            kk = 0
-            for i in G:
-                d1 = time[kk+ii]
-                try:
-                    d2 = time[kk+ii+1]
-                except IndexError:
-                    break
-                if (d2 - d1) > 24*60**2:
-                    break
-                kk+=1
-            if (ii+kk-1) - ii > 5:
-                out.append((ii,ii+kk-1))
-        ii+=len(G)
-    return out
-
-def get_grids(group, slices, lon, lat, varname='rain_rate'):
-    x = group.variables[varname].shape[1]
-    y = group.variables[varname].shape[2]
-
-    for s in range(slices[0], slices[-1]+1):
-        yield {'x': lon, 'y': lat,
-               'data':group.variables[varname][s].reshape(1,x,y),
-               'time': num2date(group.variables['time'][s],
-               group.variables['time'].units)}
-def get_times(time, start=None, end=None, isfile=None):
-    '''Get the start and end index for a given period'''
-    if type(end) == type('a') and type(start) == type('a'):
-        end = datetime.strptime(end, '%Y-%m-%d %H:%M')
-        start = datetime.strptime(start, '%Y-%m-%d %H:%M')
-        start = date2num([start], time.units)
-        end = date2num([end], time.units)
-        e_idx = np.argmin(np.fabs(time[:] - end))+1
-        s_idx = np.argmin(np.fabs(time[:] - start))
-        return [(s_idx,e_idx)]
-    elif type(isfile) == type(None):
-        isifle = np.ones_like(time.shape[0])
-        return spl(isfile, time)
-
-
-def spl(present, time):
-    out = []
-    start = True
-    a = ''.join(list(present.astype(int).astype(str)))
-    b = list(present.astype(int).astype(str))
-    ii = 0
-    for k, g in groupby(a):
-        gg = list(g)
-        if len(gg) == 1:
-            b[ii] = str(1 - int(gg[0]))
-        ii += len(gg)
-    ii = 0
-    for k, g in groupby(''.join(b)):
-        G = list(g)
-        if k == '1':
-            kk = 0
-            for i in G:
-                d1 = time[kk+ii]
-                try:
-                    d2 = time[kk+ii+1]
-                except IndexError:
-                    break
-                if (d2 - d1) > 24*60**2:
-                    break
-                kk+=1
-            if (ii+kk-1) - ii > 5:
-                out.append((ii,ii+kk-1))
-        ii+=len(G)
-    return out
-
-def get_grids(group, slices, lon, lat, varname='rain_rate'):
-    x = group.variables[varname].shape[1]
-    y = group.variables[varname].shape[2]
-
-    for s in range(slices[0], slices[-1]+1):
-        yield {'x': lon, 'y': lat,
-               'data':group.variables[varname][s].reshape(1,x,y),
-               'time': num2date(group.variables['time'][s],
-               group.variables['time'].units)}
-def get_times(time, start=None, end=None, isfile=None):
-    '''Get the start and end index for a given period'''
-    if type(end) == type('a') and type(start) == type('a'):
-        end = datetime.strptime(end, '%Y-%m-%d %H:%M')
-        start = datetime.strptime(start, '%Y-%m-%d %H:%M')
-        start = date2num([start], time.units)
-        end = date2num([end], time.units)
-        e_idx = np.argmin(np.fabs(time[:] - end))+1
-        s_idx = np.argmin(np.fabs(time[:] - start))
-        return [(s_idx,e_idx)]
-    elif type(isfile) == type(None):
-        isifle = np.ones_like(time.shape[0])
-        return spl(isfile, time)
-
-
