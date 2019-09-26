@@ -1,4 +1,4 @@
-# TintV2 (Tint is not TITAN tracking algorithm version 2)
+# Tint (Tint is not TITAN) tracking algorithm for any kind of input data
 
 This source code is python the implementation of a tracking algorithm that has been 
 developed by a team of researchers at Monash University. The original version 
