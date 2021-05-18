@@ -7,6 +7,14 @@ meta = dict(\
         author = 'Martin Bergemann',
         author_email = 'martin.bergemann@met.fu-berlin.de',
         license = 'GPL',
-        version = '1.0')
+        version = '1.0',
+        install_requires=[
+            'pandas',
+            'numpy',
+            'netCDF4',
+            'scipy',
+            'matplotlib',
+            'basemap',
+            ])
 
 setup(name='tint', packages=['tint'], **meta)
