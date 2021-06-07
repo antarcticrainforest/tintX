@@ -1,8 +1,8 @@
 # Tint (Tint is not TITAN) tracking algorithm for any kind of input data
 
 This source code is python the implementation of a tracking algorithm that has been 
-developed by a team of researchers at Monash University. The original version 
-of the tracking framework is designed to only work with radar-data. The aim of TintV2 
+developed by a team of researchers at Monash University [Raut et al. 2020](http://dx.doi.org/10.1175/JAMC-D-20-0119.1). The original version 
+of the tracking framework is designed to only work with radar-data. The aim of this code stack
 is the application of the algorithm to arbitrary binary data. 
 
 ## Pre-requesites
