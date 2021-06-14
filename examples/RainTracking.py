@@ -4,22 +4,15 @@
 # ### This Python notebook should sreve as an example of how to use tint
 # First import all modules that are needed
 
-import matplotlib
-from tint import Cell_tracks, animate
-import os, pandas as pd
-from itertools import groupby
-import numpy as np
-from netCDF4 import Dataset as nc, num2date, date2num
-from datetime import datetime, timedelta
-from tint.helpers import get_times, get_grids
+from matplotlib import pyplot as plt
+from tint import RunDirectory, animate
 from tint.visualization import embed_mp4_as_gif, plot_traj
 import warnings
+from pathlib import Path
 warnings.filterwarnings("ignore")
 
 
-dataF = os.path.join('data','CPOL_radar.nc') #NetCDF data file
-trackdir = os.path.join('tracks') #Output directory
-overwrite = True #Overwirte existing old files
+trackdir = Path(__file__).parent / 'tracks' #Output directory
 first = '2006-11-16 03:00' #Start-date
 last = '2006-11-16 11:00' #End-date
 
@@ -52,45 +45,23 @@ last = '2006-11-16 11:00' #End-date
 
 # ### Open the netCDF file and apply the tracking
 
-with nc(str(dataF)) as ncf:
-        slices = get_times(ncf.variables['time'], first, last) #Get a subset of the data
-        lats = ncf.variables['latitude'][:,0] #The latitude vector - 1D
-        lons = ncf.variables['longitude'][0,:] # Tthe longitude vector - 1D
-        # Define the centre of the domain
-        x = lons[lons.shape[0] // 2]
-        y = lats[lats.shape[0] // 2]
-        grids = []
-        for s in slices:
-            ani = False
-            #Create an iterator for the data dictionary 
-            gr = (i for i in get_grids(ncf, s, lons, lats, varname='radar_estimated_rain_rate'))
-            anim = (i for i in get_grids(ncf, s, lons, lats, varname='radar_estimated_rain_rate'))
-            #Construct start and end date of slcie
-            start = num2date(ncf.variables['time'][s[0]],
-                             ncf.variables['time'].units)
-            end = num2date(ncf.variables['time'][s[-1]],
-                           ncf.variables['time'].units)
-            #Filename suffix
-            suffix = '%s-%s'%(start.strftime('%Y_%m_%d_%H'), end.strftime('%Y_%m_%d_%H'))
-            tracks_obj = Cell_tracks()
-            tracks_obj.params['MIN_SIZE'] = 4
-            tracks_obj.params['FIELD_THRESH'] = 1
-            track_file = os.path.join(trackdir,'tint_tracks_%s.h5'%suffix)
-            if not os.path.isfile(track_file) or overwrite:
-                ncells = tracks_obj.get_tracks(gr, (x, y))
-                if ncells > 2 :
-                    # Save tracks in handy hdf5 format for later analysis
-                    tracks_obj.tracks.to_hdf(track_file, 'radar_tracks')
-                    ani = True
-                else:
-                    ani = False
-            animate(tracks_obj, anim, os.path.join(os.path.abspath(trackdir),'ani', 'tint_tracks_%s.mp4'%suffix), 
-                    overwrite=overwrite, dt=9.5, tracers=True, basemap_res='f')
+RD = RunDirectory('data/*.nc', 'radar_estimated_rain_rate',
+                  start=first, end=last, lon_name='longitude',
+                  lat_name='latitude')
+suffix = '%s-%s'%(RD.start.strftime('%Y_%m_%d_%H'),
+                  RD.end.strftime('%Y_%m_%d_%H'))
+RD.params['MIN_SIZE'] = 4
+RD.params['FIELD_THRESH'] = 1
+track_file = trackdir / f'tint_tracks_{suffix}.h5'
+ncells = RD.get_tracks()
+RD.tracks.to_hdf(track_file, 'radar_tracks')
+#animate(RD, RD.grids, trackdir / 'ani' / 'tint_tracks_{suffix}.mp4',
+#        overwrite=True, dt=9.5, tracers=True, basemap_res='f')
 
-
-# ### Accessing the tracking data
 #  the tracks are saved in a dataframe and can be accessed by the ```.tracks``` instance:
 
-embed_mp4_as_gif(os.path.join(trackdir, 'ani', 'tint_tracks_%s.mp4'%suffix))
-ax = plot_traj(tracks_obj.tracks, lons, lats, basemap_res='f', label=True, size=20)
-
+#embed_mp4_as_gif(trackdir / 'ani' / f'tint_tracks_{suffix}.mp4')
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax = plot_traj(RD.tracks, RD.lons, RD.lats, basemap_res='f', label=True, size=20, ax=ax)
+fig.savefig(Path('tracks') / 'tracks.png', bbox_inches='tight', dpi=300)
