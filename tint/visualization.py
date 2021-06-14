@@ -91,10 +91,10 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.01, vmax=15, cmap=None, alt=None,
         sys.stdout.flush()
         #display.plot_crosshairs(lon=radar_lon, lat=radar_lat)
         if nframe == 0:
-            X = grid['x']
-            Y = grid['y']
-            m = Basemap(llcrnrlat=min(Y), llcrnrlon=min(X), urcrnrlat=max(Y),
-                        urcrnrlon=max(X), resolution=basemap_res, ax=ax)
+            X = grid['lon']
+            Y = grid['lat']
+            m = Basemap(llcrnrlat=Y.min(), llcrnrlon=X.min(), urcrnrlat=Y.max(),
+                        urcrnrlon=X.max(), resolution=basemap_res, ax=ax)
             m.drawcoastlines()
             try:
                 im = m.pcolormesh(X, Y, grid['data'][0].filled(np.nan),
@@ -273,8 +273,8 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111)
     if create_map is None :
-        m = Basemap(llcrnrlat=min(Y), llcrnrlon=min(X), urcrnrlat=max(Y),
-                urcrnrlon=max(X), resolution=basemap_res, ax=ax)
+        m = Basemap(llcrnrlat=Y.min(), llcrnrlon=X.min(), urcrnrlat=Y.max(),
+                urcrnrlon=X.max(), resolution=basemap_res, ax=ax)
         try:
             lw=plot_style['lw']
         except KeyError:

@@ -177,8 +177,17 @@ def get_object_prop(image1, grid1, field, record, params):
             rounded = np.round(this_centroid).astype('i')
             c_x = grid1['x'][rounded[1]]
             c_y = grid1['y'][rounded[0]]
-            longitude.append(np.round(grid1['x'][rounded[1]], 4))
-            latitude.append(np.round(grid1['y'][rounded[0]], 4))
+            lon, lat = grid1['lon'], grid1['lat']
+            if len(lon.shape) == 2:
+                lon = lon[rounded[0], rounded[1]]
+            else:
+                lon = lon[rounded[1]]
+            if len(lat.shape) == 2:
+                lat = lat[rounded[0], rounded[1]]
+            else:
+                lat = lat[rounded[0]]
+            longitude.append(np.round(lon, 4))
+            latitude.append(np.round(lat, 4))
 
 
             id1.append(obj)

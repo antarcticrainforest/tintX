@@ -144,17 +144,41 @@ class Cell_tracks(object):
         self.counter = self.__saved_counter
         self.current_objects = self.__saved_objects
 
-    def get_tracks(self, grids, c):
+    def get_tracks(self, grids, c=None):
         """ Obtains tracks given a list of data arrays. This is the
         primary method of the tracks class. This method makes use of all of the
         functions and helper classes defined above. """
+        return self._get_tracks(grids, c)
+
+    def _get_tracks(self, grids, c=None):
         start_time = datetime.datetime.now()
         ncells = 0
         if self.record is None:
             # tracks object being initialized
             grid_obj2 = next(grids)
             self.grid_size = get_grid_size(grid_obj2)
-            self.radar_info = get_radar_info(c)
+            try:
+                self.radar_info = get_radar_info(c)
+            except TypeError:
+                X = grid_obj2['x']
+                Y = grid_obj2['y']
+                if len(X.shape) == 2:
+                    x = X[X.shape[0] // 2][X.shape[1] // 2]
+                else:
+                    x = X[X.shape[0] // 2]
+                if len(Y.shape) == 2:
+                    y = Y[Y.shape[0] // 2][Y.shape[1] // 2]
+                else:
+                    y = Y[Y.shape[0] // 2]
+                try:
+                    x = x.values
+                except AttributeError:
+                    pass
+                try:
+                    y = y.values
+                except AttributeError:
+                    pass
+                self.radar_info = get_radar_info((x, y))
             self.counter = Counter()
             self.record = Record(grid_obj2)
         else:
