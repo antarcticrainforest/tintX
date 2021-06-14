@@ -15,6 +15,9 @@ TITAN cell tracking
 
 #from .cell_tracking import Cell_tracks
 from .tracks import Cell_tracks
+from .reader import RunDirectory
 from .visualization import animate
 
 __all__ = [s for s in dir() if not s.startswith('_')]
+
+

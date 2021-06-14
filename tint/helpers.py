@@ -178,22 +178,39 @@ def spl(present, time):
     return out
 
 
-def get_grids(group, slices, lon, lat, varname='rain_rate'):
+def get_grids(group, slices, lon, lat, varname='rain_rate', times=None):
+
     x = group.variables[varname].shape[1]
     y = group.variables[varname].shape[2]
 
+    try:
+        dims = group.variables[varname].dimensions[1:]
+    except AttributeError:
+        dims = group.variables[varname].dims[1:]
     for s in range(slices[0], slices[-1]+1):
-        yield {'x': lon, 'y': lat,
-               'data': group.variables[varname][s].reshape(1, x, y),
-               'time': num2date(group.variables['time'][s],
-                                group.variables['time'].units)}
+        try:
+            time = times[s]
+        except TypeError:
+            time = num2date(group.variables['time'][s],
+                            group['time'].units)
+        try:
+            data = group.variables[varname][s].values
+        except AttributeError:
+            data = group.variables[varname][s]
+        
+        yield {'x': group.variables[dims[-1]],
+               'y': group.variables[dims[-2]],
+               'lon': lon, 'lat': lat,
+               'data': np.ma.masked_invalid(data.reshape(1, x, y)),
+               'time': time}
 
 
 def get_times(time, start=None, end=None, isfile=None):
     '''Get the start and end index for a given period'''
+
     if type(end) == type('a') and type(start) == type('a'):
-        end = datetime.strptime(end, '%Y-%m-%d %H:%M')
-        start = datetime.strptime(start, '%Y-%m-%d %H:%M')
+        end = pd.DatetimeIndex([end]).to_pydatetime()[0]
+        start = pd.DatetimeIndex([start]).to_pydatetime()[0]
         start = date2num([start], time.units)
         end = date2num([end], time.units)
         e_idx = np.argmin(np.fabs(time[:] - end))+1
