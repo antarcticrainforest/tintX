@@ -55,13 +55,13 @@ RD.params['FIELD_THRESH'] = 1
 track_file = trackdir / f'tint_tracks_{suffix}.h5'
 ncells = RD.get_tracks()
 RD.tracks.to_hdf(track_file, 'radar_tracks')
-#animate(RD, RD.grids, trackdir / 'ani' / 'tint_tracks_{suffix}.mp4',
-#        overwrite=True, dt=9.5, tracers=True, basemap_res='f')
+animate(RD, RD.grids, trackdir / 'ani' / f'tint_tracks_{suffix}.mp4',
+        overwrite=True, dt=9.5, tracers=True, basemap_res='f')
 
 #  the tracks are saved in a dataframe and can be accessed by the ```.tracks``` instance:
 
-#embed_mp4_as_gif(trackdir / 'ani' / f'tint_tracks_{suffix}.mp4')
+embed_mp4_as_gif(trackdir / 'ani' / f'tint_tracks_{suffix}.mp4')
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax = plot_traj(RD.tracks, RD.lons, RD.lats, basemap_res='f', label=True, size=20, ax=ax)
-fig.savefig(Path('tracks') / 'tracks.png', bbox_inches='tight', dpi=300)
+fig.savefig(Path('tracks') / f'tint_tracks_{suffix}.png', bbox_inches='tight', dpi=300)
