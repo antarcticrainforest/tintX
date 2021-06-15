@@ -5,51 +5,46 @@ Created on Tue Apr 24 12:38:03 2018
 @author: mbergemann@unimelb.edu.au
 """
 
+from pathlib import Path
+from matplotlib import pyplot as plt
+import xarray as xr
 
-import matplotlib
-from tint import Cell_tracks, animate
-import os, pandas as pd
-from itertools import groupby
-import numpy as np
-from netCDF4 import Dataset as nc, num2date, date2num
-from datetime import datetime, timedelta
-from tint.helpers import get_times, get_grids
-from tint.visualization import embed_mp4_as_gif, plot_traj
-dataF = os.path.join(os.path.abspath('.'),'data','CPOL_radar.nc') #NetCDF data file
-trackdir = os.path.join(os.path.abspath('.'),'tracks') #Output directory
-overwrite = True #Overwirte existing old files
-first = '2006-11-16 03:00' #Start-date
-last = '2006-11-17 15:00' #End-date
+from tint import RunDirectory
 
-f = nc('/home/unimelb.edu.au/mbergemann/Data/Darwin/netcdf/Cmorph_1998-2010.nc')
-lats = f.variables['lat'][:]
-lons = f.variables['lon'][:]
-slices = get_times(f.variables['time'], first, last, None)
-x = lons[int(len(lons)/2)]
-y = lats[int(len(lats)/2)]
-s = slices[0]
-gr = (i for i in get_grids(f, s, lons, lats, varname='precip'))
-anim = (i for i in get_grids(f, s, lons, lats, varname='precip'))
-start = num2date(f.variables['time'][s[0]],
-                 f.variables['time'].units)
-end = num2date(f.variables['time'][s[-1]],
-               f.variables['time'].units)
-suffix = '%s-%s'%(start.strftime('%Y_%m_%d_%H'), end.strftime('%Y_%m_%d_%H'))
-tracks_obj = Cell_tracks()
-tracks_obj.params['MIN_SIZE'] = 4
-tracks_obj.params['FIELD_THRESH'] = 1
-tracks_obj.params['ISO_THRESH'] = 2
-tracks_obj.params['ISO_SMOOTH'] = 2
-tracks_obj.params['SEARCH_MARGIN'] = 750
-tracks_obj.params['FLOW_MARGIN'] = 1550
-tracks_obj.params['MAX_DISPARITY'] = 999
-tracks_obj.params['MAX_FLOW_MAG ']= 50
-tracks_obj.params['MAX_SHIFT_DISP'] = 15
-tracks_obj.params['GS_ALT'] = 1500
-track_file = os.path.join(trackdir,'cpol_tracks_%s.pkl'%suffix)
-ncells = tracks_obj.get_tracks(gr, (x,y))
-animate(tracks_obj, anim, os.path.join(trackdir,'ani', 'cmporph_tracks_%s.mp4'%suffix),
-        overwrite=overwrite, dt=9.5, tracers=True, basemap_res='f')
-f.close()
-embed_mp4_as_gif(os.path.join(trackdir,'ani', 'cmporph_tracks_%s.mp4'%suffix))
-ax = plot_traj(tracks_obj.tracks, lons, lats, basemap_res='f', label=True, mintrace=2)
+# In this example we are going to process satellite based observation.
+# Sometimes data needs to be processed first. For example if derived
+# variables like (density potential temperature) are applied to the tracking,
+# or data needs to be remapped first. In this scenario you would create the
+# netCDF dataset yourself, rather then letting the code load the data, 
+# and apply the tracking on the dataset. Below is an example:
+
+# Read satellite based rainfall estimates and select a sub region.
+trackdir = Path(__file__).parent / 'tracks' #Output directory
+files = [str(f) for f in Path('data').rglob('CMORPH*.nc')]
+# Select a box around the Maritime Continent
+dset = xr.open_mfdataset(sorted(files), combine='by_coords').sel(lon=slice(100, 160), lat=slice(-13, 13))
+
+RD = RunDirectory('cmorph', dset.isel(time=slice(0, 20)),
+                  dset.lon,
+                  dset.lat)
+RD.params['MIN_SIZE'] = 8
+RD.params['FIELD_THRESH'] = 3
+RD.params['ISO_THRESH'] = 10
+RD.params['ISO_SMOOTH'] = 10
+RD.params['SEARCH_MARGIN'] = 8750
+RD.params['FLOW_MARGIN'] = 1750
+RD.params['MAX_DISPARITY'] = 999
+RD.params['MAX_FLOW_MAG ']= 5000
+RD.params['MAX_SHIFT_DISP'] = 1000
+suffix = '%s-%s'%(RD.start.strftime('%Y_%m_%d_%H'),
+                  RD.end.strftime('%Y_%m_%d_%H'))
+track_file = trackdir / f'cmorph_tracks_{suffix}.h5'
+ncells = RD.get_tracks()
+track_file = trackdir / f'sat_tracks_{suffix}.h5'
+RD.tracks.to_hdf(track_file, 'sat_tracks')
+RD.animate(trackdir / 'ani' / f'sat_tracks_{suffix}.mp4', vmax=3,
+           overwrite=True, dt=9.5, tracers=True, basemap_res='i')
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax = RD.plot_traj(basemap_res='i', label=True, size=20, ax=ax)
+fig.savefig(Path('tracks') / f'sat_tracks_{suffix}.png', bbox_inches='tight', dpi=300)

@@ -45,23 +45,22 @@ last = '2006-11-16 11:00' #End-date
 
 # ### Open the netCDF file and apply the tracking
 
-RD = RunDirectory('data/*.nc', 'radar_estimated_rain_rate',
+RD = RunDirectory.open_dataset('data/*.nc', 'radar_estimated_rain_rate',
                   start=first, end=last, lon_name='longitude',
                   lat_name='latitude')
 suffix = '%s-%s'%(RD.start.strftime('%Y_%m_%d_%H'),
                   RD.end.strftime('%Y_%m_%d_%H'))
 RD.params['MIN_SIZE'] = 4
 RD.params['FIELD_THRESH'] = 1
-track_file = trackdir / f'tint_tracks_{suffix}.h5'
+track_file = trackdir / f'radar_tracks_{suffix}.h5'
 ncells = RD.get_tracks()
 RD.tracks.to_hdf(track_file, 'radar_tracks')
-animate(RD, RD.grids, trackdir / 'ani' / f'tint_tracks_{suffix}.mp4',
-        overwrite=True, dt=9.5, tracers=True, basemap_res='f')
+RD.animate(trackdir / 'ani' / f'radar_tracks_{suffix}.mp4', embed_gif=True,
+           overwrite=True, dt=9.5, tracers=True, basemap_res='f')
 
 #  the tracks are saved in a dataframe and can be accessed by the ```.tracks``` instance:
 
-embed_mp4_as_gif(trackdir / 'ani' / f'tint_tracks_{suffix}.mp4')
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax = plot_traj(RD.tracks, RD.lons, RD.lats, basemap_res='f', label=True, size=20, ax=ax)
-fig.savefig(Path('tracks') / f'tint_tracks_{suffix}.png', bbox_inches='tight', dpi=300)
+ax = RD.plot_traj(basemap_res='f', label=True, size=20, ax=ax)
+fig.savefig(Path('tracks') / f'radar_tracks_{suffix}.png', bbox_inches='tight', dpi=300)
