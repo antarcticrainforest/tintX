@@ -9,10 +9,13 @@ Visualization tools for tracks objects.
 import gc
 import os
 import pandas as pd
+from pathlib import Path
 import numpy as np
 import shutil
 import tempfile
 import matplotlib as mpl
+from subprocess import run, CalledProcessError, PIPE
+import shlex
 from mpl_toolkits.basemap import Basemap
 from IPython.display import display, Image
 from matplotlib import pyplot as plt
@@ -490,23 +493,20 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
 '''
 
 def make_mp4_from_frames(tmp_dir, dest_dir, basename, fps, glob='*'):
-    cur_dir = os.path.abspath(os.path.curdir)
-    os.chdir(tmp_dir)
-    os.system(" ffmpeg -framerate " + str(fps)
-              + " -pattern_type glob -i '"+glob+".png'"
-              + " -movflags faststart -pix_fmt yuv420p -vf"
-              + " 'scale=trunc(iw/2)*2:trunc(ih/2)*2' -y "
-              + basename)
+    res = run(shlex.split("ffmpeg -framerate " + str(fps)
+          + " -pattern_type glob -i '"+glob+".png'"
+          + " -movflags faststart -pix_fmt yuv420p -vf"
+          + " 'scale=trunc(iw/2)*2:trunc(ih/2)*2' -y "
+          + basename), stdout=PIPE, stderr=PIPE, cwd=tmp_dir)
     try:
         if os.path.isfile(os.path.join(dest_dir, basename)):
             os.remove(os.path.join(dest_dir, basename))
-        shutil.move(basename, dest_dir)
+        shutil.move(os.path.join(tmp_dir, basename), dest_dir)
     except FileNotFoundError:
         print('Make sure ffmpeg is installed properly.')
-    os.chdir(cur_dir)
 
 def animate(tobj, grids, outfile_name, style='full', fps=1, keep_frames=False,
-            overwrite=False, **kwargs):
+            overwrite=False, embed_gif=False, **kwargs):
     """
     Creates gif animation of tracked cells.
 
@@ -535,11 +535,10 @@ def animate(tobj, grids, outfile_name, style='full', fps=1, keep_frames=False,
         Frames per second for output gif.
 
     """
-
+    outfile_name = Path(outfile_name).absolute()
     styles = {'full': full_domain}
              # 'lagrangian': lagrangian_view}
     anim_func = styles[style]
-
     dest_dir = os.path.dirname(outfile_name)
     basename = os.path.basename(outfile_name)
     if len(dest_dir) == 0:
@@ -563,10 +562,10 @@ def animate(tobj, grids, outfile_name, style='full', fps=1, keep_frames=False,
         if keep_frames:
             frame_dir = os.path.join(dest_dir, basename + '_frames')
             shutil.copytree(tmp_dir, frame_dir)
-            os.chdir(dest_dir)
     finally:
         shutil.rmtree(tmp_dir)
-
+    if embed_gif:
+        return embed_mp4_as_gif(outfile_name)
 
 def embed_mp4_as_gif(filename):
     """ Makes a temporary gif version of an mp4 using ffmpeg for embedding in
@@ -579,10 +578,8 @@ def embed_mp4_as_gif(filename):
     basename = os.path.basename(filename)
     newfile = tempfile.NamedTemporaryFile()
     newname = newfile.name + '.gif'
-    if len(dirname) != 0:
-        os.chdir(dirname)
-
-    os.system('ffmpeg -i ' + basename + ' ' + newname)
+    res = run(shlex.split('ffmpeg -i ' + basename + ' ' + newname),
+        cwd=dirname, stdout=PIPE, stderr=PIPE)
 
     try:
         with open(newname, 'rb') as f:
