@@ -144,7 +144,7 @@ class Record(object):
         old_diff = self.interval
         self.interval = time2 - self.time
         if old_diff is not None:
-            self.interval_ratio = self.interval.seconds/old_diff.seconds
+            self.interval_ratio = self.interval.total_seconds()/old_diff.total_seconds()
 
 
 def spl(present, time):
