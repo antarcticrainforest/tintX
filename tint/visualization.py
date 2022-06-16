@@ -16,7 +16,7 @@ import tempfile
 import matplotlib as mpl
 from subprocess import run, CalledProcessError, PIPE
 import shlex
-from mpl_toolkits.basemap import Basemap
+from cartopy import crs as ccrs
 from IPython.display import display, Image
 from matplotlib import pyplot as plt
 from datetime import timedelta
@@ -86,7 +86,7 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.01, vmax=15, cmap=None, alt=None,
     nframes = tobj.tracks.index.levels[0].max() + 1
     print('Animating', nframes, 'frames')
     fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111)
+    ax = fig.add_subplot(111,projection=ccrs.PlateCarree())
 
     for nframe, grid in enumerate(grids):
         sys.stdout.flush()
@@ -96,9 +96,9 @@ def full_domain(tobj, grids, tmp_dir, vmin=0.01, vmax=15, cmap=None, alt=None,
         if nframe == 0:
             X = grid['lon']
             Y = grid['lat']
-            m = Basemap(llcrnrlat=Y.min(), llcrnrlon=X.min(), urcrnrlat=Y.max(),
-                        urcrnrlon=X.max(), resolution=basemap_res, ax=ax)
-            m.drawcoastlines()
+#            m = Basemap(llcrnrlat=Y.min(), llcrnrlon=X.min(), urcrnrlat=Y.max(),
+#                        urcrnrlon=X.max(), resolution=basemap_res, ax=ax)
+            ax.coastlines()
             try:
                 im = m.pcolormesh(X, Y, grid['data'][0].filled(np.nan),
                         vmin=vmin, vmax=vmax, cmap=cmap, shading='gouraud')
@@ -256,7 +256,7 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     thresh : tuple for thresholds to be applied to the plotted objects. first
         entry of the tuple is the variable (default 'mean') second one the
         the minimum value (default -1)
-    create_map: boolean, reate a map object, this can be useful for loops where
+    create_map: boolean, create a map object, this can be useful for loops where
         a basemap object has already been created
     pos_columns : list of strings, optional
         Dataframe column names for spatial coordinates. Default is ['x', 'y'].
@@ -274,15 +274,16 @@ def plot_traj(traj, X, Y, mpp=None, label=False, basemap_res='i',
     from matplotlib.collections import LineCollection
     if ax is None:
         fig = plt.figure(figsize=(10, 8))
-        ax = fig.add_subplot(111)
+        ax = fig.add_subplot(111,projection=ccrs.PlateCarree())
     if create_map is None :
-        m = Basemap(llcrnrlat=Y.min(), llcrnrlon=X.min(), urcrnrlat=Y.max(),
-                urcrnrlon=X.max(), resolution=basemap_res, ax=ax)
+#        m = Basemap(llcrnrlat=Y.min(), llcrnrlon=X.min(), urcrnrlat=Y.max(),
+#                urcrnrlon=X.max(), resolution=basemap_res, ax=ax)
         try:
             lw=plot_style['lw']
         except KeyError:
             lw=0.5
-        m.drawcoastlines(linewidth=lw)
+#        m.drawcoastlines(linewidth=lw)
+        ax.coastlines(linewidth=lw)
     else:
         m = create_map
 
