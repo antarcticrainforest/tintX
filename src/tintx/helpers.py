@@ -3,17 +3,18 @@ tint.helpers
 ============
 
 """
-
+from __future__ import annotations
+from datetime import datetime
 import string
+from typing import Iterator, Optional, Union
 
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from netCDF4 import num2date, date2num
-from .grid_utils import parse_grid_datetime, get_grid_size
+import xarray as xr
+from .grid_utils import parse_grid_datetime, get_grid_size, GridType
 
 
-class Counter(object):
+class Counter:
     """
     Counter objects generate and keep track of unique cell ids.
     Currently only the uid attribute is used, but this framework can
@@ -29,20 +30,20 @@ class Counter(object):
     """
 
     def __init__(self):
-        """ uid is an integer that tracks the number of independently formed
+        """uid is an integer that tracks the number of independently formed
         cells. The cid dictionary keeps track of 'children' --i.e., cells that
-        have split off from another cell. """
+        have split off from another cell."""
         self.uid = -1
         self.cid = {}
 
     def next_uid(self, count=1):
-        """ Incremented for every new independently formed cell. """
+        """Incremented for every new independently formed cell."""
         new_uids = self.uid + np.arange(count) + 1
         self.uid += count
         return np.array([str(uid) for uid in new_uids])
 
     def next_cid(self, pid):
-        """ Returns parent uid with appended letter to denote child. """
+        """Returns parent uid with appended letter to denote child."""
         if pid in self.cid.keys():
             self.cid[pid] += 1
         else:
@@ -51,7 +52,7 @@ class Counter(object):
         return pid + letter
 
 
-class Record(object):
+class Record:
     """
     Record objects keep track of information related to the shift correction
     process.
@@ -86,7 +87,7 @@ class Record(object):
 
     """
 
-    def __init__(self, grid_obj):
+    def __init__(self, grid_obj: GridType) -> None:
         self.scan = -1
         self.time = None
         self.interval = None
@@ -94,47 +95,53 @@ class Record(object):
         self.grid_size = get_grid_size(grid_obj)
         self.shifts = pd.DataFrame()
         self.new_shifts = pd.DataFrame()
-        self.correction_tally = {'case0': 0, 'case1': 0, 'case2': 0,
-                                 'case3': 0, 'case4': 0, 'case5': 0}
+        self.correction_tally = {
+            "case0": 0,
+            "case1": 0,
+            "case2": 0,
+            "case3": 0,
+            "case4": 0,
+            "case5": 0,
+        }
 
     def count_case(self, case_num):
-        """ Updates correction_tally dictionary. This is used to monitor the
-        shift correction process. """
-        self.correction_tally['case' + str(case_num)] += 1
+        """Updates correction_tally dictionary. This is used to monitor the
+        shift correction process."""
+        self.correction_tally["case" + str(case_num)] += 1
 
     def record_shift(self, corr, gl_shift, l_heads, local_shift, case):
-        """ Records corrected shift, phase shift, global shift, and last
+        """Records corrected shift, phase shift, global shift, and last
         heads per object per timestep. This information can be used to
         monitor and refine the shift correction algorithm in the
-        correct_shift function. """
+        correct_shift function."""
         if l_heads is None:
             l_heads = np.ma.array([-999, -999], mask=[True, True])
 
         new_shift_record = pd.DataFrame()
-        new_shift_record['scan'] = [self.scan]
-        new_shift_record['uid'] = ['uid']
-        new_shift_record['corrected'] = [corr]
-        new_shift_record['global'] = [gl_shift]
-        new_shift_record['last_heads'] = [l_heads]
-        new_shift_record['phase'] = [local_shift]
-        new_shift_record['case'] = [case]
+        new_shift_record["scan"] = [self.scan]
+        new_shift_record["uid"] = ["uid"]
+        new_shift_record["corrected"] = [corr]
+        new_shift_record["global"] = [gl_shift]
+        new_shift_record["last_heads"] = [l_heads]
+        new_shift_record["phase"] = [local_shift]
+        new_shift_record["case"] = [case]
 
-        self.new_shifts = self.new_shifts.append(new_shift_record)
+        self.new_shifts = pd.concat([self.new_shifts, new_shift_record])
 
     def add_uids(self, current_objects):
-        """ Because of the chronology of the get_tracks process, object uids
+        """Because of the chronology of the get_tracks process, object uids
         cannot be added to the shift record at the time of correction, so they
-        must be added later in the process. """
+        must be added later in the process."""
         if len(self.new_shifts) > 0:
-            self.new_shifts['uid'] = current_objects['uid']
-            self.new_shifts.set_index(['scan', 'uid'], inplace=True)
-            self.shifts = self.shifts.append(self.new_shifts)
+            self.new_shifts["uid"] = current_objects["uid"]
+            self.new_shifts.set_index(["scan", "uid"], inplace=True)
+            self.shifts = pd.concat([self.shifts, self.new_shifts])
             self.new_shifts = pd.DataFrame()
 
     def update_scan_and_time(self, grid_obj1, grid_obj2=None):
-        """ Updates the scan number and associated time. This information is
+        """Updates the scan number and associated time. This information is
         used for obtaining object properties as well as for the interval ratio
-        correction of last_heads vectors. """
+        correction of last_heads vectors."""
         self.scan += 1
         self.time = parse_grid_datetime(grid_obj1)
         if grid_obj2 is None:
@@ -143,14 +150,22 @@ class Record(object):
         time2 = parse_grid_datetime(grid_obj2)
         old_diff = self.interval
         self.interval = time2 - self.time
+        try:
+            inter_val_s = self.interval.total_seconds()
+        except AttributeError:
+            inter_val_s = self.interval / np.timedelta64(1, "s")
         if old_diff is not None:
-            self.interval_ratio = self.interval.total_seconds()/old_diff.total_seconds()
+            try:
+                diff = old_diff.total_seconds()
+            except AttributeError:
+                diff = old_diff / np.timedelta64(1, "s")
+            self.interval_ratio = inter_val_s / diff
 
 
 def spl(present, time):
     out = []
     start = True
-    a = ''.join(list(present.astype(int).astype(str)))
+    a = "".join(list(present.astype(int).astype(str)))
     b = list(present.astype(int).astype(str))
     ii = 0
     for k, g in groupby(a):
@@ -159,63 +174,48 @@ def spl(present, time):
             b[ii] = str(1 - int(gg[0]))
         ii += len(gg)
     ii = 0
-    for k, g in groupby(''.join(b)):
+    for k, g in groupby("".join(b)):
         G = list(g)
-        if k == '1':
+        if k == "1":
             kk = 0
             for i in G:
-                d1 = time[kk+ii]
+                d1 = time[kk + ii]
                 try:
-                    d2 = time[kk+ii+1]
+                    d2 = time[kk + ii + 1]
                 except IndexError:
                     break
-                if (d2 - d1) > 24*60**2:
+                if (d2 - d1) > 24 * 60**2:
                     break
                 kk += 1
-            if (ii+kk-1) - ii > 5:
-                out.append((ii, ii+kk-1))
+            if (ii + kk - 1) - ii > 5:
+                out.append((ii, ii + kk - 1))
         ii += len(G)
     return out
 
 
-def get_grids(group, slices, lon, lat, varname='rain_rate', times=None):
+def get_grids(
+    group: xr.Dataset,
+    slices: tuple[int, int],
+    lon: xr.DataArray,
+    lat: xr.DataArray,
+    times: xr.DataArray,
+    varname: str = "rain_rate",
+) -> Iterator[GridType]:
 
-    x = group.variables[varname].shape[1]
-    y = group.variables[varname].shape[2]
-
-    try:
-        dims = group.variables[varname].dimensions[1:]
-    except AttributeError:
-        dims = group.variables[varname].dims[1:]
-    for s in range(slices[0], slices[-1]+1):
-        try:
-            time = times[s]
-        except TypeError:
-            time = num2date(group.variables['time'][s],
-                            group['time'].units)
+    dims = group.variables[varname].dims
+    for s in range(slices[0], slices[-1]):
+        time = times[s]
         try:
             data = group.variables[varname][s].values
         except AttributeError:
             data = group.variables[varname][s]
-        
-        yield {'x': group.variables[dims[-1]],
-               'y': group.variables[dims[-2]],
-               'lon': lon, 'lat': lat,
-               'data': np.ma.masked_invalid(data.reshape(1, x, y)),
-               'time': time}
-
-
-def get_times(time, start=None, end=None, isfile=None):
-    '''Get the start and end index for a given period'''
-
-    if type(end) == type('a') and type(start) == type('a'):
-        end = pd.DatetimeIndex([end]).to_pydatetime()[0]
-        start = pd.DatetimeIndex([start]).to_pydatetime()[0]
-        start = date2num([start], time.units)
-        end = date2num([end], time.units)
-        e_idx = np.argmin(np.fabs(time[:] - end))+1
-        s_idx = np.argmin(np.fabs(time[:] - start))
-        return [(s_idx, e_idx)]
-    elif type(isfile) == type(None):
-        isifle = np.ones_like(time.shape[0])
-        return spl(isfile, time)
+        if len(data.shape) < 3:
+            data = data[np.newaxis, :]
+        yield GridType(
+            x=group.variables[dims[-1]],
+            y=group.variables[dims[-2]],
+            lon=lon,
+            lat=lat,
+            data=np.ma.masked_invalid(data),
+            time=time,
+        )

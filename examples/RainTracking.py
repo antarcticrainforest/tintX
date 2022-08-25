@@ -9,12 +9,13 @@ from tint import RunDirectory, animate
 from tint.visualization import embed_mp4_as_gif, plot_traj
 import warnings
 from pathlib import Path
+
 warnings.filterwarnings("ignore")
 
 
-trackdir = Path(__file__).parent / 'tracks' #Output directory
-first = '2006-11-16 03:00' #Start-date
-last = '2006-11-16 11:00' #End-date
+trackdir = Path(__file__).parent / "tracks"  # Output directory
+first = "2006-11-16 03:00"  # Start-date
+last = "2006-11-16 11:00"  # End-date
 
 
 # The application of the tracking algorithm constists of the following steps:
@@ -23,15 +24,15 @@ last = '2006-11-16 11:00' #End-date
 #     3. animate the tracking output
 
 # ## The tuning parameters
-# 
+#
 # The parameters play an important role when the tracking is applied to different datatypes (e.g satellite data).
 # The algorithm offers the following tunable parameters:
-# 
-# 
+#
+#
 # * FIELD_THRESH : The threshold used for object detection. Detected objects are connnected pixels above this threshold.
-#     
+#
 # * ISO_THRESH : Used in isolated cell classification. Isolated cells must not be connected to any other cell by contiguous pixels above this threshold.
-#     
+#
 # * ISO_SMOOTH : Gaussian smoothing parameter in peak detection preprocessing. See
 #     single_max in tint.objects.
 # * MIN_SIZE : The minimum size threshold in pixels for an object to be detected.
@@ -41,26 +42,36 @@ last = '2006-11-16 11:00' #End-date
 # * MAX_FLOW_MAG : Maximum allowable global shift magnitude.
 # * MAX_SHIFT_DISP :Maximum magnitude of difference in meters per second for two shifts to be
 #     considered in agreement.
-# 
+#
 
 # ### Open the netCDF file and apply the tracking
 
-RD = RunDirectory.open_dataset('data/*.nc', 'radar_estimated_rain_rate',
-                  start=first, end=last, lon_name='longitude',
-                  lat_name='latitude')
-suffix = '%s-%s'%(RD.start.strftime('%Y_%m_%d_%H'),
-                  RD.end.strftime('%Y_%m_%d_%H'))
-RD.params['MIN_SIZE'] = 4
-RD.params['FIELD_THRESH'] = 1
-track_file = trackdir / f'radar_tracks_{suffix}.h5'
-ncells = RD.get_tracks()
-RD.tracks.to_hdf(track_file, 'radar_tracks')
-RD.animate(trackdir / 'ani' / f'radar_tracks_{suffix}.mp4', embed_gif=True,
-           overwrite=True, dt=9.5, tracers=True, basemap_res='f')
+RD = RunDirectory.open_files(
+    "data/*.nc",
+    "radar_estimated_rain_rate",
+    start=first,
+    end=last,
+    lon_name="longitude",
+    lat_name="latitude",
+)
+suffix = "%s-%s" % (RD.start.strftime("%Y_%m_%d_%H"), RD.end.strftime("%Y_%m_%d_%H"))
+RD.params["MIN_SIZE"] = 4
+RD.params["FIELD_THRESH"] = 1
+track_file = trackdir / f"radar_tracks_{suffix}.h5"
+ncells = RD.get_tracks(min_size=4, field_thresh=1)
+RD.tracks.to_hdf(track_file, "radar_tracks")
+RD.animate(
+    trackdir / "ani" / f"radar_tracks_{suffix}.mp4",
+    embed_gif=True,
+    overwrite=True,
+    dt=9.5,
+    tracers=True,
+    basemap_res="f",
+)
 
 #  the tracks are saved in a dataframe and can be accessed by the ```.tracks``` instance:
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax = RD.plot_traj(basemap_res='f', label=True, size=20, ax=ax)
-fig.savefig(Path('tracks') / f'radar_tracks_{suffix}.png', bbox_inches='tight', dpi=300)
+ax = RD.plot_trajectory(label=True, ax=ax)
+fig.savefig(Path("tracks") / f"radar_tracks_{suffix}.png", bbox_inches="tight", dpi=300)
