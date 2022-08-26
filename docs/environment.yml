@@ -8,4 +8,4 @@ dependencies:
   - ipython
   - pip
   - pip:
-      - . [docs]
+      - .[docs]
