@@ -45,7 +45,7 @@ from __future__ import annotations
 from typing import TypedDict, Sequence, Literal, Optional
 
 ConfigType = TypedDict(
-    "Parameters",
+    "ConfigType",
     {
         "FIELD_THRESH": float,
         "ISO_THRESH": float,
@@ -132,11 +132,10 @@ class set:
     """
 
     config: dict[str, float]
-    _record: list[tuple[Literal["insert", "replace"], str, float]]
+    _record: list[tuple[Literal["insert", "replace"], str, Optional[float]]]
 
     def __init__(
-        self,
-        **kwargs: float,
+        self, **kwargs: float,
     ):
         self.config = config
         self._record = []

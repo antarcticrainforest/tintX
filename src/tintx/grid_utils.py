@@ -8,8 +8,9 @@ Tools for pulling data from reading data.
 """
 
 from __future__ import annotations
-from typing_extensions import NamedTuple
+from typing import NamedTuple
 
+import cftime
 import numpy as np
 import pandas as pd
 from scipy import ndimage
@@ -23,7 +24,7 @@ GridType = NamedTuple(
         ("lon", xr.DataArray),
         ("lat", xr.DataArray),
         ("time", xr.DataArray),
-        ("data", np.ndarray),
+        ("data", cftime.datetime),
     ],
 )
 
@@ -33,7 +34,7 @@ def parse_grid_datetime(grid_obj: GridType) -> xr.DataArray:
     return grid_obj.time
 
 
-def get_grid_size(grid_obj: GridType) -> tuple[int, ...]:
+def get_grid_size(grid_obj: GridType) -> np.ndarray:
     """Calculates grid size per dimension given a grid object."""
     return np.array(grid_obj.data.shape)
 

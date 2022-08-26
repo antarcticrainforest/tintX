@@ -1,8 +1,8 @@
 from __future__ import annotations
-import datetime
+from datetime import datetime
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, Iterator
 
 import pandas as pd
 from tqdm.auto import tqdm
@@ -12,6 +12,7 @@ from .helpers import get_grids, GridType
 from .tracks import Cell_tracks
 from .visualization import full_domain, plot_traj
 from .config import set as set_config
+
 
 __all__ = ["RunDirectory"]
 
@@ -103,8 +104,7 @@ class RunDirectory(Cell_tracks):
 
         """
         defaults: dict[str, Union[str, bool]] = dict(
-            combine="by_coords",
-            use_cftime=True,
+            combine="by_coords", use_cftime=True,
         )
         defaults = dict()
         for key, value in defaults.items():
@@ -133,10 +133,10 @@ class RunDirectory(Cell_tracks):
             self.data = xr.Dataset({var_name: dataset})
         else:
             self.data = dataset
-        self.lons = dataset[x_coord].values
-        self.lats = dataset[y_coord].values
+        self.lons = dataset[x_coord]
+        self.lats = dataset[y_coord]
         self.var_name = var_name
-        self.time = self.data[time_coord].values
+        self.time = self.data[time_coord]
         self.start = self.time[0]
         self.end = self.time[-1]
         super().__init__(var_name)

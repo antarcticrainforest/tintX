@@ -6,8 +6,9 @@ tint.helpers
 from __future__ import annotations
 from datetime import datetime
 import string
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional, Union, cast
 
+import cftime
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -204,16 +205,21 @@ def get_grids(
 
     dims = group.variables[varname].dims
     for s in range(slices[0], slices[-1]):
-        time = times[s]
+        time = cast(Union[np.datetime64, cftime.datetime], times[s].values)
         try:
             data = group.variables[varname][s].values
         except AttributeError:
             data = group.variables[varname][s]
         if len(data.shape) < 3:
             data = data[np.newaxis, :]
+        if isinstance(time, np.datetime64):
+            t = datetime.fromtimestamp(time.astype("O") / 1e9)
+            time = cftime.DatetimeGregorian(
+                t.year, t.month, t.day, t.hour, t.minute, t.second
+            )
         yield GridType(
-            x=group.variables[dims[-1]],
-            y=group.variables[dims[-2]],
+            x=group[dims[-1]],
+            y=group[dims[-2]],
             lon=lon,
             lat=lat,
             data=np.ma.masked_invalid(data),

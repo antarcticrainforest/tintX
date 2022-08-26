@@ -93,7 +93,7 @@ def full_domain(
     vmax: float = 15,
     ax: Optional[GeoAxesSubplot] = None,
     cmap: Union[str, plt.cm] = "Blues",
-    alt: Optional[int] = None,
+    alt: Optional[float] = None,
     fps: int = 5,
     isolated_only: bool = False,
     tracers: bool = False,
@@ -104,7 +104,7 @@ def full_domain(
     plot_style = plot_style or {}
     if tracers:
         tracer = Tracer(tobj, True)
-    nframes = tobj.tracks.index.levels[0].max()
+    nframes = tobj._tracks.index.levels[0].max()
     title = plot_style.pop("title", "")
     grid = next(grids)
     X = grid.lon
@@ -271,7 +271,7 @@ def plot_traj(
     return ax
 
 
-def _normalize_kwargs(kwargs: dict[str, str], kind: str = "patch") -> dict[str, str]:
+def _normalize_kwargs(kwargs: dict[str, Any], kind: str = "patch") -> dict[str, Any]:
     """Convert matplotlib keywords from short to long form."""
     # Source:
     # github.com/tritemio/FRETBursts/blob/fit_experim/fretbursts/burst_plot.py

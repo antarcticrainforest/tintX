@@ -93,12 +93,6 @@ class Cell_tracks(object):
         self.counter = self.__saved_counter
         self.current_objects = self.__saved_objects
 
-    def get_tracks(self, grids, c=None):
-        """Obtains tracks given a list of data arrays. This is the
-        primary method of the tracks class. This method makes use of all of the
-        functions and helper classes defined above."""
-        return self._get_tracks(grids, c)
-
     def _get_tracks(self, grids, c=None, pbar=None):
 
         ncells = 0
