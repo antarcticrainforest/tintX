@@ -5,7 +5,15 @@ dependencies:
   - python=3.10
   - cartopy
   - xarray
+  - cftime
+  - matplotlib
   - ipython
   - pip
   - pip:
-      - .[docs]
+      - sphinx-execute-code-python3
+      - sphinx-rtd-theme
+      - sphinxcontrib_github_alt
+      - nbsphinx
+      - recommonmark
+      - sphinx
+      - tintx
