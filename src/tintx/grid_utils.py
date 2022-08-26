@@ -8,13 +8,15 @@ Tools for pulling data from reading data.
 """
 
 from __future__ import annotations
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 import cftime
 import numpy as np
 import pandas as pd
 from scipy import ndimage
 import xarray as xr
+
+from .config import ConfigType
 
 GridType = NamedTuple(
     "GridType",
@@ -40,21 +42,26 @@ def get_grid_size(grid_obj: GridType) -> np.ndarray:
 
 
 def get_radar_info(radar: tuple[float, float]) -> dict[str, float]:
+    """Return the longitude/latitude of the radar."""
     info = {"radar_lon": radar[0], "radar_lat": radar[1]}
     return info
 
 
-def get_grid_alt(grid_size, alt_meters=1500):
+def get_grid_alt(
+    grid_size: tuple[float, float], alt_meters: Union[float, int] = 1500.0
+) -> int:
     """Returns z-index closest to alt_meters."""
-    return np.int(np.round(alt_meters / grid_size[0]))
+    return int(np.round(alt_meters / grid_size[0]))
 
 
-def get_vert_projection(grid, thresh=40):
+def get_vert_projection(grid: np.ndarray, thresh: Union[float, int] = 40) -> np.ndarray:
     """Returns boolean vertical projection from grid."""
     return np.any(grid > thresh, axis=0)
 
 
-def get_filtered_frame(grid, min_size, thresh):
+def get_filtered_frame(
+    grid: np.ndarray, min_size: float, thresh: Union[int, float]
+) -> np.ndarray:
     """Returns a labeled frame from gridded radar data. Smaller objects
     are removed and the rest are labeled."""
     echo_height = get_vert_projection(grid, thresh)
@@ -63,7 +70,7 @@ def get_filtered_frame(grid, min_size, thresh):
     return frame
 
 
-def clear_small_echoes(label_image, min_size):
+def clear_small_echoes(label_image: np.ndarray, min_size: float) -> np.ndarray:
     """Takes in binary image and clears objects less than min_size."""
     flat_image = pd.Series(label_image.flatten())
     flat_image = flat_image[flat_image > 0]
@@ -76,14 +83,14 @@ def clear_small_echoes(label_image, min_size):
     return label_image[0]
 
 
-def extract_grid_data(grid_obj, field, grid_size, params):
-    """Returns filtered grid frame and raw grid slice at global shift
-    altitude."""
+def extract_grid_data(
+    grid_obj: GridType, params: ConfigType
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return filtered grid frame and raw grid slice at global shift altitude."""
     try:
         masked = grid_obj.data.filled(0)
     except AttributeError:
         masked = grid_obj.data
-    gs_alt = params["GS_ALT"]
     raw = masked[0, :, :]
     frame = get_filtered_frame(masked, params["MIN_SIZE"], params["FIELD_THRESH"])
     return raw, frame

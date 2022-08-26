@@ -7,13 +7,14 @@ Cell_tracks class.
 """
 
 import copy
-import datetime
-import numpy as np
-import pandas as pd
+from typing import cast, Iterator, Optional, Union
 
+import pandas as pd
+import numpy as np
+from tqdm.std import tqdm
 
 from .grid_utils import get_grid_size, get_radar_info, extract_grid_data
-from .helpers import Record, Counter
+from .helpers import Record, Counter, GridType
 from .phase_correlation import get_global_shift
 from .matching import get_pairs
 from .objects import init_current_objects, update_current_objects
@@ -21,7 +22,7 @@ from .objects import get_object_prop, write_tracks
 from .config import config as tint_config, ConfigType
 
 
-class Cell_tracks(object):
+class Cell_tracks:
     """
     This is the main class in the module. It allows tracks
     objects to be built using lists of data arrays.
@@ -46,97 +47,93 @@ class Cell_tracks(object):
         Contains information about objects in the current scan.
     _tracks : DataFrame
 
-    __saved_record : Record
+    _saved_record : Record
         Deep copy of Record at the penultimate scan in the sequence. This and
         following 2 attributes used for link-up in dynamic updates.
-    __saved_counter : Counter
+    _saved_counter : Counter
         Deep copy of Counter.
-    __saved_objects : dict
+    _saved_objects : dict
         Deep copy of current_objects.
 
     """
 
-    def __init__(self, field="reflectivity"):
+    def __init__(self, field: str = "reflectivity"):
 
         self.field = field
-        self.grid_size = None
-        self.radar_info = None
-        self.last_grid = None
-        self.counter = None
-        self.record = None
+        self.grid_size: Optional[np.ndarray] = None
+        self.radar_info: Optional[dict[str, float]] = None
+        self.last_grid: Optional[GridType] = None
+        self.counter: Optional[Counter] = None
+        self.record: Optional[Record] = None
         self.current_objects = None
         self._tracks = pd.DataFrame()
 
-        self.__saved_record = None
-        self.__saved_counter = None
-        self.__saved_objects = None
+        self._saved_record: Optional[Record] = None
+        self._saved_counter: Optional[Counter] = None
+        self._saved_objects = None
 
     @property
-    def params(self) -> dict[str, float]:
+    def params(self) -> ConfigType:
         """Get the tracking parameters."""
-        return tint_config
+        return cast(ConfigType, tint_config)
 
-    def __save(self):
+    def _save(self) -> None:
         """Saves deep copies of record, counter, and current_objects."""
-        self.__saved_record = copy.deepcopy(self.record)
-        self.__saved_counter = copy.deepcopy(self.counter)
-        self.__saved_objects = copy.deepcopy(self.current_objects)
+        self._saved_record = copy.deepcopy(self.record)
+        self._saved_counter = copy.deepcopy(self.counter)
+        self._saved_objects = copy.deepcopy(self.current_objects)
 
-    def __load(self):
+    def _load(self) -> None:
         """Loads saved copies of record, counter, and current_objects. If new
         tracks are appended to existing tracks via the get_tracks method, the
         most recent scan prior to the addition must be overwritten to link up
         with the new scans. Because of this, record, counter and
         current_objects must be reverted to their state in the penultimate
         iteration of the loop in get_tracks. See get_tracks for details."""
-        self.record = self.__saved_record
-        self.counter = self.__saved_counter
-        self.current_objects = self.__saved_objects
+        self.record = self._saved_record
+        self.counter = self._saved_counter
+        self.current_objects = self._saved_objects
 
-    def _get_tracks(self, grids, c=None, pbar=None):
+    def _get_tracks(
+        self,
+        grids: Iterator[GridType],
+        centre: Optional[tuple[float, float]] = None,
+        pbar: Optional[tqdm] = None,
+    ) -> int:
 
         ncells = 0
+        raw2: Optional[np.ndarray] = None
         if self.record is None:
             # tracks object being initialized
             grid_obj2 = next(grids)
             self.grid_size = get_grid_size(grid_obj2)
-            try:
-                self.radar_info = get_radar_info(c)
-            except TypeError:
-                X = grid_obj2.x
-                Y = grid_obj2.y
-                if len(X.shape) == 2:
-                    x = X[X.shape[0] // 2][X.shape[1] // 2]
+            if centre is None:
+                xgrid = grid_obj2.x.values
+                ygrid = grid_obj2.y.values
+                if len(xgrid.shape) == 2:
+                    x_c = xgrid[xgrid.shape[0] // 2][xgrid.shape[1] // 2]
                 else:
-                    x = X[X.shape[0] // 2]
-                if len(Y.shape) == 2:
-                    y = Y[Y.shape[0] // 2][Y.shape[1] // 2]
+                    x_c = xgrid[xgrid.shape[0] // 2]
+                if len(ygrid.shape) == 2:
+                    y_c = ygrid[ygrid.shape[0] // 2][ygrid.shape[1] // 2]
                 else:
-                    y = Y[Y.shape[0] // 2]
-                try:
-                    x = x.values
-                except AttributeError:
-                    pass
-                try:
-                    y = y.values
-                except AttributeError:
-                    pass
-                self.radar_info = get_radar_info((x, y))
+                    y_c = ygrid[ygrid.shape[0] // 2]
+                x_c = cast(float, x_c)
+                y_c = cast(float, y_c)
+                self.radar_info = get_radar_info((x_c, y_c))
+            else:
+                self.radar_info = get_radar_info(centre)
             self.counter = Counter()
             self.record = Record(grid_obj2)
         else:
             # tracks object being updated
-            grid_obj2 = self.last_grid
+            grid_obj2 = cast(GridType, self.last_grid)
             self._tracks.drop(self.record.scan + 1)  # last scan is overwritten
 
-        if self.current_objects is None:
-            newRain = True
-        else:
-            newRain = False
-        raw2, frame2 = extract_grid_data(
-            grid_obj2, self.field, self.grid_size, self.params
-        )
-        while grid_obj2 is not None:
+        new_rain = bool(self.current_objects is None)
+        stop_iteration = bool(grid_obj2 is None)
+        raw2, frame2 = extract_grid_data(grid_obj2, self.params)
+        while not stop_iteration:
             grid_obj1 = grid_obj2
             raw1 = raw2
             frame1 = frame2
@@ -144,26 +141,24 @@ class Cell_tracks(object):
             try:
                 grid_obj2 = next(grids)
             except StopIteration:
-                grid_obj2 = None
+                stop_iteration = True
 
-            if grid_obj2 is not None:
+            if not stop_iteration:
                 self.record.update_scan_and_time(grid_obj1, grid_obj2)
-                raw2, frame2 = extract_grid_data(
-                    grid_obj2, self.field, self.grid_size, self.params
-                )
+                raw2, frame2 = extract_grid_data(grid_obj2, self.params)
             else:
                 # setup to write final scan
-                self.__save()
+                self._save()
                 self.last_grid = grid_obj1
                 self.record.update_scan_and_time(grid_obj1)
                 raw2 = None
                 frame2 = np.zeros_like(frame1)
 
             if np.nanmax(frame1) == 0:
-                newRain = True
+                new_rain = True
                 self.current_objects = None
                 continue
-            global_shift = get_global_shift(raw1, raw2, self.params)
+            global_shift = get_global_shift(raw1, raw2)
             pairs = get_pairs(
                 frame1,
                 frame2,
@@ -172,12 +167,12 @@ class Cell_tracks(object):
                 self.record,
                 self.params,
             )
-            if newRain:
+            if new_rain:
                 # first nonempty scan after a period of empty scans
                 self.current_objects, self.counter = init_current_objects(
                     frame1, frame2, pairs, self.counter
                 )
-                newRain = False
+                new_rain = False
             else:
                 self.current_objects, self.counter = update_current_objects(
                     frame1, frame2, pairs, self.current_objects, self.counter
@@ -195,7 +190,7 @@ class Cell_tracks(object):
             if pbar is not None:
                 pbar.update()
             # scan loop end
-        self.__load()
+        self._load()
         if ncells > 0:
             ncells = self._tracks.index.get_level_values(1).astype(int).max()
 

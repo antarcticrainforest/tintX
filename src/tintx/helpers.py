@@ -34,18 +34,18 @@ class Counter:
         """uid is an integer that tracks the number of independently formed
         cells. The cid dictionary keeps track of 'children' --i.e., cells that
         have split off from another cell."""
-        self.uid = -1
-        self.cid = {}
+        self.uid: int = -1
+        self.cid: dict[str, int] = {}
 
-    def next_uid(self, count=1):
+    def next_uid(self, count: int = 1) -> np.ndarray:
         """Incremented for every new independently formed cell."""
         new_uids = self.uid + np.arange(count) + 1
         self.uid += count
         return np.array([str(uid) for uid in new_uids])
 
-    def next_cid(self, pid):
+    def next_cid(self, pid: str) -> str:
         """Returns parent uid with appended letter to denote child."""
-        if pid in self.cid.keys():
+        if pid in self.cid:
             self.cid[pid] += 1
         else:
             self.cid[pid] = 0
@@ -105,7 +105,7 @@ class Record:
             "case5": 0,
         }
 
-    def count_case(self, case_num):
+    def count_case(self, case_num: int) -> None:
         """Updates correction_tally dictionary. This is used to monitor the
         shift correction process."""
         self.correction_tally["case" + str(case_num)] += 1
@@ -161,37 +161,6 @@ class Record:
             except AttributeError:
                 diff = old_diff / np.timedelta64(1, "s")
             self.interval_ratio = inter_val_s / diff
-
-
-def spl(present, time):
-    out = []
-    start = True
-    a = "".join(list(present.astype(int).astype(str)))
-    b = list(present.astype(int).astype(str))
-    ii = 0
-    for k, g in groupby(a):
-        gg = list(g)
-        if len(gg) == 1:
-            b[ii] = str(1 - int(gg[0]))
-        ii += len(gg)
-    ii = 0
-    for k, g in groupby("".join(b)):
-        G = list(g)
-        if k == "1":
-            kk = 0
-            for i in G:
-                d1 = time[kk + ii]
-                try:
-                    d2 = time[kk + ii + 1]
-                except IndexError:
-                    break
-                if (d2 - d1) > 24 * 60**2:
-                    break
-                kk += 1
-            if (ii + kk - 1) - ii > 5:
-                out.append((ii, ii + kk - 1))
-        ii += len(G)
-    return out
 
 
 def get_grids(

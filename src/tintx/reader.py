@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 import os
 from pathlib import Path
-from typing import Optional, Union, Iterator
+from typing import cast, Any, Optional, Union, Iterator
 
 import pandas as pd
 from tqdm.auto import tqdm
@@ -62,7 +62,7 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         start: Optional[Union[str, datetime, pd.Timestamp]] = None,
         end: Optional[Union[str, datetime, pd.Timestamp]] = None,
-        **kwargs: Union[str, bool],
+        **kwargs: Any,
     ):
         """
         Create an :class:`RunDirecotry` object from given input file(s)/ directory.
@@ -133,10 +133,10 @@ class RunDirectory(Cell_tracks):
             self.data = xr.Dataset({var_name: dataset})
         else:
             self.data = dataset
-        self.lons = dataset[x_coord]
-        self.lats = dataset[y_coord]
+        self.lons = cast(xr.DataArray, dataset[x_coord])
+        self.lats = cast(xr.DataArray, dataset[y_coord])
         self.var_name = var_name
-        self.time = self.data[time_coord]
+        self.time = cast(xr.DataArray, self.data[time_coord])
         self.start = self.time[0]
         self.end = self.time[-1]
         super().__init__(var_name)
