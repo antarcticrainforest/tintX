@@ -75,7 +75,7 @@ meta = dict(
         "typing_extensions",
     ],
     extras_require={
-        "test": [
+        "docs": [
             "black",
             "h5netcdf",
             "mypy",
