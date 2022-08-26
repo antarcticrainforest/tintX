@@ -42,7 +42,7 @@ class RunDirectory(Cell_tracks):
     Example
     -------
 
-    .. execute_code::
+    ::
 
         import xarray
         from tintx import RunDirectory
@@ -97,7 +97,7 @@ class RunDirectory(Cell_tracks):
         Example
         -------
 
-        .. execute_code::
+        ::
 
             from tintx import RunDirectory
             run = RunDirectory.from_files("_static/data/CMORPH*.nc", "cmorph")
@@ -180,7 +180,7 @@ class RunDirectory(Cell_tracks):
         Example
         -------
 
-        .. execute_code::
+        ::
 
             import xarray
             from tintx import RunDirectory
