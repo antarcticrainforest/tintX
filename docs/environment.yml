@@ -1,0 +1,11 @@
+name: tintx
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - cartopy
+  - xarray
+  - ipython
+  - pip
+  - pip:
+      - . [docs]
