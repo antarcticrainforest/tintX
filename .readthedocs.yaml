@@ -1,13 +1,9 @@
 version: 2  # Required
 
 build:
-  os: ubuntu-20.04
+  os: "ubuntu-20.04"
   tools:
     python: "mambaforge-4.10"
-
-sphinx:
-   configuration: docs/conf.py
-
 
 conda:
   environment: docs/environment.yml
