@@ -8,6 +8,7 @@ dependencies:
   - cftime
   - matplotlib
   - ipython
+  - tqdm
   - pip
   - pip:
       - sphinx-execute-code-python3
