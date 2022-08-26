@@ -1,4 +1,7 @@
 *.pyc
 build/*
-tint.egg-info
+*.egg-info
 .ipynb_checkpoints/*
+dist
+!docs/build/.empty
+docs/build/*
