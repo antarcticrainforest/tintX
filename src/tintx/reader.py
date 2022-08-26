@@ -46,7 +46,7 @@ class RunDirectory(Cell_tracks):
 
         import xarray
         from tintx import RunDirectory
-        dset = xarray.open_mfdataset("source/_static/data/CMORPH*.nc", combine="by_coords")
+        dset = xarray.open_mfdataset("_static/data/CMORPH*.nc", combine="by_coords")
         run = RunDirectory('precip', dset.isel(time=slice(10, 150)))
 
     """
@@ -100,11 +100,12 @@ class RunDirectory(Cell_tracks):
         .. execute_code::
 
             from tintx import RunDirectory
-            run = RunDirectory.from_files("source/_static/data/CMORPH*.nc", "cmorph")
+            run = RunDirectory.from_files("_static/data/CMORPH*.nc", "cmorph")
 
         """
         defaults: dict[str, Union[str, bool]] = dict(
-            combine="by_coords", use_cftime=True,
+            combine="by_coords",
+            use_cftime=True,
         )
         defaults = dict()
         for key, value in defaults.items():
@@ -183,7 +184,7 @@ class RunDirectory(Cell_tracks):
 
             import xarray
             from tintx import RunDirectory
-            dset = xarray.open_mfdataset("source/_static/data/CPOL*.nc",
+            dset = xarray.open_mfdataset("_static/data/CPOL*.nc",
                                          combine="by_coords")
             run = RunDirectory("radar_estimated_rain_rate",
                                dset,
