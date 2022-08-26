@@ -72,6 +72,7 @@ meta = dict(
         "netCDF4",
         "matplotlib",
         "xarray",
+        "tqdm",
         "typing_extensions",
     ],
     extras_require={
