@@ -34,7 +34,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        conda run -n test python3 -m pip install -e .[docs,tests] --constraint .github/dependabot/constraints.txt
+        conda run -n test python3 -m pip install -e .[docs,tests] #--constraint .github/dependabot/constraints.txt
 
     - name: Linting
       run: |
