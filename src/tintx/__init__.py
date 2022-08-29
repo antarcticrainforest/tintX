@@ -15,4 +15,4 @@ from tintx import config
 
 __all__ = ["RunDirectory"]
 
-__version__ = "2022.8.1"
+__version__ = "2022.8.2"
