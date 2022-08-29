@@ -22,7 +22,8 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version:  ${{ matrix.python-version }}
-      - uses: actions/cache@v1
+
+    - uses: actions/cache@v1
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/setup.py') }}-${{ hashFiles('.github/dependabot/constraints.txt') }}
