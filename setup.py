@@ -77,6 +77,8 @@ meta = dict(
     ],
     extras_require={
         "tests": [
+            "black",
+            "dask",
             "nbval",
             "pytest",
             "pytest-env",
@@ -84,10 +86,10 @@ meta = dict(
             "testpath",
             "flake8",
             "mypy",
-            "black",
         ],
         "docs": [
             "black",
+            "dask",
             "h5netcdf",
             "mypy",
             "pytest",
