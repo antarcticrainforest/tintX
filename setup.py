@@ -82,6 +82,9 @@ meta = dict(
             "pytest-env",
             "pytest-cov",
             "testpath",
+            "flake8",
+            "mypy",
+            "black",
         ],
         "docs": [
             "black",

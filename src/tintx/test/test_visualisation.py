@@ -12,7 +12,7 @@ def test_animation(data_with_a_blob: xr.Dataset) -> None:
     from tintx import RunDirectory
 
     rd = RunDirectory("precip", data_with_a_blob, x_coord="x", y_coord="y")
-    tracks = rd.get_tracks(field_thresh=0)
+    _ = rd.get_tracks(field_thresh=0)
     animation = rd.animate(tracers=True)
     with TemporaryDirectory() as temp_dir:
         animation.save(Path(temp_dir) / "test.gif")
@@ -24,7 +24,7 @@ def test_plot_tracks(data_with_a_blob: xr.Dataset) -> None:
     from tintx import RunDirectory
 
     rd = RunDirectory("precip", data_with_a_blob, x_coord="x", y_coord="y")
-    tracks = rd.get_tracks(field_thresh=1000)
+    _ = rd.get_tracks(field_thresh=1000)
     with pytest.raises(TypeError):
         _ = rd.plot_trajectories(ax=1)
     with pytest.raises(ValueError):
