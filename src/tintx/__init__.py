@@ -15,4 +15,4 @@ from tintx import config  # noqa: F401
 
 __all__ = ["RunDirectory"]
 
-__version__ = "2022.8.2"
+__version__ = "2022.8.3"
