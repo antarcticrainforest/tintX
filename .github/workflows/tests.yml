@@ -30,7 +30,7 @@ jobs:
 
     - name: Creating conda environment for ${{ matrix.python-version }}
       run: |
-        conda create -n test -y python=${{matrix.python-version}}
+        conda create -n test -y python=${{matrix.python-version}} ffmpeg
 
     - name: Install dependencies
       run: |
