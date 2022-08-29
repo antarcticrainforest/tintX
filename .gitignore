@@ -7,6 +7,7 @@ coverage_report.xml
 docs/source/.ipynb_checkpoints/
 docs/source/_build/
 report.xml
+coverage.xml
 dist
 !docs/build/.empty
 docs/build/*
