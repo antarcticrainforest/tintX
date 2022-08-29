@@ -1,7 +1,13 @@
 *.pyc
 build/*
+.coverage
+coverage_report.xml
 *.egg-info
 *.ipynb_checkpoints/*
+docs/source/.ipynb_checkpoints/
+docs/source/_build/
+report.xml
+coverage.xml
 dist
 !docs/build/.empty
 docs/build/*

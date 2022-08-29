@@ -21,9 +21,8 @@ class Tracer(object):
     colors = ["m", "r", "lime", "darkorange", "k", "b", "darkgreen", "yellow"]
     colors.reverse()
 
-    def __init__(self, tobj, persist):
+    def __init__(self, tobj):
         self.tobj = tobj
-        self.persist = persist
         self.color_stack = self.colors * 10
         self.cell_color = pd.Series()
         self.history = None
@@ -32,14 +31,6 @@ class Tracer(object):
     def update(self, nframe: int) -> None:
         self.history = self.tobj.tracks.loc[:nframe]
         self.current = self.tobj.tracks.loc[nframe]
-        if not self.persist:
-            dead_cells = [
-                key
-                for key in self.cell_color.keys()
-                if key not in self.current.index.get_level_values("uid")
-            ]
-            self.color_stack.extend(self.cell_color[dead_cells])
-            self.cell_color.drop(dead_cells, inplace=True)
 
     def _check_uid(self, uid: str) -> None:
         if uid not in self.cell_color.keys():
@@ -53,7 +44,7 @@ class Tracer(object):
         for uid, group in self.history.groupby(level="uid"):
             self._check_uid(uid)
             tracer = group[["lon", "lat"]]
-            if self.persist or (uid in self.current.index):
+            if uid in self.current.index:
                 ax.plot(tracer.lon, tracer.lat, self.cell_color[uid])
 
 
@@ -103,7 +94,7 @@ def full_domain(
     alt = alt or tobj.params["GS_ALT"]
     plot_style = plot_style or {}
     if tracers:
-        tracer = Tracer(tobj, True)
+        tracer = Tracer(tobj)
     nframes = tobj._tracks.index.levels[0].max()
     title = plot_style.pop("title", "")
     grid = next(grids)
@@ -234,14 +225,9 @@ def plot_traj(
         uids = uid.astype(str)
 
     for particle in uids:
-        try:
-            x1 = x[:, particle].values
-            y1 = y[:, particle].values
-            mean1 = val[:, particle].values.mean()
-        except KeyError:
-            x1 = x[:, int(particle)].values
-            y1 = y[:, int(particle)].values
-            mean1 = val[:, int(particle)].values.mean()
+        x1 = x[:, particle].values
+        y1 = y[:, particle].values
+        mean1 = val[:, particle].values.mean()
         if x1.shape[0] > int(mintrace) and mean1 >= thresh:
             im = ax.plot(x1, y1, color=color, **_plot_style)
             sc_color = im[0].get_color()

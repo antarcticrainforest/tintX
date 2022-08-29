@@ -38,7 +38,7 @@ meta = dict(
     long_description=read("README.md"),
     include_package_data=True,
     long_description_content_type="text/markdown",
-    license="GPL",
+    license="BSD-3-Clause",
     python_requires=">=3.7",
     project_urls={
         #  'Documentation': 'https://extra-data.readthedocs.io/en/latest/',
@@ -76,6 +76,13 @@ meta = dict(
         "typing_extensions",
     ],
     extras_require={
+        "tests": [
+            "nbval",
+            "pytest",
+            "pytest-env",
+            "pytest-cov",
+            "testpath",
+        ],
         "docs": [
             "black",
             "h5netcdf",
@@ -87,7 +94,7 @@ meta = dict(
             "sphinxcontrib_github_alt",
             "sphinx-execute-code-python3",
             "sphinx-rtd-theme",
-        ]
+        ],
     },
 )
 

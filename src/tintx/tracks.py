@@ -77,6 +77,14 @@ class Cell_tracks:
         """Get the tracking parameters."""
         return cast(ConfigType, tint_config)
 
+    def _reset(self) -> None:
+        """Reset the tracking information."""
+        self.record = None
+        self.counter = None
+        self.current_objects = None
+        self._tracks = pd.DataFrame()
+        self._save()
+
     def _save(self) -> None:
         """Saves deep copies of record, counter, and current_objects."""
         self._saved_record = copy.deepcopy(self.record)
@@ -100,7 +108,6 @@ class Cell_tracks:
         centre: Optional[tuple[float, float]] = None,
         pbar: Optional[tqdm] = None,
     ) -> int:
-
         ncells = 0
         raw2: Optional[np.ndarray] = None
         if self.record is None:
@@ -191,7 +198,7 @@ class Cell_tracks:
                 pbar.update()
             # scan loop end
         self._load()
-        if ncells > 0:
-            ncells = self._tracks.index.get_level_values(1).astype(int).max()
-
+        ncells = 0
+        if len(self._tracks):
+            ncells = self._tracks.index.get_level_values(1).astype(int).max() + 1
         return ncells
