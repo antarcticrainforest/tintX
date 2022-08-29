@@ -11,7 +11,7 @@ Welcome to tintX's documentation!
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/antarcticrainforest/tintX/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/antarcticrainforest/tintX
-.. image:: https://github.com/antarcticrainforest/tintX/actions/workflows/tests.yml/badge.svg?event=push
+.. image:: https://github.com/antarcticrainforest/tintX/actions/workflows/tests.yml/badge.svg
    :target: https://github.com/antarcticrainforest/tintX/actions
 .. image:: https://badge.fury.io/py/tintx.svg
     :target: https://badge.fury.io/py/tintx
