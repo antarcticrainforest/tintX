@@ -23,7 +23,6 @@ def find_version(*parts):
             from tmp_frevaversion import __version__
 
             sys.path = old_path
-            print(__version__)
             return __version__
         except ImportError:
             sys.path = old_path
@@ -64,7 +63,6 @@ meta = dict(
     version=find_version("src", "tintx", "__init__.py"),
     package_dir={"": "src"},
     install_requires=[
-        "cartopy",
         "cftime",
         "pandas",
         "tables",
@@ -75,6 +73,7 @@ meta = dict(
         "xarray",
         "tqdm",
         "typing_extensions",
+        "cartopy",
     ],
     extras_require={
         "tests": [

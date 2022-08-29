@@ -30,11 +30,10 @@ jobs:
 
     - name: Creating conda environment for ${{ matrix.python-version }}
       run: |
-        conda create -n test -y python=${{matrix.python-version}} ffmpeg
+        conda create -n test -y python=${{matrix.python-version}} ffmpeg pip cartopy
 
     - name: Install dependencies
       run: |
-        conda install -n test -y -c conda-forge cartopy pip
         conda run -n test python3 -m pip install -e .[docs,tests] --constraint .github/dependabot/constraints.txt
 
     - name: Linting
