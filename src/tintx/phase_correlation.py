@@ -7,7 +7,7 @@ between scans.
 
 """
 
-from typing import cast, Literal, Optional, overload
+from typing import Literal, Optional, overload
 
 import numpy as np
 from scipy import ndimage

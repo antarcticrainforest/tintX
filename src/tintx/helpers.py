@@ -5,8 +5,7 @@ tint.helpers
 """
 from __future__ import annotations
 from datetime import datetime
-import string
-from typing import Iterator, Optional, Union, cast
+from typing import Iterator, Union, cast
 
 import cftime
 import numpy as np

@@ -9,8 +9,7 @@ Functions for managing and recording object properties.
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-import sys
-from .grid_utils import get_filtered_frame, GridType
+from .grid_utils import get_filtered_frame
 
 
 def get_object_center(obj_id, labeled_image):
@@ -167,10 +166,7 @@ def get_object_prop(image1, grid1, field, record, params):
     field_mean = []
     nobj = np.max(image1)
 
-    unit_dim = record.grid_size
-    unit_alt = unit_dim[0] / 1000
     unit_area = 1  # (unit_dim[1]*unit_dim[2])/(1000**2)
-    unit_vol = (unit_dim[0] * unit_dim[1] * unit_dim[2]) / (1000**3)
 
     raw3D = grid1.data
     get_items = []
@@ -180,8 +176,6 @@ def get_object_prop(image1, grid1, field, record, params):
             obj_index = np.argwhere(image1 == obj)
             this_centroid = np.round(np.mean(obj_index, axis=0), 3)
             rounded = np.round(this_centroid).astype("i")
-            c_x = grid1.x[rounded[1]]
-            c_y = grid1.y[rounded[0]]
             lon, lat = grid1.lon.values, grid1.lat.values
             if len(lon.shape) == 2:
                 lon = lon[rounded[0], rounded[1]]
@@ -206,9 +200,6 @@ def get_object_prop(image1, grid1, field, record, params):
             obj_slices = [raw3D[:, ind[0], ind[1]] for ind in obj_index]
             field_max.append(np.nanmax(obj_slices))
             field_mean.append(np.nanmean(obj_slices))
-            filtered_slices = [
-                obj_slice > params["FIELD_THRESH"] for obj_slice in obj_slices
-            ]
             get_items.append(obj - 1)
         except IndexError:
             pass
@@ -235,8 +226,8 @@ def write_tracks(old_tracks, record, current_objects, obj_props):
 
     nobj = len(obj_props["id1"])
     scan_num = [record.scan] * nobj
-    gi = obj_props["ok_items"]
-    uid = current_objects["uid"][gi]
+    gi_obj = obj_props["ok_items"]
+    uid = current_objects["uid"][gi_obj]
     new_tracks = pd.DataFrame(
         {
             "scan": scan_num,
@@ -249,7 +240,7 @@ def write_tracks(old_tracks, record, current_objects, obj_props):
             "area": obj_props["area"],
             "max": obj_props["field_max"],
             "mean": obj_props["field_mean"],
-            "isolated": obj_props["isolated"][gi],
+            "isolated": obj_props["isolated"][gi_obj],
         }
     )
     new_tracks.set_index(["scan", "uid"], inplace=True)

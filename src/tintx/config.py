@@ -42,7 +42,7 @@ Getting the values of the currently set parameters can be done by the
 """
 
 from __future__ import annotations
-from typing import TypedDict, Sequence, Literal, Optional
+from typing import TypedDict, Literal, Optional
 
 ConfigType = TypedDict(
     "ConfigType",
