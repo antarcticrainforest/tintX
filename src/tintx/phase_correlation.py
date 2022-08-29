@@ -6,8 +6,9 @@ Functions for performing phase correlation. Used to predict cell movement
 between scans.
 
 """
-
-from typing import Literal, Optional, overload
+from __future__ import annotations
+from typing import Optional, overload
+from typing_extensions import Literal
 
 import numpy as np
 from scipy import ndimage

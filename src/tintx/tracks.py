@@ -6,6 +6,7 @@ Cell_tracks class.
 
 """
 
+from __future__ import annotations
 import copy
 from typing import cast, Iterator, Optional
 
