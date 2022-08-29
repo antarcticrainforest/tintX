@@ -40,8 +40,8 @@ meta = dict(
     license="BSD-3-Clause",
     python_requires=">=3.7",
     project_urls={
-        #  'Documentation': 'https://extra-data.readthedocs.io/en/latest/',
-        #  'Release notes': 'https://extra-data.readthedocs.io/en/latest/changelog.html',
+        "Documentation": "https://tintx.readthedocs.io/en/latest/",
+        # 'Release notes': 'https://extra-data.readthedocs.io/en/latest/changelog.html',
         "Issues": "https://github.com/antarcticrainforest/tintX/issues",
         "Source": "https://github.com/antarcticrainforest/tintX",
     },

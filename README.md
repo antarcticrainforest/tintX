@@ -1,5 +1,12 @@
 # TintX (Tint is not TITAN) tracking algorithm for any kind of input data
 
+[![Documentation Status](https://readthedocs.org/projects/tintx/badge/?version=latest)](https://tintx.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/badge/License-BSD-purple.svg)](LICENSE)
+[![tests](https://github.com/antarcticrainforest/tintX/actions/workflows/tests.yml/badge.svg?event=push)](https://github.com/antarcticrainforest/tintX/actions)
+[![codecov](https://codecov.io/gh/antarcticrainforest/tintX/branch/master/graph/badge.svg)](https://codecov.io/gh/antarcticrainforest/tintX)
+[![PyPI version](https://badge.fury.io/py/tintx.svg)](https://badge.fury.io/py/tintx)
+
+
 TintX is an adaptation of the tint (tracking algorithm)[https://github.com/openradar/TINT].
 Tint and TintX are easy-to-use storm cell tracking package based on the
 TITAN methodology by Dixon and Wiener. While Tint is meant to be applied to
