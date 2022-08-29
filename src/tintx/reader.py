@@ -1,6 +1,5 @@
 from __future__ import annotations
 from datetime import datetime
-import os
 from pathlib import Path
 from typing import cast, Any, Optional, Union, Iterator
 
@@ -56,7 +55,7 @@ class RunDirectory(Cell_tracks):
     @classmethod
     def from_files(
         cls,
-        input_files: Union[os.PathLike, list[os.PathLike]],
+        input_files: Union[Path, str, list[str], list[Path]],
         var_name: str,
         *,
         x_coord: str = "lon",

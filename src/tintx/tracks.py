@@ -6,8 +6,9 @@ Cell_tracks class.
 
 """
 
+from __future__ import annotations
 import copy
-from typing import cast, Iterator, Optional, Union
+from typing import cast, Iterator, Optional
 
 import pandas as pd
 import numpy as np

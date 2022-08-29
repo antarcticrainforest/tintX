@@ -10,30 +10,45 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        python-version: [3.7, 3.8, 3.9, 3.10]
+        max-parallel: 5
+        matrix:
+          python-version: [3.7, 3.8, 3.9, "3.10"]
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version:  ${{ matrix.python-version }}
 
-    - uses: actions/cache@v1
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('**/setup.py') }}-${{ hashFiles('.github/dependabot/constraints.txt') }}
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
+
+    - name: Creating conda environment for ${{ matrix.python-version }}
+      run: |
+        conda create -n test -y python=${{matrix.python-version}} ffmpeg
 
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install .[docs,tests] --constraint .github/dependabot/constraints.txt
+        conda install -n test -y -c conda-forge cartopy pip
+        conda run -n test python3 -m pip install -e .[docs,tests] #--constraint .github/dependabot/constraints.txt
+
+    - name: Linting
+      run: |
+       # stop the build if there are Python syntax errors or undefined names
+       conda run -n test flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
+       # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+       conda run -n test flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+       conda run -n test black --check src/tintx
+       conda run -n test mypy --install-types --non-interactive src/tintx
+
     - name: Test with pytest
       run: |
-        python3 -m pytest -v --nbval-lax --current-env --cov=src --cov-report=xml
+        conda run -n test python3 -m pytest -v --nbval-lax --current-env --cov=src/tintx --cov-report=xml
       env:
         MPLBACKEND: agg
 
