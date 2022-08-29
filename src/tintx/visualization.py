@@ -24,7 +24,7 @@ class Tracer(object):
     def __init__(self, tobj):
         self.tobj = tobj
         self.color_stack = self.colors * 10
-        self.cell_color = pd.Series()
+        self.cell_color = pd.Series([], dtype=str)
         self.history = None
         self.current = None
 
@@ -93,26 +93,25 @@ def full_domain(
 ):
     alt = alt or tobj.params["GS_ALT"]
     plot_style = plot_style or {}
+    shading = plot_style.pop("shading", "auto")
     if tracers:
         tracer = Tracer(tobj)
     nframes = tobj._tracks.index.levels[0].max()
     title = plot_style.pop("title", "")
     grid = next(grids)
-    X = grid.lon
-    Y = grid.lat
-    ax = _get_axes(X, Y, ax, **plot_style)
+    ax = _get_axes(grid.lon, grid.lat, ax, **plot_style)
     try:
         data = grid.data[0].filled(np.nan)
     except AttributeError:
         data = grid.data[0]
     im = ax.pcolormesh(
-        X,
-        Y,
+        grid.lon,
+        grid.lat,
         data,
         vmin=vmin,
         vmax=vmax,
         cmap=cmap,
-        shading="gouraud",
+        shading=shading,
     )
 
     ann: dict[str, mpl.text.Annotation] = {}

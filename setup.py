@@ -67,6 +67,7 @@ meta = dict(
         "cartopy",
         "cftime",
         "pandas",
+        "tables",
         "numpy",
         "scipy",
         "netCDF4",
@@ -78,7 +79,7 @@ meta = dict(
     extras_require={
         "tests": [
             "black",
-            "dask",
+            "dask[diagnostics]",
             "nbval",
             "pytest",
             "pytest-env",

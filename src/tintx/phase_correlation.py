@@ -61,7 +61,7 @@ def fft_flowvectors(
 
     crosscov = fft_crosscov(im1, im2)
     sigma = (1 / 8) * min(crosscov.shape)
-    cov_smooth = ndimage.filters.gaussian_filter(crosscov, sigma)
+    cov_smooth = ndimage.gaussian_filter(crosscov, sigma)
     dims = np.array(im1.shape)
     pshift = np.argwhere(cov_smooth == np.max(cov_smooth))[0]
     pshift = (pshift + 1) - np.round(dims / 2, 0)

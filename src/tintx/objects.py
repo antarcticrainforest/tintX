@@ -136,7 +136,7 @@ def check_isolation(raw, filtered, grid_size, params):
 def single_max(obj_ind, raw, params):
     """Returns True if object has at most one peak."""
     max_proj = np.max(raw, axis=0)
-    smooth = ndimage.filters.gaussian_filter(max_proj, params["ISO_SMOOTH"])
+    smooth = ndimage.gaussian_filter(max_proj, params["ISO_SMOOTH"])
     padded = np.pad(smooth, 1, mode="constant")
     obj_ind = [axis + 1 for axis in obj_ind]  # adjust for padding
     maxima = 0
