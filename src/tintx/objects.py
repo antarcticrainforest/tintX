@@ -81,13 +81,8 @@ def update_current_objects(frame1, frame2, pairs, old_objects, counter):
             obs_num = np.append(obs_num, old_objects["obs_num"][obj_index] + 1)
             origin = np.append(origin, old_objects["origin"][obj_index])
         else:
-            #  obj_orig = get_origin_uid(obj, frame1, old_objects)
-            obj_orig = "-1"
-            origin = np.append(origin, obj_orig)
-            if obj_orig != "-1":
-                uid = np.append(uid, counter.next_cid(obj_orig))
-            else:
-                uid = np.append(uid, counter.next_uid())
+            origin = np.append(origin, -1)
+            uid = np.append(uid, counter.next_uid())
             obs_num = np.append(obs_num, 0)
 
     id2 = pairs
@@ -187,7 +182,7 @@ def get_object_prop(image1, grid1, field, record, params):
             rounded = np.round(this_centroid).astype("i")
             c_x = grid1.x[rounded[1]]
             c_y = grid1.y[rounded[0]]
-            lon, lat = grid1.lon, grid1.lat
+            lon, lat = grid1.lon.values, grid1.lat.values
             if len(lon.shape) == 2:
                 lon = lon[rounded[0], rounded[1]]
             else:

@@ -43,15 +43,6 @@ class Counter:
         self.uid += count
         return np.array([str(uid) for uid in new_uids])
 
-    def next_cid(self, pid: str) -> str:
-        """Returns parent uid with appended letter to denote child."""
-        if pid in self.cid:
-            self.cid[pid] += 1
-        else:
-            self.cid[pid] = 0
-        letter = string.ascii_lowercase[self.cid[pid]]
-        return pid + letter
-
 
 class Record:
     """
@@ -186,11 +177,13 @@ def get_grids(
             time = cftime.DatetimeGregorian(
                 t.year, t.month, t.day, t.hour, t.minute, t.second
             )
+        mask_data = np.ma.masked_invalid(data)
+
         yield GridType(
             x=group[dims[-1]],
             y=group[dims[-2]],
             lon=lon,
             lat=lat,
-            data=np.ma.masked_invalid(data),
+            data=mask_data,
             time=time,
         )

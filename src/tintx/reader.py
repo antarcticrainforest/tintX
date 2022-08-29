@@ -67,7 +67,7 @@ class RunDirectory(Cell_tracks):
         **kwargs: Any,
     ):
         """
-        Create an :class:`RunDirecotry` object from given input file(s)/ directory.
+        Create an :class:`RunDirectory` object from given input file(s)/ directory.
 
         The :class:`RunDirectory` object gathers all necessary information on the
         data that is stored in the run directory. Once loaded the most
@@ -200,6 +200,7 @@ class RunDirectory(Cell_tracks):
             num_cells = run.get_tracks(field_thresh=0.01)
 
         """
+        self._reset()
         with tqdm(
             self.grids, total=self.time.size - 1, desc="Tracking", leave=leave_bar
         ) as pbar:

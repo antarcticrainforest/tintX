@@ -76,6 +76,11 @@ meta = dict(
         "typing_extensions",
     ],
     extras_require={
+        "tests": [
+            "pytest",
+            "pytest-env",
+            "pytest-cov",
+        ],
         "docs": [
             "black",
             "h5netcdf",
@@ -87,7 +92,7 @@ meta = dict(
             "sphinxcontrib_github_alt",
             "sphinx-execute-code-python3",
             "sphinx-rtd-theme",
-        ]
+        ],
     },
 )
 

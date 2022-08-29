@@ -135,7 +135,8 @@ class set:
     _record: list[tuple[Literal["insert", "replace"], str, Optional[float]]]
 
     def __init__(
-        self, **kwargs: float,
+        self,
+        **kwargs: float,
     ):
         self.config = config
         self._record = []
@@ -144,7 +145,7 @@ class set:
             self._assign(key.upper(), float(value), config)
 
     def __enter__(self):
-        return self.config
+        return self
 
     def __exit__(self, typ, value, traceback):
         for op, key, value in reversed(self._record):
