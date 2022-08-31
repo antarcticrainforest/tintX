@@ -43,7 +43,7 @@ jobs:
        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
        conda run -n test flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
        conda run -n test black --check src/tintx
-       conda run -n test mypy --install-types --non-interactive src/tintx
+       conda run -n test mypy
 
     - name: Test with pytest
       run: |
