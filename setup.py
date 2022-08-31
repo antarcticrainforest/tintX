@@ -62,7 +62,9 @@ meta = dict(
     ],
     version=find_version("src", "tintx", "__init__.py"),
     package_dir={"": "src"},
+    entry_points={"console_scripts": ["tintx = tintx.cli:tintx"]},
     install_requires=[
+        "click",
         "cftime",
         "pandas",
         "tables",

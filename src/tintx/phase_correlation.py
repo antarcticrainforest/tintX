@@ -7,7 +7,7 @@ between scans.
 
 """
 from __future__ import annotations
-from typing import Optional, overload
+from typing import Optional, overload, Union
 from typing_extensions import Literal
 
 import numpy as np
@@ -17,12 +17,12 @@ from .config import ConfigType
 
 
 def get_ambient_flow(
-    obj_extent,
+    obj_extent: dict[str, np.ndarray],
     img1: np.ndarray,
     img2: np.ndarray,
     params: ConfigType,
-    grid_size: tuple[float, float, float],
-) -> Optional[np.ndarray]:
+    grid_size: Union[np.ndarray, tuple[int, int, int]],
+) -> Optional[float]:
     """Takes in object extent and two images and returns ambient flow. Margin
     is the additional region around the object used to compute the flow
     vectors."""
@@ -54,7 +54,7 @@ def get_ambient_flow(
 
 def fft_flowvectors(
     im1: np.ndarray, im2: np.ndarray, global_shift: bool = False
-) -> Optional[np.ndarray]:
+) -> Optional[float]:
     """Estimates flow vectors in two images using cross covariance."""
     if not global_shift and (np.max(im1) == 0 or np.max(im2) == 0):
         return None
@@ -98,27 +98,27 @@ def fft_shift(fft_mat: np.ndarray) -> np.ndarray:
 
 @overload
 def get_global_shift(im1: Literal[None], im2: Literal[None]) -> None:
-    ...
+    ...  # pragma: no cover
 
 
 @overload
 def get_global_shift(im1: np.ndarray, im2: Literal[None]) -> None:
-    ...
+    ...  # pragma: no cover
 
 
 @overload
 def get_global_shift(im1: Literal[None], im2: np.ndarray) -> None:
-    ...
+    ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: np.ndarray, im2: np.ndarray) -> np.ndarray:
-    ...
+def get_global_shift(im1: np.ndarray, im2: np.ndarray) -> float:
+    ...  # pragma: no cover
 
 
 def get_global_shift(
     im1: Optional[np.ndarray], im2: Optional[np.ndarray]
-) -> Optional[np.ndarray]:
+) -> Optional[float]:
     """Returns standardazied global shift vector. im1 and im2 are full frames
     of raw DBZ values."""
     if im2 is None or im1 is None:

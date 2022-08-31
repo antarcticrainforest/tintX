@@ -45,7 +45,16 @@ def create_data(variable_name: str, blobs: int, size: int) -> xr.Dataset:
         name=variable_name,
     )
     data_array = np.zeros(dims)
-    return xr.Dataset({variable_name: dset, "Lt": Lat, "Lg": Lon})
+    return xr.Dataset({variable_name: dset, "Lt": Lat, "Lg": Lon}).set_coords(
+        list(coords.keys())
+    )
+
+
+@pytest.fixture(scope="session")
+def save_dir() -> Generator[Path, None, None]:
+    """Crate a temporary directory."""
+    with TemporaryDirectory() as td:
+        yield Path(td)
 
 
 @pytest.fixture(scope="session")

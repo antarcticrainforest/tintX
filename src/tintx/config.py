@@ -43,25 +43,9 @@ Getting the values of the currently set parameters can be done by the
 
 from __future__ import annotations
 from typing import Optional
-from typing_extensions import TypedDict, Literal
+from typing_extensions import Literal
 
-ConfigType = TypedDict(
-    "ConfigType",
-    {
-        "FIELD_THRESH": float,
-        "ISO_THRESH": float,
-        "ISO_SMOOTH": float,
-        "MIN_SIZE": float,
-        "FLOW_MARGIN": float,
-        "MAX_DISPARITY": float,
-        "MAX_FLOW_MAG": float,
-        "MAX_SHIFT_DISP": float,
-        "SEARCH_MARGIN": float,
-        "GS_ALT": float,
-    },
-)
-"""The Parameter type defines the default values and types of the tint
-tracking tuning parameters."""
+from .types import ConfigType
 
 config: dict[str, float] = dict(
     ISO_THRESH=4.0,

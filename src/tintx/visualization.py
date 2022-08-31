@@ -15,6 +15,7 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from .tracks import Cell_tracks
+from .helpers import GridType
 
 
 class Tracer(object):
@@ -66,20 +67,20 @@ def _get_axes(
 
 
 def _gen_from_grids(
-    total_num: int, grid_0: dict[str, Any], grids: Iterator[dict[str, Any]]
-) -> Iterator[dict[str, Any]]:
+    total_num: int, grid_0: GridType, grids: Iterator[GridType]
+) -> Iterator[GridType]:
 
     with tqdm(total=total_num, desc="Animating", leave=False) as pbar:
-        yield grid_0
         pbar.update()
+        yield grid_0
         for grid in grids:
-            yield grid
             pbar.update()
+            yield grid
 
 
 def full_domain(
     tobj: Cell_tracks,
-    grids,
+    grids: Iterator[GridType],
     vmin: float = 0.01,
     vmax: float = 15,
     ax: Optional[GeoAxesSubplot] = None,
@@ -90,7 +91,7 @@ def full_domain(
     tracers: bool = False,
     dt: float = 0,
     plot_style: Optional[dict[str, Union[float, int, str]]] = None,
-):
+) -> GeoAxesSubplot:
     alt = alt or tobj.params["GS_ALT"]
     plot_style = plot_style or {}
     shading = plot_style.pop("shading", "auto")
@@ -102,8 +103,8 @@ def full_domain(
     ax = _get_axes(grid.lon, grid.lat, ax, **plot_style)
     try:
         data = grid.data[0].filled(np.nan)
-    except AttributeError:
-        data = grid.data[0]
+    except AttributeError:  # pragma: no cover
+        data = grid.data[0]  # pragma: no cover
     im = ax.pcolormesh(
         grid.lon,
         grid.lat,
@@ -120,13 +121,13 @@ def full_domain(
         for annotation in ann.values():
             try:
                 annotation.remove()
-            except ValueError:
-                pass
+            except ValueError:  # pragma: no cover
+                pass  # pragma: no cover
         nframe, grid = enum
         try:
             im.set_array(grid.data[0].filled(np.nan).ravel())
-        except AttributeError:
-            im.set_array(grid.data[0].ravel())
+        except AttributeError:  # pragma: no cover
+            im.set_array(grid.data[0].ravel())  # pragma: no cover
         title_text = ""
         if title:
             title_text = f"{title} at "

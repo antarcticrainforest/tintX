@@ -8,30 +8,17 @@ Tools for pulling data from reading data.
 """
 
 from __future__ import annotations
-from typing import NamedTuple, Union
+from typing import Union
 
 import cftime
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-import xarray as xr
 
-from .config import ConfigType
-
-GridType = NamedTuple(
-    "GridType",
-    [
-        ("x", xr.DataArray),
-        ("y", xr.DataArray),
-        ("lon", xr.DataArray),
-        ("lat", xr.DataArray),
-        ("time", xr.DataArray),
-        ("data", cftime.datetime),
-    ],
-)
+from .types import ConfigType, GridType
 
 
-def parse_grid_datetime(grid_obj: GridType) -> xr.DataArray:
+def parse_grid_datetime(grid_obj: GridType) -> Union[np.datetime64, cftime.datetime]:
     """Obtains datetime object from the data dictionary."""
     return grid_obj.time
 
@@ -87,10 +74,7 @@ def extract_grid_data(
     grid_obj: GridType, params: ConfigType
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return filtered grid frame and raw grid slice at global shift altitude."""
-    try:
-        masked = grid_obj.data.filled(0)
-    except AttributeError:
-        masked = grid_obj.data
+    masked = grid_obj.data.filled(0)
     raw = masked[0, :, :]
     frame = get_filtered_frame(masked, params["MIN_SIZE"], params["FIELD_THRESH"])
     return raw, frame

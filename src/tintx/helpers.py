@@ -4,8 +4,8 @@ tint.helpers
 
 """
 from __future__ import annotations
-from datetime import datetime
-from typing import Iterator, Union, cast
+from datetime import datetime, timedelta
+from typing import Iterator, Optional, Union, cast
 
 import cftime
 import numpy as np
@@ -80,9 +80,9 @@ class Record:
 
     def __init__(self, grid_obj: GridType) -> None:
         self.scan = -1
-        self.time = None
-        self.interval = None
-        self.interval_ratio = None
+        self.time: Optional[Union[np.datetime64, cftime.datetime]] = None
+        self.interval: Optional[Union[timedelta, np.timedelta64]] = None
+        self.interval_ratio: Optional[float] = None
         self.grid_size = get_grid_size(grid_obj)
         self.shifts = pd.DataFrame()
         self.new_shifts = pd.DataFrame()
@@ -100,7 +100,14 @@ class Record:
         shift correction process."""
         self.correction_tally["case" + str(case_num)] += 1
 
-    def record_shift(self, corr, gl_shift, l_heads, local_shift, case):
+    def record_shift(
+        self,
+        corr: float,
+        gl_shift: float,
+        l_heads: Optional[float],
+        local_shift: float,
+        case: int,
+    ) -> None:
         """Records corrected shift, phase shift, global shift, and last
         heads per object per timestep. This information can be used to
         monitor and refine the shift correction algorithm in the
@@ -119,7 +126,7 @@ class Record:
 
         self.new_shifts = pd.concat([self.new_shifts, new_shift_record])
 
-    def add_uids(self, current_objects):
+    def add_uids(self, current_objects: pd.DataFrame) -> None:
         """Because of the chronology of the get_tracks process, object uids
         cannot be added to the shift record at the time of correction, so they
         must be added later in the process."""
@@ -129,7 +136,9 @@ class Record:
             self.shifts = pd.concat([self.shifts, self.new_shifts])
             self.new_shifts = pd.DataFrame()
 
-    def update_scan_and_time(self, grid_obj1, grid_obj2=None):
+    def update_scan_and_time(
+        self, grid_obj1: GridType, grid_obj2: Optional[GridType] = None
+    ) -> None:
         """Updates the scan number and associated time. This information is
         used for obtaining object properties as well as for the interval ratio
         correction of last_heads vectors."""
@@ -140,17 +149,29 @@ class Record:
             return
         time2 = parse_grid_datetime(grid_obj2)
         old_diff = self.interval
-        self.interval = time2 - self.time
-        try:
-            inter_val_s = self.interval.total_seconds()
-        except AttributeError:
-            inter_val_s = self.interval / np.timedelta64(1, "s")
+        self.interval = cast(Union[timedelta, np.timedelta64], time2 - self.time)
+        inter_val_s = get_interval(self.interval)
         if old_diff is not None:
-            try:
-                diff = old_diff.total_seconds()
-            except AttributeError:
-                diff = old_diff / np.timedelta64(1, "s")
+            diff = get_interval(old_diff)
             self.interval_ratio = inter_val_s / diff
+
+
+def get_interval(interval: Union[timedelta, np.timedelta64]) -> float:
+    """Get a timeinterval in total seconds."""
+
+    if isinstance(interval, np.timedelta64):
+        return float(interval / np.timedelta64(1, "s"))
+    return interval.total_seconds()
+
+
+def convert_to_cftime(time: Union[np.datetime64, cftime.datetime]) -> cftime.datetime:
+    """Convert a dateim to a cftime object."""
+    if isinstance(time, np.datetime64):
+        t = datetime.fromisoformat(str(time).partition(".")[0])
+        return cftime.DatetimeGregorian(
+            t.year, t.month, t.day, t.hour, t.minute, t.second
+        )
+    return time
 
 
 def get_grids(
@@ -164,20 +185,16 @@ def get_grids(
 
     dims = group.variables[varname].dims
     for s in range(slices[0], slices[-1]):
-        time = cast(Union[np.datetime64, cftime.datetime], times[s].values)
+        time = convert_to_cftime(
+            cast(Union[np.datetime64, cftime.datetime], times[s].values)
+        )
         try:
             data = group.variables[varname][s].values
         except AttributeError:
             data = group.variables[varname][s]
         if len(data.shape) < 3:
             data = data[np.newaxis, :]
-        if isinstance(time, np.datetime64):
-            t = datetime.fromtimestamp(time.astype("O") / 1e9)
-            time = cftime.DatetimeGregorian(
-                t.year, t.month, t.day, t.hour, t.minute, t.second
-            )
         mask_data = np.ma.masked_invalid(data)
-
         yield GridType(
             x=group[dims[-1]],
             y=group[dims[-2]],

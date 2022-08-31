@@ -20,7 +20,8 @@ from .phase_correlation import get_global_shift
 from .matching import get_pairs
 from .objects import init_current_objects, update_current_objects
 from .objects import get_object_prop, write_tracks
-from .config import config as tint_config, ConfigType
+from .config import config as tint_config
+from .types import ConfigType, CurrentObjectType
 
 
 class Cell_tracks:
@@ -66,25 +67,17 @@ class Cell_tracks:
         self.last_grid: Optional[GridType] = None
         self.counter: Optional[Counter] = None
         self.record: Optional[Record] = None
-        self.current_objects = None
+        self.current_objects: Optional[CurrentObjectType] = None
         self._tracks = pd.DataFrame()
 
         self._saved_record: Optional[Record] = None
         self._saved_counter: Optional[Counter] = None
-        self._saved_objects = None
+        self._saved_objects: Optional[CurrentObjectType] = None
 
     @property
     def params(self) -> ConfigType:
         """Get the tracking parameters."""
         return cast(ConfigType, tint_config)
-
-    def _reset(self) -> None:
-        """Reset the tracking information."""
-        self.record = None
-        self.counter = None
-        self.current_objects = None
-        self._tracks = pd.DataFrame()
-        self._save()
 
     def _save(self) -> None:
         """Saves deep copies of record, counter, and current_objects."""
@@ -106,10 +99,9 @@ class Cell_tracks:
     def _get_tracks(
         self,
         grids: Iterator[GridType],
+        pbar: tqdm,
         centre: Optional[tuple[float, float]] = None,
-        pbar: Optional[tqdm] = None,
     ) -> int:
-        ncells = 0
         raw2: Optional[np.ndarray] = None
         if self.record is None:
             # tracks object being initialized
@@ -142,6 +134,7 @@ class Cell_tracks:
         stop_iteration = bool(grid_obj2 is None)
         raw2, frame2 = extract_grid_data(grid_obj2, self.params)
         while not stop_iteration:
+            pbar.update()
             grid_obj1 = grid_obj2
             raw1 = raw2
             frame1 = frame2
@@ -166,7 +159,7 @@ class Cell_tracks:
                 new_rain = True
                 self.current_objects = None
                 continue
-            global_shift = get_global_shift(raw1, raw2)
+            global_shift = cast(float, get_global_shift(raw1, raw2))
             pairs = get_pairs(
                 frame1,
                 frame2,
@@ -185,18 +178,13 @@ class Cell_tracks:
                 self.current_objects, self.counter = update_current_objects(
                     frame1, frame2, pairs, self.current_objects, self.counter
                 )
-            obj_props = get_object_prop(
-                frame1, grid_obj1, self.field, self.record, self.params
-            )
+            obj_props = get_object_prop(frame1, grid_obj1, self.record, self.params)
 
             self.record.add_uids(self.current_objects)
             self._tracks = write_tracks(
                 self._tracks, self.record, self.current_objects, obj_props
             )
-            ncells += 1
             del grid_obj1, raw1, frame1, global_shift, pairs, obj_props
-            if pbar is not None:
-                pbar.update()
             # scan loop end
         self._load()
         ncells = 0
