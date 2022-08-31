@@ -1,7 +1,7 @@
 """Command line interface for tintX tracking."""
 from __future__ import annotations
 from pathlib import Path
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional
 
 import click
 from tintx import __version__, RunDirectory, config
@@ -115,9 +115,8 @@ def plot(
 
     run_dir = RunDirectory.from_dataframe(input_file)
     time_suffix = (
-        run_dir.start.strftime("%Y%m%dT%H%M")
-        + "-"
-        + run_dir.end.strftime("%Y%m%dT%H%M")
+        f'{run_dir.start.strftime("%Y%m%dT%H%M")}-'
+        f'{run_dir.end.strftime("%Y%m%dT%H%M")}'
     )
     outf = Path(".").absolute() / f"tintx_tracks_{run_dir.var_name}_{time_suffix}"
     if animate:
@@ -305,9 +304,8 @@ def track(
             combine="by_coords",
         )
         time_suffix = (
-            run_d.start.strftime("%Y%m%dT%H%M")
-            + "-"
-            + run_d.end.strftime("%Y%m%dT%H%M")
+            f'{run_d.start.strftime("%Y%m%dT%H%M")}-'
+            f'{run_d.end.strftime("%Y%m%dT%H%M")}'
         )
         outf = Path(".").absolute() / f"tintx_tracks_{variable}_{time_suffix}.hdf5"
         output = output or outf

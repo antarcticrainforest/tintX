@@ -45,8 +45,6 @@ from __future__ import annotations
 from typing import cast, Any, Optional
 from typing_extensions import Literal
 
-from .types import ConfigType
-
 config: dict[str, float] = dict(
     ISO_THRESH=4.0,
     FIELD_THRESH=32.0,

@@ -1,5 +1,6 @@
+"""Collection of all type definitions used for type hinting."""
 from __future__ import annotations
-from typing import Optional, Union, NamedTuple
+from typing import Union, NamedTuple
 from typing_extensions import TypedDict
 
 import cftime

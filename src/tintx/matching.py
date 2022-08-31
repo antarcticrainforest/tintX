@@ -16,7 +16,7 @@ from scipy import optimize
 from .phase_correlation import get_ambient_flow
 from .objects import get_obj_extent
 from .helpers import get_interval, Record
-from .types import ConfigType, CurrentObjectType, SearchPredictType
+from .types import ConfigType, SearchPredictType
 
 LARGE_NUM = 1000
 

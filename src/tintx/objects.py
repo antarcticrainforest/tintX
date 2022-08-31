@@ -13,7 +13,7 @@ import pandas as pd
 from scipy import ndimage
 from .grid_utils import get_filtered_frame
 from .helpers import Counter, Record
-from .types import ConfigType, GridType, ObjectPropType, CurrentObjectType
+from .types import ConfigType, GridType, ObjectPropType
 
 
 def get_object_center(obj_id: Union[int, float, str], labeled_image: np.ndarray) -> int:

@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 import hashlib
 from pathlib import Path
-from typing import cast, Any, Optional, Union, Iterator
+from typing import Any, Optional, Union, Iterator
 import warnings
 
 from cartopy.mpl.geoaxes import GeoAxesSubplot

@@ -21,7 +21,7 @@ from .matching import get_pairs
 from .objects import init_current_objects, update_current_objects
 from .objects import get_object_prop, write_tracks
 from .config import config as tint_config
-from .types import ConfigType, CurrentObjectType
+from .types import ConfigType
 
 
 class Cell_tracks:

@@ -13,7 +13,7 @@ from typing_extensions import Literal
 import numpy as np
 from scipy import ndimage
 
-from .config import ConfigType
+from .types import ConfigType
 
 
 def get_ambient_flow(
