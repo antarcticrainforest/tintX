@@ -26,5 +26,6 @@ prepdocs:
 
 
 lint:
-	mypy --install-types --non-interactive
+	mypy
 	black --check -t py310 src
+	flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
