@@ -42,7 +42,7 @@ Getting the values of the currently set parameters can be done by the
 """
 
 from __future__ import annotations
-from typing import Optional
+from typing import Any, Optional
 from typing_extensions import Literal
 
 from .types import ConfigType
@@ -117,7 +117,7 @@ class set:
     """
 
     config: dict[str, float]
-    _record: list[tuple[Literal["insert", "replace"], str, Optional[float]]]
+    _record: list[tuple[Literal["insert", "replace"], str, float]]
 
     def __init__(
         self,
@@ -129,10 +129,10 @@ class set:
         for key, value in kwargs.items():
             self._assign(key.upper(), float(value), config)
 
-    def __enter__(self):
+    def __enter__(self) -> config:
         return self
 
-    def __exit__(self, typ, value, traceback):
+    def __exit__(self, *args: Any) -> None:
         for op, key, value in reversed(self._record):
             if op == "replace":
                 self.config[key] = value

@@ -67,12 +67,12 @@ class Cell_tracks:
         self.last_grid: Optional[GridType] = None
         self.counter: Optional[Counter] = None
         self.record: Optional[Record] = None
-        self.current_objects: Optional[CurrentObjectType] = None
+        self.current_objects: Optional[dict[str, np.ndarray]] = None
         self._tracks = pd.DataFrame()
 
         self._saved_record: Optional[Record] = None
         self._saved_counter: Optional[Counter] = None
-        self._saved_objects: Optional[CurrentObjectType] = None
+        self._saved_objects: Optional[dict[str, np.ndarray]] = None
 
     @property
     def params(self) -> ConfigType:
@@ -95,6 +95,11 @@ class Cell_tracks:
         self.record = self._saved_record
         self.counter = self._saved_counter
         self.current_objects = self._saved_objects
+
+    @property
+    def tracks(self) -> pd.DataFrame:
+        """A pandas.DataFrame representation of the tracked cells."""
+        return self._tracks
 
     def _get_tracks(
         self,
@@ -160,23 +165,30 @@ class Cell_tracks:
                 self.current_objects = None
                 continue
             global_shift = cast(float, get_global_shift(raw1, raw2))
-            pairs = get_pairs(
-                frame1,
-                frame2,
-                global_shift,
-                self.current_objects,
-                self.record,
-                self.params,
+            pairs = cast(
+                np.ndarray,
+                get_pairs(
+                    frame1,
+                    frame2,
+                    global_shift,
+                    self.current_objects,
+                    self.record,
+                    self.params,
+                ),
             )
             if new_rain:
                 # first nonempty scan after a period of empty scans
                 self.current_objects, self.counter = init_current_objects(
-                    frame1, frame2, pairs, self.counter
+                    frame1, frame2, pairs, cast(Counter, self.counter)
                 )
                 new_rain = False
             else:
                 self.current_objects, self.counter = update_current_objects(
-                    frame1, frame2, pairs, self.current_objects, self.counter
+                    frame1,
+                    frame2,
+                    pairs,
+                    cast(dict[str, np.ndarray], self.current_objects),
+                    cast(Counter, self.counter),
                 )
             obj_props = get_object_prop(frame1, grid_obj1, self.record, self.params)
 

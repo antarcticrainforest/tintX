@@ -79,7 +79,7 @@ def update_current_objects(
     frame1: np.ndarray,
     frame2: np.ndarray,
     pairs: np.ndarray,
-    old_objects: CurrentObjectType,
+    old_objects: dict[str, np.ndarray],
     counter: Counter,
 ) -> tuple[dict[str, np.ndarray], Counter]:
     """Removes dead objects, updates living objects, and assigns new uids to
@@ -254,7 +254,7 @@ def get_object_prop(
 def write_tracks(
     old_tracks: pd.DataFrame,
     record: Record,
-    current_objects: CurrentObjectType,
+    current_objects: dict[str, np.ndarray],
     obj_props: ObjectPropType,
 ) -> pd.DataFrame:
     """Writes all cell information to tracks dataframe."""

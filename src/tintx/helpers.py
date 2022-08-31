@@ -29,7 +29,7 @@ class Counter:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """uid is an integer that tracks the number of independently formed
         cells. The cid dictionary keeps track of 'children' --i.e., cells that
         have split off from another cell."""

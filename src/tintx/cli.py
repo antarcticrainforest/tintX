@@ -138,7 +138,7 @@ def plot(
         output.parent.mkdir(exist_ok=True, parents=True)
         axes = run_dir.plot_trajectories(
             thresh=kwargs["vmin"],
-            mintrace=kwargs["mintrace"],
+            mintrace=int(kwargs["mintrace"]),
             plot_style={"lw": kwargs["linewidth"], "ms": kwargs["markersize"]},
         )
         axes.figure.savefig(output, bbox_inches="tight")

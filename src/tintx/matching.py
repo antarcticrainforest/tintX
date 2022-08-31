@@ -149,7 +149,10 @@ def correct_shift(
 
 
 def predict_search_extent(
-    obj1_extent, shift: float, params: ConfigType, grid_size: np.ndarray
+    obj1_extent: dict[str, np.ndarray],
+    shift: float,
+    params: ConfigType,
+    grid_size: np.ndarray,
 ) -> SearchPredictType:
     """Predicts search extent/region for the object in image2 given
     the image shift."""
@@ -306,7 +309,7 @@ def get_pairs(
     image1: np.ndarray,
     image2: np.ndarray,
     global_shift: float,
-    current_objects: Optional[CurrentObjectType],
+    current_objects: Optional[dict[str, np.ndarray]],
     record: Record,
     params: ConfigType,
 ) -> Optional[np.ndarray]:

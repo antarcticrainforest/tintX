@@ -73,7 +73,7 @@ class RunDirectory(Cell_tracks):
         start: Optional[Union[str, datetime, pd.Timestamp]] = None,
         end: Optional[Union[str, datetime, pd.Timestamp]] = None,
         **kwargs: Any,
-    ):
+    ) -> RunDirectory:
         """
         Create an :class:`RunDirectory` object from given input file(s)/ directory.
 
@@ -145,15 +145,15 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         x_coord: str = "lon",
         y_coord: str = "lat",
-    ):
+    ) -> None:
         if isinstance(dataset, xr.DataArray):
             self.data = xr.Dataset({var_name: dataset})
         else:
             self.data = dataset
-        self.lons = cast(xr.DataArray, self.data[x_coord])
-        self.lats = cast(xr.DataArray, self.data[y_coord])
+        self.lons = self.data[x_coord]
+        self.lats = self.data[y_coord]
         self.var_name = var_name
-        self.time = cast(xr.DataArray, self.data[time_coord])
+        self.time = self.data[time_coord]
         self.start = convert_to_cftime(self.time.values[0])
         self.end = convert_to_cftime(self.time.values[-1])
         super().__init__(var_name)
@@ -169,7 +169,7 @@ class RunDirectory(Cell_tracks):
         leave_bar: bool = True,
         flush: bool = True,
         **tracking_parameters: float,
-    ):
+    ) -> int:
         """Obtains tracks given a list of data arrays. This is the
             primary method of the tracks class. This method makes use of all of the
             functions and helper classes defined above.
@@ -331,7 +331,7 @@ class RunDirectory(Cell_tracks):
     @classmethod
     def from_dataframe(
         cls, track_file: Union[str, Path], dataset: Optional[xr.Dataset] = None
-    ):
+    ) -> RunDirectory:
         """Create an instance of the RunDirectory class from tintx tracks.
 
         Parameters
@@ -386,7 +386,7 @@ class RunDirectory(Cell_tracks):
         ax: Optional[GeoAxesSubplot] = None,
         cmap: Union[str, plt.cm] = "Blues",
         alt: Optional[float] = None,
-        fps: int = 5,
+        fps: float = 5,
         isolated_only: bool = False,
         tracers: bool = False,
         dt: float = 0,

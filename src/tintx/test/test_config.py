@@ -1,7 +1,9 @@
 """Tests for the tint configuration."""
 
+import xarray as xr
 
-def test_set_config(data_with_a_blob) -> None:
+
+def test_set_config(data_with_a_blob: xr.Dataset) -> None:
     """Test the set class."""
 
     from tintx import config, RunDirectory

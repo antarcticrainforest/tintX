@@ -73,7 +73,7 @@ def real_data_files() -> Generator[Path, None, None]:
 
 
 @pytest.fixture(scope="session")
-def netcdf_files_with_blob(data_with_a_blob) -> Generator[Path, None, None]:
+def netcdf_files_with_blob(data_with_a_blob: xr.Dataset) -> Generator[Path, None, None]:
     """Save data with a blob to file."""
 
     with TemporaryDirectory() as td:
