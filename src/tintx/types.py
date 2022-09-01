@@ -1,6 +1,6 @@
 """Collection of all type definitions used for type hinting."""
 from __future__ import annotations
-from typing import Union, NamedTuple
+from typing import Union, NamedTuple, List
 from typing_extensions import TypedDict
 
 import cftime
@@ -23,17 +23,17 @@ SearchPredictType = TypedDict(
 ObjectPropType = TypedDict(
     "ObjectPropType",
     {
-        "id1": list[int],
-        "center": list[float],
-        "grid_x": list[float],
-        "grid_y": list[float],
-        "area": list[float],
-        "field_max": list[float],
-        "field_mean": list[float],
-        "lon": list[float],
-        "lat": list[float],
+        "id1": List[int],
+        "center": List[float],
+        "grid_x": List[float],
+        "grid_y": List[float],
+        "area": List[float],
+        "field_max": List[float],
+        "field_mean": List[float],
+        "lon": List[float],
+        "lat": List[float],
         "isolated": np.ndarray,
-        "ok_items": list[bool],
+        "ok_items": List[bool],
     },
 )
 
