@@ -18,7 +18,9 @@ from scipy import ndimage
 from .types import ConfigType, GridType
 
 
-def parse_grid_datetime(grid_obj: GridType) -> Union[np.datetime64, cftime.datetime]:
+def parse_grid_datetime(
+    grid_obj: GridType,
+) -> Union[np.datetime64, cftime.datetime]:
     """Obtains datetime object from the data dictionary."""
     return grid_obj.time
 
@@ -41,7 +43,9 @@ def get_grid_alt(
     return int(np.round(alt_meters / grid_size[0]))
 
 
-def get_vert_projection(grid: np.ndarray, thresh: Union[float, int] = 40) -> np.ndarray:
+def get_vert_projection(
+    grid: np.ndarray, thresh: Union[float, int] = 40
+) -> np.ndarray:
     """Returns boolean vertical projection from grid."""
     return np.any(grid > thresh, axis=0)
 
@@ -73,7 +77,7 @@ def clear_small_echoes(label_image: np.ndarray, min_size: float) -> np.ndarray:
 def extract_grid_data(
     grid_obj: GridType, params: ConfigType
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return filtered grid frame and raw grid slice at global shift altitude."""
+    """Get filtered grid frame and raw grid slice at global shift altitude."""
     masked = grid_obj.data.filled(0)
     raw = masked[0, :, :]
     frame = get_filtered_frame(masked, params["MIN_SIZE"], params["FIELD_THRESH"])

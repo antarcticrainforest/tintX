@@ -64,6 +64,7 @@ def _get_axes(
         raise TypeError("Ax should be a cartopy GeoAxesSubplot object")
     ax.set_ylim(Y.min(), Y.max())
     ax.set_xlim(X.min(), X.max())
+    kwargs.setdefault("resolution", "10m")
     ax.coastlines(**kwargs)
     return ax
 
@@ -212,9 +213,10 @@ def plot_traj(
 
     plot_style = plot_style or {}
     _plot_style = dict(linewidth=1)
+    resolution = plot_style.pop("resolution", "10m")
     _plot_style.update(**_normalize_kwargs(plot_style, "line2d"))
     size = _plot_style.pop("markersize", 50)
-    ax = _get_axes(X, Y, ax, **_plot_style)
+    ax = _get_axes(X, Y, ax, resolution=resolution, **_plot_style)
     proj = ax.projection
     if len(traj) == 0:
         raise ValueError("DataFrame of trajectories is empty.")
@@ -261,7 +263,9 @@ def plot_traj(
     return ax
 
 
-def _normalize_kwargs(kwargs: dict[str, Any], kind: str = "patch") -> dict[str, Any]:
+def _normalize_kwargs(
+    kwargs: dict[str, Any], kind: str = "patch"
+) -> dict[str, Any]:
     """Convert matplotlib keywords from short to long form."""
     # Source:
     # github.com/tritemio/FRETBursts/blob/fit_experim/fretbursts/burst_plot.py

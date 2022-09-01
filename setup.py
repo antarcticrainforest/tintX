@@ -79,6 +79,7 @@ meta = dict(
     ],
     extras_require={
         "tests": [
+            "bash_kernel",
             "black",
             "dask[diagnostics]",
             "nbval",
@@ -90,6 +91,7 @@ meta = dict(
             "mypy",
         ],
         "docs": [
+            "bash_kernel",
             "black",
             "dask",
             "h5netcdf",

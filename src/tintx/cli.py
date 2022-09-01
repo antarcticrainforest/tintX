@@ -44,7 +44,9 @@ def _get_file_names(input_paths: tuple[Path, ...]) -> Iterator[Path]:
 @click.argument(
     "input_file",
     nargs=1,
-    type=click.Path(resolve_path=True, path_type=Path, exists=True, dir_okay=False),
+    type=click.Path(
+        resolve_path=True, path_type=Path, exists=True, dir_okay=False
+    ),
 )
 @click.option(
     "-o",
@@ -61,7 +63,10 @@ def _get_file_names(input_paths: tuple[Path, ...]) -> Iterator[Path]:
 )
 @click.option("--animate", is_flag=True, help="Create animation")
 @click.option(
-    "--dt", type=click.FLOAT, default=0, help="Offset in hours from UTC. Animation only"
+    "--dt",
+    type=click.FLOAT,
+    default=0,
+    help="Offset in hours from UTC. Animation only",
 )
 @click.option(
     "--fps",
@@ -70,7 +75,10 @@ def _get_file_names(input_paths: tuple[Path, ...]) -> Iterator[Path]:
     help="Play back speed of an animation. Animation only",
 )
 @click.option(
-    "--cmap", type=click.STRING, default="Blues", help="Colormap used for animations."
+    "--cmap",
+    type=click.STRING,
+    default="Blues",
+    help="Colormap used for animations.",
 )
 @click.option(
     "--vmin", type=click.FLOAT, default=0, help="minimum values to be plotted"
@@ -95,7 +103,11 @@ def _get_file_names(input_paths: tuple[Path, ...]) -> Iterator[Path]:
     help="Help marker size of the trijectory plot",
 )
 @click.option(
-    "--linewidth", "-lw", type=click.FLOAT, default=1, help="Line width to be plotted."
+    "--linewidth",
+    "-lw",
+    type=click.FLOAT,
+    default=1,
+    help="Line width to be plotted.",
 )
 def plot(
     input_file: Path,
@@ -225,7 +237,7 @@ def plot(
     help=("Radius of the search box around the predicted object center."),
 )
 @click.option(
-    "-flow-margin",
+    "--flow-margin",
     type=click.FLOAT,
     default=750,
     help=("Margin size around objects to perform phase correlation."),
@@ -307,7 +319,9 @@ def track(
             f'{run_d.start.strftime("%Y%m%dT%H%M")}-'
             f'{run_d.end.strftime("%Y%m%dT%H%M")}'
         )
-        outf = Path(".").absolute() / f"tintx_tracks_{variable}_{time_suffix}.hdf5"
+        outf = (
+            Path(".").absolute() / f"tintx_tracks_{variable}_{time_suffix}.hdf5"
+        )
         output = output or outf
         num_tracks = run_d.get_tracks()
         click.echo(f"Found and tracked {num_tracks} objects.")

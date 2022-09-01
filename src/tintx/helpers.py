@@ -164,7 +164,9 @@ def get_interval(interval: Union[timedelta, np.timedelta64]) -> float:
     return interval.total_seconds()
 
 
-def convert_to_cftime(time: Union[np.datetime64, cftime.datetime]) -> cftime.datetime:
+def convert_to_cftime(
+    time: Union[np.datetime64, cftime.datetime]
+) -> cftime.datetime:
     """Convert a dateim to a cftime object."""
     if isinstance(time, np.datetime64):
         t = datetime.fromisoformat(str(time).partition(".")[0])

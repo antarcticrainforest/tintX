@@ -67,12 +67,17 @@ def get(key: str, default: Optional[float] = None) -> Optional[float]:
 
     Examples
     --------
-    >>> from tintx import config
-    >>> config.get('min_size')
-    8.0
+    .. execute_code::
+        :hide_headers:
 
-    >>> config.get('bar', default=123.)
-    123
+        from tintx import config
+        print(config.get('min_size'))
+
+    .. execute_code::
+        :hide_headers:
+
+        from tintx import config
+        print(config.get('bar', default=123.))
 
 
     See Also
@@ -97,6 +102,7 @@ class set:
     the parameter will be set back to its original value.
 
     .. execute_code::
+        :hide_headers:
 
         from tintx import config
         with config.set(field_thresh=5):
@@ -106,7 +112,11 @@ class set:
     To make the configuration changes persistent you can use ``set`` without
     the ``with`` block:
 
-    >>> tintx.config.set(field_thresh=5)
+    .. execute_code::
+        :hide_headers:
+
+        import tintx
+        tintx.config.set(field_thresh=5)
 
 
     See Also

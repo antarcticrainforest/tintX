@@ -25,6 +25,18 @@ def test_tracking_of_dataset(data_with_a_blob: xr.Dataset) -> None:
     assert tracks == 0
 
 
+def test_get_parameters(data_with_a_blob: xr.DataArray) -> None:
+    """Test getting the tuning parameters."""
+
+    from tintx import RunDirectory
+
+    run_dir = RunDirectory(data_with_a_blob, "precip", x_coord="Lg", y_coord="Lt")
+    _ = run_dir.get_tracks(field_thresh=0.0)
+    assert run_dir.get_parameters(run_dir.tracks) == run_dir.get_parameters()
+    with pytest.raises(ValueError):
+        run_dir.get_parameters(pd.DataFrame({"foo": ["bar"]}))
+
+
 def test_tracking_of_datafile(netcdf_files_with_blob: Path) -> None:
     """Test tracking from saved netcdf files."""
 
@@ -50,7 +62,9 @@ def test_save_dataset(save_dir: Path, netcdf_files_with_blob: Path) -> None:
     )
     _ = run_dir.get_tracks(field_thresh=0.0, iso_thresh=0)
     run_dir.save_tracks(save_dir / "test.h5")
-    assert len(run_dir.tracks) == len(pd.read_hdf(save_dir / "test.h5", "tintx_tracks"))
+    assert len(run_dir.tracks) == len(
+        pd.read_hdf(save_dir / "test.h5", "tintx_tracks")
+    )
 
 
 def test_load_dataset(save_dir: Path, netcdf_files_with_blob: Path) -> None:

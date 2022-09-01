@@ -1,3 +1,4 @@
+"""A Convenience module to  access and apply the tint tracking algoritm."""
 from __future__ import annotations
 from datetime import datetime
 import hashlib
@@ -11,11 +12,11 @@ import pandas as pd
 from tqdm.auto import tqdm
 import xarray as xr
 
-from .helpers import get_grids, GridType, convert_to_cftime
+from .helpers import get_grids, convert_to_cftime
 from .tracks import Cell_tracks
 from .visualization import full_domain, plot_traj
 from .config import set as set_config
-
+from .types import GridType
 
 __all__ = ["RunDirectory"]
 
@@ -45,8 +46,8 @@ class RunDirectory(Cell_tracks):
 
     Example
     -------
-
     .. execute_code::
+        :hide_headers:
 
         import os
         import xarray
@@ -106,8 +107,8 @@ class RunDirectory(Cell_tracks):
 
         Example
         -------
-
         .. execute_code::
+            :hide_headers:
 
             import os
             from tintx import RunDirectory
@@ -158,11 +159,6 @@ class RunDirectory(Cell_tracks):
         self.end = convert_to_cftime(self.time.values[-1])
         super().__init__(var_name)
 
-    @property
-    def tracks(self) -> pd.DataFrame:
-        """A pandas.DataFrame representation of the tracked cells."""
-        return self._tracks
-
     def get_tracks(
         self,
         centre: Optional[tuple[float, float]] = None,
@@ -171,8 +167,8 @@ class RunDirectory(Cell_tracks):
         **tracking_parameters: float,
     ) -> int:
         """Obtains tracks given a list of data arrays. This is the
-            primary method of the tracks class. This method makes use of all of the
-            functions and helper classes defined above.
+            primary method of the tracks class. This method makes use of all of
+            the functions and helper classes defined above.
 
         Parameters
         ----------
@@ -198,8 +194,8 @@ class RunDirectory(Cell_tracks):
 
         Example
         -------
-
         .. execute_code::
+            :hide_headers:
 
             import os
             import xarray
@@ -215,24 +211,19 @@ class RunDirectory(Cell_tracks):
         """
         if flush:
             self.reset_tracks()
-        parameters = self._parameters.get(self._track_hash, {})
+        parameters = self._parameters.get(self._track_hash(), {})
         parameters.update(tracking_parameters)
         with tqdm(
             self.grids, total=self.time.size - 1, desc="Tracking", leave=leave_bar
         ) as pbar:
             with set_config(**parameters) as cfg:
                 num_tracks = self._get_tracks(self.grids, pbar, centre)
-                self._parameters[self._track_hash] = cfg.config.copy()
+                self._parameters[self._track_hash()] = cfg.config.copy()
             return num_tracks
 
     @property
-    def _track_hash(self) -> str:
-        df_hash = hashlib.sha512(self.tracks.to_string().encode("utf-8"))
-        return df_hash.hexdigest()
-
-    @property
     def grids(self) -> Iterator[GridType]:
-        """Create dictionary holding longitude and latitude information."""
+        """Iterator holding longitude/latitude/time and data."""
         yield from get_grids(
             self.data,
             (0, self.time.size),
@@ -243,15 +234,9 @@ class RunDirectory(Cell_tracks):
         )
 
     @property
-    def _metadata(self) -> dict[str, Any]:
-        return dict(
-            x_coord=self.lons.name,
-            y_coord=self.lats.name,
-            time_coord=self.time.name,
-            var_name=self.var_name,
-            start=str(self.start),
-            end=str(self.end),
-        )
+    def tracks(self) -> pd.DataFrame:
+        """A pandas.DataFrame representation of the tracked cells."""
+        return self._tracks
 
     def save_tracks(self, output: Union[str, Path]) -> None:
         """Save tracked data to hdf5 table.
@@ -264,6 +249,7 @@ class RunDirectory(Cell_tracks):
         Example
         -------
         .. execute_code::
+            :hide_headers:
 
             import os
             import xarray
@@ -277,6 +263,9 @@ class RunDirectory(Cell_tracks):
             num_cells = run.get_tracks(field_thresh=0.01)
             run.save_tracks("/tmp/output.hdf5")
 
+        See Also
+        --------
+        :class:`from_dataframe`
         """
         output = Path(output).expanduser().absolute()
         metadata = self._metadata.copy()
@@ -290,43 +279,7 @@ class RunDirectory(Cell_tracks):
             hdf5.get_storer("tintx_tracks").attrs.track_meta = metadata
             hdf5.get_storer(
                 "tintx_tracks"
-            ).attrs.tracking_parameters = self._parameters[self._track_hash]
-
-    def reset_tracks(self, tracks: Optional[pd.DataFrame] = None) -> None:
-        """Override the tack data with a given DataFrame.
-
-        Parameters
-        ----------
-        tracks: pd.DataFrame, default: None
-            Tracking information used to override the current tarcks.
-            If None (default) an empyt DataFrame will be used.
-
-        Example
-        -------
-        .. execute_code::
-
-            import os
-            import xarray
-            from tintx import RunDirectory
-            files = os.path.join(os.environ["FILE_PATH"], "CPOL*.nc")
-            dset = xarray.open_mfdataset(files, combine="by_coords")
-            run = RunDirectory(dset,
-                               "radar_estimated_rain_rate",
-                               x_coord="longitude",
-                               y_coord="latitude")
-            num_cells = run.get_tracks(field_thresh=0.01)
-            print(len(run.tracks))
-            run.reset_tracks()
-            print(len(run.tracks))
-        """
-        self.record = None
-        self.counter = None
-        self.current_objects = None
-        if tracks is None:
-            self._tracks = pd.DataFrame()
-        else:
-            self._tracks = tracks
-        self._save()
+            ).attrs.tracking_parameters = self._parameters[self._track_hash()]
 
     @classmethod
     def from_dataframe(
@@ -352,10 +305,28 @@ class RunDirectory(Cell_tracks):
         Example
         -------
         .. execute_code::
+            :hide_code:
+            :hide_headers:
+
+            from pathlib import Path
+            if not Path("/tmp/output.hdf5").is_file():
+                from tintx import RunDirectory
+                run = RunDirectory.from_files(
+                    os.path.join(os.environ["FILE_PATH"], "CPOL*.nc"),
+                    "radar_estimated_rain_rate", x_coord="x", y_coord="y"
+                )
+                run.get_tracks(min_size=4, field_thresh=0.1)
+                run.save_tracks("/tmp/output.hdf5")
+                run = RunDirectory.from_dataframe("/tmp/output.hdf5")
+
+        ::
 
             from tintx import RunDirectory
             run = RunDirectory.from_dataframe("/tmp/output.hdf5")
-            print(run.tracks.head(2))
+
+        See Also
+        --------
+        :class:`save_tracks`
         """
 
         track_file = Path(track_file).expanduser().absolute()
@@ -375,9 +346,116 @@ class RunDirectory(Cell_tracks):
                 cls_instance = cls(dataset, var_name, **metadata)
         except Exception as error:
             raise ValueError("Cannot read dataset") from error
-        cls_instance._metadata[cls_instance._track_hash] = parameters
+        cls_instance._metadata[cls_instance._track_hash()] = parameters
         cls_instance.reset_tracks(tracks)
         return cls_instance
+
+    def get_parameters(
+        self, tracks: Optional[pd.DataFrame] = None
+    ) -> dict[str, float]:
+        """Get the parameters of given object tracks.
+
+        Parameters
+        ----------
+        tracks: pd.DataFrame, default: None
+            The tracks ``DataFrame`` that is the result of the tuning
+            parameters in question.
+
+        Returns
+        -------
+        dict: dictionary holding the parameter information for the
+              given track object.
+
+        Raises
+        ------
+        ValueError: if no parameters matching the input tracks ``DataFrame```
+                    could be found.
+
+        Example
+        -------
+        .. execute_code::
+            :hide_code:
+            :hide_headers:
+
+            from pathlib import Path
+            if not Path("/tmp/output.hdf5").is_file():
+                from tintx import RunDirectory
+                run = RunDirectory.from_files(
+                    os.path.join(os.environ["FILE_PATH"], "CPOL*.nc"),
+                    "radar_estimated_rain_rate", x_coord="x", y_coord="y"
+                )
+                run.get_tracks(min_size=4, field_thresh=0.1)
+                run.save_tracks("/tmp/output.hdf5")
+                parameters = run.get_parameters()
+
+        ::
+
+            from tintx import RunDirectory
+            run = RunDirectory.from_dataframe("/tmp/output.hdf5")
+            parameters = run.get_parameters()
+            print(parameters)
+        """
+
+        try:
+            return self._parameters[self._track_hash(tracks)]
+        except KeyError as error:
+            raise ValueError(
+                "Could not retrieve parameters for given tracks"
+            ) from error
+
+    def _track_hash(self, tracks: Optional[pd.DataFrame] = None) -> str:
+        if tracks is None:
+            tracks = self._tracks
+        df_hash = hashlib.sha512(tracks.to_string().encode("utf-8"))
+        return df_hash.hexdigest()
+
+    @property
+    def _metadata(self) -> dict[str, Any]:
+        return dict(
+            x_coord=self.lons.name,
+            y_coord=self.lats.name,
+            time_coord=self.time.name,
+            var_name=self.var_name,
+            start=str(self.start),
+            end=str(self.end),
+        )
+
+    def reset_tracks(self, tracks: Optional[pd.DataFrame] = None) -> None:
+        """Override the tack data with a given DataFrame.
+
+        Parameters
+        ----------
+        tracks: pd.DataFrame, default: None
+            Tracking information used to override the current tarcks.
+            If None (default) an empyt DataFrame will be used.
+
+        Example
+        -------
+        .. execute_code::
+            :hide_headers:
+
+            import os
+            import xarray
+            from tintx import RunDirectory
+            files = os.path.join(os.environ["FILE_PATH"], "CPOL*.nc")
+            dset = xarray.open_mfdataset(files, combine="by_coords")
+            run = RunDirectory(dset,
+                               "radar_estimated_rain_rate",
+                               x_coord="longitude",
+                               y_coord="latitude")
+            num_cells = run.get_tracks(field_thresh=0.01)
+            print(len(run.tracks))
+            run.reset_tracks()
+            print(len(run.tracks))
+        """
+        self.record = None
+        self.counter = None
+        self.current_objects = None
+        if tracks is None:
+            self._tracks = pd.DataFrame()
+        else:
+            self._tracks = tracks
+        self._save()
 
     def animate(
         self,
@@ -431,9 +509,28 @@ class RunDirectory(Cell_tracks):
         Example
         -------
         .. execute_code::
+            :hide_code:
+            :hide_headers:
+
+            from pathlib import Path
+            if not Path("/tmp/output.hdf5").is_file():
+                from tintx import RunDirectory
+                run = RunDirectory.from_files(
+                    os.path.join(os.environ["FILE_PATH"], "CPOL*.nc"),
+                    "radar_estimated_rain_rate", x_coord="x", y_coord="y"
+                )
+                run.get_tracks(min_size=4, field_thresh=0.1)
+                run.save_tracks("/tmp/output.hdf5")
+
+        .. execute_code::
+            :hide_headers:
 
             from tintx import RunDirectory
-            run = RunDirectory.from_dataframe("/tmp/output.hdf5")
+            run = RunDirectory.from_files(
+                os.path.join(os.environ["FILE_PATH"], "CPOL*.nc"),
+                "radar_estimated_rain_rate", x_coord="x", y_coord="y"
+            )
+            run.get_tracks(min_size=4, field_thresh=2)
             anim = run.animate(vmax=3, fps=2, plot_style={"res": "10m", "lw":1})
 
         """
@@ -467,7 +564,8 @@ class RunDirectory(Cell_tracks):
         Plot traces of trajectories for each particle.
 
         This code is a fork of plot_traj method in the plot module from the
-        trackpy project see http://soft-matter.github.io/trackpy for more details
+        trackpy project see http://soft-matter.github.io/trackpy for more
+        details
 
         Parameters
         ----------
@@ -481,14 +579,15 @@ class RunDirectory(Cell_tracks):
         uids : list[str], default: None
             a preset of stroms to be drawn, instead of all (default)
         color : str, default: None
-            A pre-defined color, if None (default) each track will be assigned a
-            different color.
+            A pre-defined color, if None (default) each track will be assigned
+            a different color.
         thresh : float, default: -1
             Plot only trajectories with average intensity above this value.
         mintrace : int, default 2
             Minimum length of a trace to be plotted
         plot_style: dict
-            Additional keyword arguments passed through to the ``Axes.plot(...)``
+            Additional keyword arguments passed through to the
+            ``Axes.plot(...)``
 
         Returns
         -------
@@ -498,6 +597,21 @@ class RunDirectory(Cell_tracks):
         Example
         -------
         .. execute_code::
+            :hide_code:
+            :hide_headers:
+
+            from pathlib import Path
+            if not Path("/tmp/output.hdf5").is_file():
+                from tintx import RunDirectory
+                run = RunDirectory.from_files(
+                    os.path.join(os.environ["FILE_PATH"], "CPOL*.nc"),
+                    "radar_estimated_rain_rate", x_coord="x", y_coord="y"
+                )
+                run.get_tracks(min_size=4, field_thresh=0.1)
+                run.save_tracks("/tmp/output.hdf5")
+                run = RunDirectory.from_dataframe("/tmp/output.hdf5")
+
+        ::
 
             from tintx import RunDirectory
             run = RunDirectory.from_dataframe("/tmp/output.hdf5")

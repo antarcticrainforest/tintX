@@ -13,7 +13,7 @@ def test_animation(data_with_a_blob: xr.Dataset) -> None:
 
     rd = RunDirectory(data_with_a_blob, "precip", x_coord="x", y_coord="y")
     _ = rd.get_tracks(field_thresh=0)
-    animation = rd.animate(tracers=True)
+    animation = rd.animate(tracers=True, plot_style={"title": "test"})
     with TemporaryDirectory() as temp_dir:
         animation.save(Path(temp_dir) / "test.gif")
         assert (Path(temp_dir) / "test.gif").is_file()

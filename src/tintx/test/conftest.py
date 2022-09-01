@@ -17,8 +17,10 @@ def get_blobs(blobs: int, size: int) -> np.ndarray:
     centres: list[tuple[int, int]] = []
     for i in x_blob:
         centres.append((i, i))
-    for c in centres:
-        is_smaller = (x_coords - c[1]) ** 2 + (y_coords - c[0]) ** 2 < (size / 2) ** 2
+    for centre in centres:
+        is_smaller = (x_coords - centre[1]) ** 2 + (y_coords - centre[0]) ** 2 < (
+            size / 2
+        ) ** 2
         data_array[is_smaller] = 1
     return data_array * 10
 
@@ -73,7 +75,9 @@ def real_data_files() -> Generator[Path, None, None]:
 
 
 @pytest.fixture(scope="session")
-def netcdf_files_with_blob(data_with_a_blob: xr.Dataset) -> Generator[Path, None, None]:
+def netcdf_files_with_blob(
+    data_with_a_blob: xr.Dataset,
+) -> Generator[Path, None, None]:
     """Save data with a blob to file."""
 
     with TemporaryDirectory() as td:
