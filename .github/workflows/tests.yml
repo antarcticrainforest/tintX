@@ -30,8 +30,7 @@ jobs:
 
     - name: Creating conda environment for ${{ matrix.python-version }}
       run: |
-        conda create -n test -y python=${{matrix.python-version}} ffmpeg pip proj make
-        conda run -n test python3 -m pip install numpy
+        conda create -n test -y python=${{matrix.python-version}} ffmpeg pip cartopy make
 
     - name: Install dependencies
       run: |
