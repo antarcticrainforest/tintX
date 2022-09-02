@@ -10,6 +10,7 @@ install:
 
 test:
 	python3 -m pytest -vv $(PWD)/src/tintx/test
+	rm -rf '='
 
 test_coverage:
 	python3 -m pytest -vv \
