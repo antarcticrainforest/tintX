@@ -7,7 +7,7 @@ all: install test
 .PHONY: docs
 install:
 	python3 -m pip install -e .[tests,docs]
-	python -m bash_kernel.install
+	python3 -m bash_kernel.install
 
 test:
 	python3 -m pytest -vv $(PWD)/src/tintx/test

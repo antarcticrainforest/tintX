@@ -8,7 +8,7 @@
 
 
 TintX is an adaptation of the tint (tracking algorithm)[https://github.com/openradar/TINT].
-Tint and TintX are easy-to-use storm cell tracking package based on the
+Tint and `tintX` are easy-to-use storm cell tracking package based on the
 TITAN methodology by Dixon and Wiener. While Tint is meant to be applied to
 radar data using the [py-ART toolkit](http://arm-doe.github.io/pyart/) tintX can
 be applied with any data - for example output from numerical weather prediction
@@ -16,14 +16,16 @@ models. The original tracking algorithm that has been developed by a team of
 researchers at Monash University [Raut et al. 2020](http://dx.doi.org/10.1175/JAMC-D-20-0119.1).
 
 ## Installation
-To install the packages run :
-```bash
-$: python -m pip install tintx
+The `tintX` package can be installed using pip:
+```console
+python -m pip install tintx
 ```
-if you don't have root access add the ```--user``` flag for a local installation
+if you don't have root access add the `--user` flag for a local installation.
 
 ## Usage
-Documentation can be found on the official document page of this library.
+Documentation can be found on the
+[official document page](https://tintx.readthedocs.io/en/latest/) of this
+library.
 
 ## Acknowledgements
 This work is the adaptation of tracking code in R created by Bhupendra Raut
