@@ -13,20 +13,23 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import numpy as np
 from tqdm.auto import tqdm
+import xarray as xr
 
 from .tracks import Cell_tracks
+from .types import GridType
+from .helpers import convert_to_cftime
 
 
-class Tracer(object):
+class Tracer:
     colors = ["m", "r", "lime", "darkorange", "k", "b", "darkgreen", "yellow"]
     colors.reverse()
 
-    def __init__(self, tobj):
+    def __init__(self, tobj: Cell_tracks) -> None:
         self.tobj = tobj
         self.color_stack = self.colors * 10
         self.cell_color = pd.Series([], dtype=str)
-        self.history = None
-        self.current = None
+        self.history: pd.DataFrame = pd.DataFrame()
+        self.current: pd.DataFrame = pd.DataFrame()
 
     def update(self, nframe: int) -> None:
         self.history = self.tobj.tracks.loc[:nframe]
@@ -49,10 +52,10 @@ class Tracer(object):
 
 
 def _get_axes(
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: Union[np.ndarray, xr.DataArray],
+    Y: Union[np.ndarray, xr.DataArray],
     ax: Optional[GeoAxesSubplot],
-    **kwargs,
+    **kwargs: Union[float, int, str],
 ) -> GeoAxesSubplot:
     if ax is None:
         fig = plt.figure(figsize=(10, 8))
@@ -61,36 +64,37 @@ def _get_axes(
         raise TypeError("Ax should be a cartopy GeoAxesSubplot object")
     ax.set_ylim(Y.min(), Y.max())
     ax.set_xlim(X.min(), X.max())
+    kwargs.setdefault("resolution", "10m")
     ax.coastlines(**kwargs)
     return ax
 
 
 def _gen_from_grids(
-    total_num: int, grid_0: dict[str, Any], grids: Iterator[dict[str, Any]]
-) -> Iterator[dict[str, Any]]:
+    total_num: int, grid_0: GridType, grids: Iterator[GridType]
+) -> Iterator[GridType]:
 
     with tqdm(total=total_num, desc="Animating", leave=False) as pbar:
-        yield grid_0
         pbar.update()
+        yield grid_0
         for grid in grids:
-            yield grid
             pbar.update()
+            yield grid
 
 
 def full_domain(
     tobj: Cell_tracks,
-    grids,
+    grids: Iterator[GridType],
     vmin: float = 0.01,
     vmax: float = 15,
     ax: Optional[GeoAxesSubplot] = None,
     cmap: Union[str, plt.cm] = "Blues",
     alt: Optional[float] = None,
-    fps: int = 5,
+    fps: float = 5,
     isolated_only: bool = False,
     tracers: bool = False,
     dt: float = 0,
     plot_style: Optional[dict[str, Union[float, int, str]]] = None,
-):
+) -> GeoAxesSubplot:
     alt = alt or tobj.params["GS_ALT"]
     plot_style = plot_style or {}
     shading = plot_style.pop("shading", "auto")
@@ -99,12 +103,12 @@ def full_domain(
     nframes = tobj._tracks.index.levels[0].max()
     title = plot_style.pop("title", "")
     grid = next(grids)
-    ax = _get_axes(grid.lon, grid.lat, ax, **plot_style)
+    new_ax = _get_axes(grid.lon, grid.lat, ax, **plot_style)
     try:
         data = grid.data[0].filled(np.nan)
-    except AttributeError:
-        data = grid.data[0]
-    im = ax.pcolormesh(
+    except AttributeError:  # pragma: no cover
+        data = grid.data[0]  # pragma: no cover
+    im = new_ax.pcolormesh(
         grid.lon,
         grid.lat,
         data,
@@ -116,37 +120,39 @@ def full_domain(
 
     ann: dict[str, mpl.text.Annotation] = {}
 
-    def _update(enum, title=""):
+    def _update(enum: tuple[int, GridType], title: str = "") -> None:
         for annotation in ann.values():
             try:
                 annotation.remove()
-            except ValueError:
-                pass
+            except ValueError:  # pragma: no cover
+                pass  # pragma: no cover
         nframe, grid = enum
         try:
             im.set_array(grid.data[0].filled(np.nan).ravel())
-        except AttributeError:
-            im.set_array(grid.data[0].ravel())
+        except AttributeError:  # pragma: no cover
+            im.set_array(grid.data[0].ravel())  # pragma: no cover
         title_text = ""
         if title:
             title_text = f"{title} at "
-        time_str = (grid.time + timedelta(hours=dt)).strftime("%Y-%m-%d %H:%M")
-        ax.set_title(f"{title_text}{time_str}")
-        if nframe in tobj.tracks.index.levels[0]:
-            frame_tracks = tobj.tracks.loc[nframe]
+        time_str = (convert_to_cftime(grid.time) + timedelta(hours=dt)).strftime(
+            "%Y-%m-%d %H:%M"
+        )
+        new_ax.set_title(f"{title_text}{time_str}")
+        if nframe in tobj._tracks.index.levels[0]:
+            frame_tracks = tobj._tracks.loc[nframe]
             if tracers:
                 tracer.update(nframe)
-                tracer.plot(ax)
+                tracer.plot(new_ax)
             for ind, uid in enumerate(frame_tracks.index):
                 if isolated_only and not frame_tracks["isolated"].iloc[ind]:
                     continue
                 x = frame_tracks["lon"].iloc[ind]
                 y = frame_tracks["lat"].iloc[ind]
-                ann[uid] = ax.annotate(uid, (x, y), fontsize=20)
+                ann[uid] = new_ax.annotate(uid, (x, y), fontsize=20)
 
     frames = enumerate(_gen_from_grids(nframes, grid, grids))
     animation = FuncAnimation(
-        ax.get_figure(),
+        new_ax.get_figure(),
         partial(_update, title=title),
         frames=frames,
         interval=1000 / fps,
@@ -157,8 +163,8 @@ def full_domain(
 
 def plot_traj(
     traj: pd.DataFrame,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: Union[np.ndarray, xr.DataArray],
+    Y: Union[np.ndarray, xr.DataArray],
     label: bool = False,
     ax: Optional[GeoAxesSubplot] = None,
     uids: list[str] = None,
@@ -207,9 +213,10 @@ def plot_traj(
 
     plot_style = plot_style or {}
     _plot_style = dict(linewidth=1)
+    resolution = plot_style.pop("resolution", "10m")
     _plot_style.update(**_normalize_kwargs(plot_style, "line2d"))
     size = _plot_style.pop("markersize", 50)
-    ax = _get_axes(X, Y, ax, **_plot_style)
+    ax = _get_axes(X, Y, ax, resolution=resolution, **_plot_style)
     proj = ax.projection
     if len(traj) == 0:
         raise ValueError("DataFrame of trajectories is empty.")
@@ -256,7 +263,9 @@ def plot_traj(
     return ax
 
 
-def _normalize_kwargs(kwargs: dict[str, Any], kind: str = "patch") -> dict[str, Any]:
+def _normalize_kwargs(
+    kwargs: dict[str, Any], kind: str = "patch"
+) -> dict[str, Any]:
     """Convert matplotlib keywords from short to long form."""
     # Source:
     # github.com/tritemio/FRETBursts/blob/fit_experim/fretbursts/burst_plot.py

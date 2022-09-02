@@ -30,7 +30,7 @@ jobs:
 
     - name: Creating conda environment for ${{ matrix.python-version }}
       run: |
-        conda create -n test -y python=${{matrix.python-version}} ffmpeg pip cartopy
+        conda create -n test -y python=${{matrix.python-version}} ffmpeg pip cartopy make
 
     - name: Install dependencies
       run: |
@@ -41,13 +41,11 @@ jobs:
        # stop the build if there are Python syntax errors or undefined names
        conda run -n test flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-       conda run -n test flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
-       conda run -n test black --check src/tintx
-       conda run -n test mypy --install-types --non-interactive src/tintx
+       conda run -n test make lint
 
     - name: Test with pytest
       run: |
-        conda run -n test python3 -m pytest -v --nbval-lax --current-env --cov=src/tintx --cov-report=xml
+        conda run -n test make test_coverage
       env:
         MPLBACKEND: agg
 

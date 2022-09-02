@@ -5,14 +5,20 @@ tint.objects
 Functions for managing and recording object properties.
 
 """
+from __future__ import annotations
+from typing import Union
 
 import numpy as np
 import pandas as pd
 from scipy import ndimage
 from .grid_utils import get_filtered_frame
+from .helpers import Counter, Record
+from .types import ConfigType, GridType, ObjectPropType
 
 
-def get_object_center(obj_id, labeled_image):
+def get_object_center(
+    obj_id: Union[int, float, str], labeled_image: np.ndarray
+) -> int:
     """Returns index of center pixel of the given object id from labeled
     image. The center is calculated as the median pixel of the object extent;
     it is not a true centroid."""
@@ -21,7 +27,9 @@ def get_object_center(obj_id, labeled_image):
     return center
 
 
-def get_obj_extent(labeled_image, obj_label):
+def get_obj_extent(
+    labeled_image: np.ndarray, obj_label: float
+) -> dict[str, np.ndarray]:
     """Takes in labeled image and finds the radius, area, and center of the
     given object."""
     obj_index = np.argwhere(labeled_image == obj_label)
@@ -41,7 +49,12 @@ def get_obj_extent(labeled_image, obj_label):
     return obj_extent
 
 
-def init_current_objects(first_frame, second_frame, pairs, counter):
+def init_current_objects(
+    first_frame: np.ndarray,
+    second_frame: np.ndarray,
+    pairs: np.ndarray,
+    counter: Counter,
+) -> tuple[dict[str, np.ndarray], Counter]:
     """Returns a dictionary for objects with unique ids and their
     corresponding ids in frame1 and frame1. This function is called when
     echoes are detected after a period of no echoes."""
@@ -60,11 +73,19 @@ def init_current_objects(first_frame, second_frame, pairs, counter):
         "obs_num": obs_num,
         "origin": origin,
     }
-    current_objects = attach_last_heads(first_frame, second_frame, current_objects)
+    current_objects = attach_last_heads(
+        first_frame, second_frame, current_objects
+    )
     return current_objects, counter
 
 
-def update_current_objects(frame1, frame2, pairs, old_objects, counter):
+def update_current_objects(
+    frame1: np.ndarray,
+    frame2: np.ndarray,
+    pairs: np.ndarray,
+    old_objects: dict[str, np.ndarray],
+    counter: Counter,
+) -> tuple[dict[str, np.ndarray], Counter]:
     """Removes dead objects, updates living objects, and assigns new uids to
     new-born objects."""
     nobj = np.max(frame1)
@@ -92,16 +113,19 @@ def update_current_objects(frame1, frame2, pairs, old_objects, counter):
         "obs_num": obs_num,
         "origin": origin,
     }
-    current_objects = attach_last_heads(frame1, frame2, current_objects)
-    return current_objects, counter
+    return attach_last_heads(frame1, frame2, current_objects), counter
 
 
-def attach_last_heads(frame1, frame2, current_objects):
+def attach_last_heads(
+    frame1: np.ndarray, frame2: np.ndarray, current_objects: dict[str, np.ndarray]
+) -> dict[str, np.ndarray]:
     """Attaches last heading information to current_objects dictionary."""
     nobj = len(current_objects["uid"])
     heads = np.ma.empty((nobj, 2))
     for obj in range(nobj):
-        if (current_objects["id1"][obj] > 0) and (current_objects["id2"][obj] > 0):
+        if (current_objects["id1"][obj] > 0) and (
+            current_objects["id2"][obj] > 0
+        ):
             center1 = get_object_center(current_objects["id1"][obj], frame1)
             center2 = get_object_center(current_objects["id2"][obj], frame2)
             heads[obj, :] = center2 - center1
@@ -112,7 +136,12 @@ def attach_last_heads(frame1, frame2, current_objects):
     return current_objects
 
 
-def check_isolation(raw, filtered, grid_size, params):
+def check_isolation(
+    raw: np.ndarray,
+    filtered: np.ndarray,
+    grid_size: np.ndarray,
+    params: ConfigType,
+) -> np.ndarray:
     """Returns list of booleans indicating object isolation. Isolated objects
     are not connected to any other objects by pixels greater than ISO_THRESH,
     and have at most one peak."""
@@ -133,17 +162,21 @@ def check_isolation(raw, filtered, grid_size, params):
     return iso
 
 
-def single_max(obj_ind, raw, params):
+def single_max(
+    obj_ind: tuple[np.ndarray, ...], raw: np.ndarray, params: ConfigType
+) -> bool:
     """Returns True if object has at most one peak."""
     max_proj = np.max(raw, axis=0)
     smooth = ndimage.gaussian_filter(max_proj, params["ISO_SMOOTH"])
     padded = np.pad(smooth, 1, mode="constant")
-    obj_ind = [axis + 1 for axis in obj_ind]  # adjust for padding
+    obj_ind = tuple([axis + 1 for axis in obj_ind])  # adjust for padding
     maxima = 0
     for pixel in range(len(obj_ind[0])):
         ind_0 = obj_ind[0][pixel]
         ind_1 = obj_ind[1][pixel]
-        neighborhood = padded[(ind_0 - 1) : (ind_0 + 2), (ind_1 - 1) : (ind_1 + 2)]
+        neighborhood = padded[
+            (ind_0 - 1) : (ind_0 + 2), (ind_1 - 1) : (ind_1 + 2)
+        ]
         max_ind = np.unravel_index(neighborhood.argmax(), neighborhood.shape)
         if max_ind == (1, 1):
             maxima += 1
@@ -152,18 +185,23 @@ def single_max(obj_ind, raw, params):
     return True
 
 
-def get_object_prop(image1, grid1, field, record, params):
+def get_object_prop(
+    image1: np.ndarray,
+    grid1: GridType,
+    record: Record,
+    params: ConfigType,
+) -> ObjectPropType:
     """Returns dictionary of object properties for all objects found in
     image1."""
-    id1 = []
-    center = []
-    grid_x = []
-    grid_y = []
-    area = []
-    longitude = []
-    latitude = []
-    field_max = []
-    field_mean = []
+    id1: list[int] = []
+    center: list[float] = []
+    grid_x: list[float] = []
+    grid_y: list[float] = []
+    area: list[float] = []
+    longitude: list[float] = []
+    latitude: list[float] = []
+    field_max: list[float] = []
+    field_mean: list[float] = []
     nobj = np.max(image1)
 
     unit_area = 1  # (unit_dim[1]*unit_dim[2])/(1000**2)
@@ -198,14 +236,14 @@ def get_object_prop(image1, grid1, field, record, params):
 
             # raw 3D grid stats
             obj_slices = [raw3D[:, ind[0], ind[1]] for ind in obj_index]
-            field_max.append(np.nanmax(obj_slices))
-            field_mean.append(np.nanmean(obj_slices))
+            field_max.append(float(np.nanmax(obj_slices)))
+            field_mean.append(float(np.nanmean(obj_slices)))
             get_items.append(obj - 1)
         except IndexError:
             pass
     # cell isolation
     isolation = check_isolation(raw3D, image1, record.grid_size, params)
-    objprop = {
+    objprop: ObjectPropType = {
         "id1": id1,
         "center": center,
         "grid_x": grid_x,
@@ -221,7 +259,12 @@ def get_object_prop(image1, grid1, field, record, params):
     return objprop
 
 
-def write_tracks(old_tracks, record, current_objects, obj_props):
+def write_tracks(
+    old_tracks: pd.DataFrame,
+    record: Record,
+    current_objects: dict[str, np.ndarray],
+    obj_props: ObjectPropType,
+) -> pd.DataFrame:
     """Writes all cell information to tracks dataframe."""
 
     nobj = len(obj_props["id1"])

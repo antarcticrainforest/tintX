@@ -42,26 +42,8 @@ Getting the values of the currently set parameters can be done by the
 """
 
 from __future__ import annotations
-from typing import Optional
-from typing_extensions import TypedDict, Literal
-
-ConfigType = TypedDict(
-    "ConfigType",
-    {
-        "FIELD_THRESH": float,
-        "ISO_THRESH": float,
-        "ISO_SMOOTH": float,
-        "MIN_SIZE": float,
-        "FLOW_MARGIN": float,
-        "MAX_DISPARITY": float,
-        "MAX_FLOW_MAG": float,
-        "MAX_SHIFT_DISP": float,
-        "SEARCH_MARGIN": float,
-        "GS_ALT": float,
-    },
-)
-"""The Parameter type defines the default values and types of the tint
-tracking tuning parameters."""
+from typing import cast, Any, Optional
+from typing_extensions import Literal
 
 config: dict[str, float] = dict(
     ISO_THRESH=4.0,
@@ -85,12 +67,17 @@ def get(key: str, default: Optional[float] = None) -> Optional[float]:
 
     Examples
     --------
-    >>> from tintx import config
-    >>> config.get('min_size')
-    8.0
+    .. execute_code::
+        :hide_headers:
 
-    >>> config.get('bar', default=123.)
-    123
+        from tintx import config
+        print(config.get('min_size'))
+
+    .. execute_code::
+        :hide_headers:
+
+        from tintx import config
+        print(config.get('bar', default=123.))
 
 
     See Also
@@ -115,6 +102,7 @@ class set:
     the parameter will be set back to its original value.
 
     .. execute_code::
+        :hide_headers:
 
         from tintx import config
         with config.set(field_thresh=5):
@@ -124,7 +112,11 @@ class set:
     To make the configuration changes persistent you can use ``set`` without
     the ``with`` block:
 
-    >>> tintx.config.set(field_thresh=5)
+    .. execute_code::
+        :hide_headers:
+
+        import tintx
+        tintx.config.set(field_thresh=5)
 
 
     See Also
@@ -145,13 +137,13 @@ class set:
         for key, value in kwargs.items():
             self._assign(key.upper(), float(value), config)
 
-    def __enter__(self):
+    def __enter__(self) -> set:
         return self
 
-    def __exit__(self, typ, value, traceback):
+    def __exit__(self, *args: Any) -> None:
         for op, key, value in reversed(self._record):
             if op == "replace":
-                self.config[key] = value
+                self.config[key] = cast(float, value)
             else:  # insert
                 self.config.pop(key, None)
 
@@ -175,8 +167,7 @@ class set:
         self,
         key: str,
         value: float,
-        cfg: dict,
-        path: tuple[str, ...] = (),
+        cfg: dict[str, float],
         record: bool = True,
     ) -> None:
         """Assign value into a nested configuration dictionary

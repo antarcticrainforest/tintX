@@ -62,7 +62,10 @@ meta = dict(
     ],
     version=find_version("src", "tintx", "__init__.py"),
     package_dir={"": "src"},
+    entry_points={"console_scripts": ["tintx = tintx.cli:tintx"]},
     install_requires=[
+        "cartopy",
+        "click",
         "cftime",
         "pandas",
         "tables",
@@ -73,10 +76,10 @@ meta = dict(
         "xarray",
         "tqdm",
         "typing_extensions",
-        "cartopy",
     ],
     extras_require={
         "tests": [
+            "bash_kernel",
             "black",
             "dask[diagnostics]",
             "nbval",
@@ -88,6 +91,7 @@ meta = dict(
             "mypy",
         ],
         "docs": [
+            "bash_kernel",
             "black",
             "dask",
             "h5netcdf",

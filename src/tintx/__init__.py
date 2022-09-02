@@ -10,8 +10,8 @@ The cell tracking as well as visualisation of cell tracks is realised through
 instances of the ``RunDirectory`` class.
 """
 
-from .reader import RunDirectory
 from tintx import config  # noqa: F401
+from .reader import RunDirectory
 
 __all__ = ["RunDirectory"]
 
