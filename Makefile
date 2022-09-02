@@ -1,6 +1,7 @@
 # makefile used for testing
 #
 #
+export DATA_FILES := $(PWD)/docs/source/_static/data
 all: install test
 
 .PHONY: docs
