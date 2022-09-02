@@ -64,6 +64,7 @@ meta = dict(
     package_dir={"": "src"},
     entry_points={"console_scripts": ["tintx = tintx.cli:tintx"]},
     install_requires=[
+        "cartopy",
         "click",
         "cftime",
         "pandas",
@@ -75,7 +76,6 @@ meta = dict(
         "xarray",
         "tqdm",
         "typing_extensions",
-        "cartopy",
     ],
     extras_require={
         "tests": [
