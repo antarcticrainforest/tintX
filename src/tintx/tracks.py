@@ -8,7 +8,7 @@ Cell_tracks class.
 
 from __future__ import annotations
 import copy
-from typing import cast, Iterator, Optional
+from typing import cast, Dict, Iterator, Optional
 
 import pandas as pd
 import numpy as np
@@ -187,7 +187,7 @@ class Cell_tracks:
                     frame1,
                     frame2,
                     pairs,
-                    cast(dict[str, np.ndarray], self.current_objects),
+                    cast(Dict[str, np.ndarray], self.current_objects),
                     cast(Counter, self.counter),
                 )
             obj_props = get_object_prop(
