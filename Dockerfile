@@ -18,10 +18,11 @@ COPY . /tmp/tint
 WORKDIR /tmp/tint
 RUN set -e && \
     mamba install -y cartopy ffmpeg &&\
-    mamba run pip install .[docs,test] --no-cache-dir ipykernel jupyterlab \
+    mamba run pip install .[docs] --no-cache-dir ipykernel jupyterlab \
     notebook bash_kernel &&\
     cp -r docs/source/_static/data $HOME/.data &&\
-    cp -r docs/source/*.ipynb $HOME/ &&\
+    for i in $(ls docs/source/*.ipynb);do sed -i "s/\.html/\.ipynb/g" $i ;done &&\
+    cp docs/source/*.ipynb $HOME/ &&\
     cp .Readme.ipynb $HOME/Readme.ipynb &&\
     cd $HOME &&\
     rm -fr /tmp/tint
