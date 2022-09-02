@@ -12,7 +12,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 import xarray as xr
 
-from .helpers import get_grids, convert_to_cftime
+from .helpers import get_grids, convert_to_cftime, MetaData
 from .tracks import Cell_tracks
 from .visualization import full_domain, plot_traj
 from .config import set as set_config
@@ -151,12 +151,18 @@ class RunDirectory(Cell_tracks):
             self.data = xr.Dataset({var_name: dataset})
         else:
             self.data = dataset
+        self._files = ""
         self.lons = self.data[x_coord]
         self.lats = self.data[y_coord]
         self.var_name = var_name
         self.time = self.data[time_coord]
         self.start = convert_to_cftime(self.time.values[0])
         self.end = convert_to_cftime(self.time.values[-1])
+        self._metadata_reader = MetaData(
+            self.data,
+            self.var_name,
+            {"x_coord": x_coord, "y_coord": y_coord, "time_coord": time_coord},
+        )
         super().__init__(var_name)
 
     def get_tracks(
@@ -276,10 +282,10 @@ class RunDirectory(Cell_tracks):
                     action="ignore", category=pd.errors.PerformanceWarning
                 )
                 hdf5.put("tintx_tracks", self.tracks)
-            hdf5.get_storer("tintx_tracks").attrs.track_meta = metadata
-            hdf5.get_storer(
-                "tintx_tracks"
-            ).attrs.tracking_parameters = self._parameters[self._track_hash()]
+                self._metadata_reader.save(hdf5)
+            table = hdf5.get_storer("tintx_tracks")
+            table.attrs.track_meta = metadata
+            table.attrs.tracking_parameters = self._parameters[self._track_hash()]
 
     @classmethod
     def from_dataframe(
@@ -334,18 +340,25 @@ class RunDirectory(Cell_tracks):
             tracks = pd.read_hdf(hdf5, "tintx_tracks")
             metadata = hdf5.get_storer("tintx_tracks").attrs.track_meta.copy()
             parameters = hdf5.get_storer("tintx_tracks").attrs.tracking_parameters
+            coord_dataset = MetaData.dataset_from_coords(hdf5)
 
         files = metadata.pop("files", "")
         var_name = metadata.pop("var_name", "")
+        start = metadata.pop("start", None) or None
+        end = metadata.pop("end", None) or None
         try:
             if dataset is None:
-                cls_instance = cls.from_files(files, var_name, **metadata)
+                cls_instance = cls.from_files(
+                    files, var_name, start=start, end=end, **metadata
+                )
             else:
-                _ = metadata.pop("start", "")
-                _ = metadata.pop("end", "")
                 cls_instance = cls(dataset, var_name, **metadata)
         except Exception as error:
-            raise ValueError("Cannot read dataset") from error
+            warnings.warn(
+                "Could not access original data, creating empty dataset "
+                f"the reason for the failure was:\n{error}"
+            )
+            cls_instance = cls(coord_dataset, var_name, **metadata)
         cls_instance._metadata[cls_instance._track_hash()] = parameters
         cls_instance.reset_tracks(tracks)
         return cls_instance
@@ -427,7 +440,7 @@ class RunDirectory(Cell_tracks):
         ----------
         tracks: pd.DataFrame, default: None
             Tracking information used to override the current tarcks.
-            If None (default) an empyt DataFrame will be used.
+            If None (default) an empty DataFrame will be used.
 
         Example
         -------

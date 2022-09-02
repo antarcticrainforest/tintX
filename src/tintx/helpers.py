@@ -8,10 +8,150 @@ from datetime import datetime, timedelta
 from typing import Iterator, Optional, Union, cast
 
 import cftime
+from dask import array as dask_array
 import numpy as np
 import pandas as pd
 import xarray as xr
 from .grid_utils import parse_grid_datetime, get_grid_size, GridType
+
+
+class MetaData:
+    """Class that writes meta data to an HDF5 file."""
+
+    time_units: str = "seconds since 1970-01-01T00:00:00"
+
+    def __init__(
+        self,
+        dataset: xr.Dataset,
+        variable: str,
+        coords: dict[str, str],
+    ) -> None:
+
+        self._time = coords["time_coord"]
+        self._x_coord = coords["x_coord"]
+        self._y_coord = coords["y_coord"]
+
+        self.dataset = dataset
+        self.x_coord = dataset[coords["x_coord"]].values
+        self.y_coord = dataset[coords["y_coord"]].values
+        self.variable = variable
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        """Get the dimensions of the DataArray."""
+        return tuple(map(str, self.dataset[self.variable].dims))
+
+    @property
+    def coords(self) -> pd.DataFrame:
+        """Get the coordinates of the DataArray in a pandas DataFrame."""
+        coords: dict[str, pd.Series] = {
+            str(v): pd.Series(self.dataset[v].values)
+            for v in self.dataset[self.variable].dims
+            if v != self._time
+        }
+        coords[self._time] = pd.Series(self.time)
+        return pd.DataFrame(coords)
+
+    @property
+    def time(self) -> np.ndarray:
+        """Get a number representation of the time vector in."""
+        return np.array(
+            [self._to_num(t) for t in self.dataset[self._time].values]
+        )
+
+    def _to_num(self, time: Union[cftime.datetime, np.datetime64]) -> int:
+        cf_time = convert_to_cftime(time)
+        return cftime.date2num(
+            cf_time, units=self.time_units, calendar=cf_time.calendar
+        )
+
+    @property
+    def calendar(self) -> str:
+        cf_time = convert_to_cftime(self.dataset[self._time].values[0])
+        return cf_time.calendar
+
+    def to_dataframe(self, var_name: str) -> Union[pd.DataFrame, pd.Series]:
+        """Convert the values of a dataset variable to a dataframe."""
+        if len(self.dataset[var_name].shape) == 1:
+            return pd.Series(self.dataset[var_name].values)
+        return pd.DataFrame(self.dataset[var_name].values)
+
+    def save(self, buffer: pd.io.pytables.Table) -> None:
+        """Save attrs to a hdf5 store object."""
+        self.coords.to_hdf(buffer, "dims")
+        self.to_dataframe(self._x_coord).to_hdf(buffer, "x_coord")
+        self.to_dataframe(self._y_coord).to_hdf(buffer, "y_coord")
+        x_attrs = self.dataset[self._x_coord].attrs
+        y_attrs = self.dataset[self._y_coord].attrs
+        x_attrs["short_name"] = self._x_coord
+        y_attrs["short_name"] = self._y_coord
+        y_attrs["dims"] = self.dataset[self._y_coord].dims
+        x_attrs["dims"] = self.dataset[self._x_coord].dims
+        buffer.get_storer("x_coord").attrs.attrs = x_attrs
+        buffer.get_storer("y_coord").attrs.attrs = y_attrs
+        buffer.get_storer("x_coord").attrs.attrs = x_attrs
+        buffer.get_storer("y_coord").attrs.attrs = y_attrs
+        dim_attrs = {v: self.dataset[v].attrs for v in self.dims}
+        dim_attrs[self._time].setdefault("calendar", self.calendar)
+        dim_attrs[self._time]["units"] = self.time_units
+        var_attrs = self.dataset[self.variable].attrs
+        var_attrs["time_coord"] = self._time
+        var_attrs["short_name"] = self.variable
+        buffer.get_storer("dims").attrs.dim_attrs = dim_attrs
+        buffer.get_storer("dims").attrs.var_attrs = var_attrs
+        buffer.get_storer("dims").attrs.dims = self.dims
+
+    @staticmethod
+    def dataset_from_coords(buffer: pd.io.pytables.Table) -> xr.Dataset:
+        """Create a xarray Dataset from metadata save in a pytable."""
+
+        dims_df = buffer.get("dims")
+        storer_obj = buffer.get_storer("dims")
+        x_coords_attrs = buffer.get_storer("x_coord").attrs.attrs.copy()
+        y_coords_attrs = buffer.get_storer("y_coord").attrs.attrs.copy()
+        var_attrs = storer_obj.attrs.var_attrs.copy()
+        var_attrs[
+            "history"
+        ] = f"{datetime.now().isoformat()}: Created empty dataset"
+        coord_attrs = storer_obj.attrs.dim_attrs.copy()
+        time_coord = var_attrs.pop("time_coord")
+        metadata = buffer.get_storer("tintx_tracks").attrs.track_meta.copy()
+        shape = []
+        data = {}
+        coords = [x_coords_attrs["short_name"], y_coords_attrs["short_name"]]
+        for dim in storer_obj.attrs.dims:
+            data[dim] = xr.DataArray(
+                dims_df[dim].dropna().values,
+                name=dim,
+                dims=(dim,),
+                attrs=coord_attrs[dim],
+            )
+            shape.append(data[dim].shape[0])
+        data[time_coord].data = cftime.num2date(
+            data[time_coord].data,
+            coord_attrs[time_coord]["units"],
+            coord_attrs[time_coord]["calendar"],
+        )
+        data[metadata["var_name"]] = xr.DataArray(
+            dask_array.zeros(shape),
+            name=metadata["var_name"],
+            attrs=var_attrs,
+            dims=storer_obj.attrs.dims,
+        ).chunk({time_coord: 1})
+        print(buffer.get("x_coord").values.shape, x_coords_attrs["dims"])
+        data[coords[0]] = xr.DataArray(
+            buffer.get("x_coord").values,
+            dims=x_coords_attrs.pop("dims"),
+            name=coords[0],
+            attrs=x_coords_attrs,
+        )
+        data[coords[1]] = xr.DataArray(
+            buffer.get("y_coord").values,
+            dims=y_coords_attrs.pop("dims"),
+            name=coords[1],
+            attrs=y_coords_attrs,
+        )
+        return xr.Dataset(data).set_coords(coords)
 
 
 class Counter:
@@ -185,18 +325,14 @@ def get_grids(
     varname: str = "rain_rate",
 ) -> Iterator[GridType]:
 
-    dims = group.variables[varname].dims
+    dims = group[varname].dims
     for s in range(slices[0], slices[-1]):
         time = convert_to_cftime(
             cast(Union[np.datetime64, cftime.datetime], times[s].values)
         )
-        try:
-            data = group.variables[varname][s].values
-        except AttributeError:
-            data = group.variables[varname][s]
-        if len(data.shape) < 3:
-            data = data[np.newaxis, :]
-        mask_data = np.ma.masked_invalid(data)
+        mask_data = np.ma.masked_invalid(group[varname][s].values)
+        if len(mask_data.shape) < 3:
+            mask_data = mask_data[np.newaxis, :]
         yield GridType(
             x=group[dims[-1]],
             y=group[dims[-2]],

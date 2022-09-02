@@ -1,7 +1,9 @@
 """Test the highlevel tracking results."""
 
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
+import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
@@ -83,5 +85,25 @@ def test_load_dataset(save_dir: Path, netcdf_files_with_blob: Path) -> None:
     run_dir3._files = ""
     run_dir3.save_tracks(save_file)
     assert len(run_dir1.tracks) == len(run_dir2.tracks) == len(run_dir3.tracks)
-    with pytest.raises(ValueError):
-        RunDirectory.from_dataframe(save_file)
+
+
+def test_load_empty(data_with_a_blob: xr.DataArray) -> None:
+    """Test loading empty datasets."""
+    from tintx import RunDirectory
+
+    run_dir = RunDirectory(data_with_a_blob, "precip", x_coord="Lg", y_coord="Lt")
+    _ = run_dir.get_tracks(field_thresh=0.0)
+    with NamedTemporaryFile(suffix=".h5") as save_file:
+        run_dir.save_tracks(save_file.name)
+        with pytest.warns(UserWarning):
+            run_dir2 = RunDirectory.from_dataframe(save_file.name)
+    data1 = run_dir.data
+    data2 = run_dir2.data
+    for dim in data1.dims:
+        assert dim in data2.dims
+        if dim != "time":
+            assert np.allclose(data1[dim].values, data2[dim].values)
+    assert "Lg" in data2.coords
+    assert "Lt" in data2.coords
+    assert "precip" in data2.data_vars
+    assert data2["precip"].shape == data1["precip"].shape
