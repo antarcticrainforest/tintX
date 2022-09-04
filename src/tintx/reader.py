@@ -371,7 +371,9 @@ class RunDirectory(Cell_tracks):
         cls_instance.reset_tracks(tracks)
         return cls_instance
 
-    def get_parameters(self, tracks: Optional[pd.DataFrame] = None) -> dict[str, float]:
+    def get_parameters(
+        self, tracks: Optional[pd.DataFrame] = None
+    ) -> dict[str, float]:
         """Get the parameters of given object tracks.
 
         Parameters
