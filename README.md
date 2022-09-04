@@ -27,6 +27,32 @@ Documentation can be found on the
 [official document page](https://tintx.readthedocs.io/en/latest/) of this
 library.
 
+## Contributing
+Any contributions to improve this software in any way are welcome. Below is a
+check list that makes sure you contributions can bee added as fast as
+possible to the tintX:
+
+- [] Create a fork of [this repository](https://github.com/antarcticrainforest/tintX)
+     and clone this fork (not the original code)
+- [] Create a new branch in the forked repository `git checkout -b my-new-branch`
+- [] Add your changes
+- [] Make sure all tests are sill running. To do so run the following commands
+    - make lint
+    - make test
+    - make docs
+- [] Create a new pull request to the `main` branch of the
+     [original repository](https://github.com/antarcticrainforest/tintX).
+### Adding new Jupyter examples
+You can add more examples to the
+[docs/source documentation folder](https://github.com/antarcticrainforest/tintX/tree/main/docs/source).
+Because notebooks are executed automatically by the unit tests github workflow,
+you should make sure that any additional dependencies imported in the notebook
+are added to the `docs` section in the
+[setup.py](https://github.com/antarcticrainforest/tintX/blob/main/setup.py).
+Make also sure to add additional link(s) to the notebook to the
+[notebook readme file](https://github.com/antarcticrainforest/tintX/blob/main/.Readme.ipynb).
+
+
 ## Acknowledgements
 This work is the adaptation of tracking code in R created by Bhupendra Raut
 who was working at Monash University, Australia in the Australian Research

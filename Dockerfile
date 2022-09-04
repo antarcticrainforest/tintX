@@ -8,27 +8,27 @@ ENV USER=${NB_USER} \
     NB_GID=${NB_UID} \
     NB_GROUP=${NB_USER} \
     DATA_FILES=/tmp/$NB_USER/.data
-USER root
+
+COPY . /tmp/tint_clone
 
 RUN set -e && \
   groupadd -r --gid "$NB_GID" "$NB_GROUP" && \
   adduser --uid "$NB_UID" --gid "$NB_GID" --gecos "Default user" \
-  --shell /bin/bash --disabled-password "$NB_USER" --home $HOME
-COPY . /tmp/tint
-WORKDIR /tmp/tint
-RUN set -e && \
-    mamba install -y cartopy ffmpeg &&\
-    mamba run pip install .[docs] --no-cache-dir ipykernel jupyterlab \
-    notebook bash_kernel &&\
-    cp -r docs/source/_static/data $HOME/.data &&\
-    for i in $(ls docs/source/*.ipynb);do sed -i "s/\.html/\.ipynb/g" $i ;done &&\
-    cp docs/source/*.ipynb $HOME/ &&\
-    cp .Readme.ipynb $HOME/Readme.ipynb &&\
-    cd $HOME &&\
-    rm -fr /tmp/tint
+  --shell /bin/bash --disabled-password "$NB_USER" --home $HOME && \
+  mamba install -y cartopy ffmpeg &&\
+  cd /tmp/tint_clone && \
+  mamba run pip install .[docs] --no-cache-dir ipykernel jupyterlab \
+  notebook bash_kernel &&\
+  cp -r /tmp/tint_clone/docs/source/_static/data $HOME/.data &&\
+  for i in $(ls /tmp/tint_clone/docs/source/*.ipynb);do sed -i "s/\.html/\.ipynb/g" $i ;done &&\
+  cp /tmp/tint_clone/docs/source/*.ipynb $HOME/ &&\
+  cp /tmp/tint_clone/.Readme.ipynb $HOME/Readme.ipynb &&\
+  rm -fr /tmp/tint_clone &&\
+  chown -R $NB_USER:$NB_GROUP $HOME
 
-WORKDIR $HOME
 USER $NB_USER
-RUN set -e && \
-    mamba run python3 -m bash_kernel.install &&\
-    mamba run python3 -m ipykernel install --name plotting --user --env DATA_FILES $DATA_FILES
+WORKDIR $HOME
+RUN set -e &&\
+  mamba run python3 -m bash_kernel.install &&\
+  mamba run python3 -m ipykernel install --name tintx --user \
+    --env DATA_FILES $DATA_FILES --display-name "tintX kernel"
