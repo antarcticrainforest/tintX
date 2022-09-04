@@ -9,7 +9,7 @@ Welcome to tintX's documentation!
 .. image:: https://readthedocs.org/projects/tintx/badge/?version=latest
     :target: https://tintx.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
-.. image:: https://codecov.io/gh/antarcticrainforest/tintX/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/antarcticrainforest/tintX/branch/main/graph/badge.svg
    :target: https://codecov.io/gh/antarcticrainforest/tintX
 .. image:: https://github.com/antarcticrainforest/tintX/actions/workflows/tests.yml/badge.svg
    :target: https://github.com/antarcticrainforest/tintX/actions
