@@ -32,15 +32,15 @@ Any contributions to improve this software in any way are welcome. Below is a
 check list that makes sure you contributions can bee added as fast as
 possible to the tintX:
 
-- [] Create a fork of [this repository](https://github.com/antarcticrainforest/tintX)
+- [ ] Create a fork of [this repository](https://github.com/antarcticrainforest/tintX)
      and clone this fork (not the original code)
-- [] Create a new branch in the forked repository `git checkout -b my-new-branch`
-- [] Add your changes
-- [] Make sure all tests are sill running. To do so run the following commands
+- [ ] Create a new branch in the forked repository `git checkout -b my-new-branch`
+- [ ] Add your changes
+- [ ] Make sure all tests are sill running. To do so run the following commands
     - make lint
     - make test
     - make docs
-- [] Create a new pull request to the `main` branch of the
+- [ ] Create a new pull request to the `main` branch of the
      [original repository](https://github.com/antarcticrainforest/tintX).
 ### Adding new Jupyter examples
 You can add more examples to the
