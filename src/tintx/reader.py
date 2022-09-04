@@ -1,4 +1,5 @@
-"""A Convenience module to  access and apply the tint tracking algoritm."""
+"""The :class:`RunDirectory` class is a convenience class to  access and apply
+the tint tracking algoritm."""
 from __future__ import annotations
 from datetime import datetime
 import hashlib
@@ -121,13 +122,14 @@ class RunDirectory(Cell_tracks):
         defaults: dict[str, Union[str, bool]] = dict(
             combine="by_coords",
         )
+        _files: Union[str, list[str]] = ""
         if isinstance(input_files, (str, Path)):
-            cls._files = str(input_files)
+            _files = str(input_files)
         else:
-            cls._files = [str(f) for f in input_files]
+            _files = [str(f) for f in input_files]
         for key, value in defaults.items():
             kwargs.setdefault(key, value)
-        _dset = xr.open_mfdataset(cls._files, **kwargs)
+        _dset = xr.open_mfdataset(_files, **kwargs)
         start_time = start or _dset[time_coord].isel({time_coord: 0})
         end_time = end or _dset[time_coord].isel({time_coord: -1})
         return cls(
@@ -136,6 +138,7 @@ class RunDirectory(Cell_tracks):
             x_coord=x_coord,
             y_coord=y_coord,
             time_coord=time_coord,
+            _files=_files,
         )
 
     def __init__(
@@ -146,12 +149,13 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         x_coord: str = "lon",
         y_coord: str = "lat",
+        _files: Union[list[str], str] = "",
     ) -> None:
         if isinstance(dataset, xr.DataArray):
             self.data = xr.Dataset({var_name: dataset})
         else:
             self.data = dataset
-        self._files = ""
+        self._files = _files
         self.lons = self.data[x_coord]
         self.lats = self.data[y_coord]
         self.var_name = var_name
@@ -349,10 +353,14 @@ class RunDirectory(Cell_tracks):
         try:
             if dataset is None:
                 cls_instance = cls.from_files(
-                    files, var_name, start=start, end=end, **metadata
+                    files,
+                    var_name,
+                    start=start,
+                    end=end,
+                    **metadata,
                 )
             else:
-                cls_instance = cls(dataset, var_name, **metadata)
+                cls_instance = cls(dataset, var_name, _files=files, **metadata)
         except Exception as error:
             warnings.warn(
                 "Could not access original data, creating empty dataset "

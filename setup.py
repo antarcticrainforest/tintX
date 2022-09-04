@@ -94,6 +94,8 @@ meta = dict(
             "bash_kernel",
             "black",
             "dask",
+            "ipython",
+            "ipywidgets",
             "h5netcdf",
             "mypy",
             "pytest",

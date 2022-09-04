@@ -15,16 +15,58 @@ Welcome to tintX's documentation!
    :target: https://github.com/antarcticrainforest/tintX/actions
 .. image:: https://badge.fury.io/py/tintx.svg
     :target: https://badge.fury.io/py/tintx
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb
 
 TintX is an adaptation of the tint `tracking algorithm <https://github.com/openradar/TINT>`_.
-Tint and TintX are easy-to-use storm cell tracking package based on the
+Tint and ``tintX`` are easy-to-use storm cell tracking package based on the
 TITAN methodology by Dixon and Wiener. While Tint is meant to be applied to
 radar data using the `py-ART toolkit <http://arm-doe.github.io/pyart/>`_ tintX can
 be applied with any data - for example output from numerical weather prediction
 models.
 
+How does the tint algorithm work?
+---------------------------------
+
+The tracking algorithm is designed to track storm cells using `phase
+correlation <https://en.wikipedia.org/wiki/Phase_correlation>`_
+between two consecutive time steps and an application of the
+`Hungarian Maximum Matching Algorithm
+<https://en.wikipedia.org/wiki/Hungarian_algorithm>`_
+to identify cells that are connected in time and space. The algorithm assigns
+every identified storm cell a unique identifier (uid).
+The Hungarian Matching Algorithm decides whether a new uid
+(a new storm cell appears or splits from another system) or an existing uid
+is assigned (a storm cell from the previous time step). This unique
+identifiers allow for a connection of individual storm cells in time and space.
+
+The `original tint package <https://github.com/openradar/TINT>`_, which has
+been developed for radar data only, is adopted to be able to track model and
+radar based rainfall data alike.
+
+If you want to just test usage and play with tracking data you can follow
+`this link <https://mybinder.org/v2/gh/antarcticrainforest/tintX/add-binder?labpath=Readme.ipynb>`_
+to start a binder session and familiarise yourself with the tracking by executing
+one of the example notebooks.
+
+
+Installation
+------------
+
+The ``tintX`` package can be installed using pip:
+
+.. code-block:: console
+
+   python3 -m pip install tintx
+
+if you don't have root access add the ``--user`` flag for a local installation.
+
+
+
+
 Citation
 --------
+
 The original version of the Tint tracking algorithm can be found under:
 
 Raut, B. A., Jackson, R., Picel, M., Collis, S. M., Bergemann, M.,
@@ -55,12 +97,12 @@ number CE170100023.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Documentation content:
 
    api
-   Example_1
-   Example_2
-   TintCli
+   I_Tracking_data_from_files
+   II_Tracking_already_loaded_datasets
+   III_Using_the_command_line_interface
 
 Indices and tables
 ==================

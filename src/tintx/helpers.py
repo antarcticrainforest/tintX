@@ -138,7 +138,6 @@ class MetaData:
             attrs=var_attrs,
             dims=storer_obj.attrs.dims,
         ).chunk({time_coord: 1})
-        print(buffer.get("x_coord").values.shape, x_coords_attrs["dims"])
         data[coords[0]] = xr.DataArray(
             buffer.get("x_coord").values,
             dims=x_coords_attrs.pop("dims"),
