@@ -3,9 +3,9 @@
 [![Documentation Status](https://readthedocs.org/projects/tintx/badge/?version=latest)](https://tintx.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-BSD-purple.svg)](LICENSE)
 [![tests](https://github.com/antarcticrainforest/tintX/actions/workflows/tests.yml/badge.svg)](https://github.com/antarcticrainforest/tintX/actions)
-[![codecov](https://codecov.io/gh/antarcticrainforest/tintX/branch/master/graph/badge.svg)](https://codecov.io/gh/antarcticrainforest/tintX)
+[![codecov](https://codecov.io/gh/antarcticrainforest/tintX/branch/main/graph/badge.svg)](https://codecov.io/gh/antarcticrainforest/tintX)
 [![PyPI version](https://badge.fury.io/py/tintx.svg)](https://badge.fury.io/py/tintx)
-
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb)
 
 TintX is an adaptation of the tint [tracking algorithm](https://github.com/openradar/TINT).
 Tint and `tintX` are easy-to-use storm cell tracking package based on the
@@ -25,7 +25,11 @@ if you don't have root access add the `--user` flag for a local installation.
 ## Usage
 Documentation can be found on the
 [official document page](https://tintx.readthedocs.io/en/latest/) of this
-library.
+library. If you want to just test usage and play with tracking data you can follow
+[this link](https://mybinder.org/v2/gh/antarcticrainforest/tintX/add-binder?labpath=Readme.ipynb)
+to launch and familiarise yourself with the tracking by executing one of the
+example notebooks.
+
 
 ## Contributing
 Any contributions to improve this software in any way are welcome. Below is a

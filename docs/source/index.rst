@@ -15,6 +15,8 @@ Welcome to tintX's documentation!
    :target: https://github.com/antarcticrainforest/tintX/actions
 .. image:: https://badge.fury.io/py/tintx.svg
     :target: https://badge.fury.io/py/tintx
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb
 
 TintX is an adaptation of the tint `tracking algorithm <https://github.com/openradar/TINT>`_.
 Tint and ``tintX`` are easy-to-use storm cell tracking package based on the
@@ -38,9 +40,15 @@ The Hungarian Matching Algorithm decides whether a new uid
 is assigned (a storm cell from the previous time step). This unique
 identifiers allow for a connection of individual storm cells in time and space.
 
-The `original tint package <https://github.com/openradar/TINT>`_, wich has
+The `original tint package <https://github.com/openradar/TINT>`_, which has
 been developed for radar data only, is adopted to be able to track model and
 radar based rainfall data alike.
+
+If you want to just test usage and play with tracking data you can follow
+`this link <https://mybinder.org/v2/gh/antarcticrainforest/tintX/add-binder?labpath=Readme.ipynb>`_
+to start a binder session and familiarise yourself with the tracking by executing
+one of the example notebooks.
+
 
 Installation
 ------------
@@ -52,6 +60,9 @@ The ``tintX`` package can be installed using pip:
    python3 -m pip install tintx
 
 if you don't have root access add the ``--user`` flag for a local installation.
+
+
+
 
 Citation
 --------
