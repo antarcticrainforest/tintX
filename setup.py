@@ -67,6 +67,7 @@ meta = dict(
         "cartopy",
         "click",
         "cftime",
+        "dask",
         "pandas",
         "tables",
         "numpy",
@@ -81,7 +82,6 @@ meta = dict(
         "tests": [
             "bash_kernel",
             "black",
-            "dask[diagnostics]",
             "nbval",
             "pytest",
             "pytest-env",
@@ -93,7 +93,6 @@ meta = dict(
         "docs": [
             "bash_kernel",
             "black",
-            "dask",
             "ipython",
             "ipywidgets",
             "h5netcdf",
