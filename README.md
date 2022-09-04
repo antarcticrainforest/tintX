@@ -26,7 +26,7 @@ if you don't have root access add the `--user` flag for a local installation.
 Documentation can be found on the
 [official document page](https://tintx.readthedocs.io/en/latest/) of this
 library. If you want to just test usage and play with tracking data you can follow
-[this link](https://mybinder.org/v2/gh/antarcticrainforest/tintX/add-binder?labpath=Readme.ipynb)
+[this link](https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb)
 to launch and familiarise yourself with the tracking by executing one of the
 example notebooks.
 

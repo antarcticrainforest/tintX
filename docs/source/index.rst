@@ -45,7 +45,7 @@ been developed for radar data only, is adopted to be able to track model and
 radar based rainfall data alike.
 
 If you want to just test usage and play with tracking data you can follow
-`this link <https://mybinder.org/v2/gh/antarcticrainforest/tintX/add-binder?labpath=Readme.ipynb>`_
+`this link <https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb>`_
 to start a binder session and familiarise yourself with the tracking by executing
 one of the example notebooks.
 
