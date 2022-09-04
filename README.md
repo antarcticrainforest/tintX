@@ -45,11 +45,18 @@ possible to the tintX:
 ### Adding new Jupyter examples
 You can add more examples to the
 [docs/source documentation folder](https://github.com/antarcticrainforest/tintX/tree/main/docs/source).
-Because notebooks are executed automatically by the unit tests github workflow,
+Because notebooks are executed automatically by the unit tests GitHub workflow,
 you should make sure that any additional dependencies imported in the notebook
 are added to the `docs` section in the
 [setup.py](https://github.com/antarcticrainforest/tintX/blob/main/setup.py).
-Make also sure to add additional link(s) to the notebook to the
+All notebooks should have run with a kernel called `tintx` to install a new
+kernel named `tintx` run the following command in the root directory
+of the cloned repository:
+```console
+python -m ipykernel install --name tintx --display-name "tintX kernel"\
+    --env DATA_FIELS $PWD/docs/source/_static/data --user
+```
+Make also sure to add additional link(s) to the
 [notebook readme file](https://github.com/antarcticrainforest/tintX/blob/main/.Readme.ipynb).
 
 
