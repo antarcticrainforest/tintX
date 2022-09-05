@@ -4,32 +4,32 @@ Tracking tuning parameters
 
 The following parameter can be set to tune the cell tracking algorithm
 
-* field_thresh : units of 'field' attribute, default: 32
+* field_thresh: units of 'field' attribute, default: 32
     The threshold used for object detection. Detected objects are connected
     pixels above this threshold.
-* iso_thresh : units of 'field' attribute, default: 4
+* iso_thresh: units of 'field' attribute, default: 4
     Used in isolated cell classification. Isolated cells must not be connected
     to any other cell by contiguous pixels above this threshold.
-* iso_smooth : pixels, default: 4
+* iso_smooth: pixels, default: 4
     Gaussian smoothing parameter in peak detection preprocessing. See
     single_max in tint.objects.
-* min_size : square kilometers, default: 8
+* min_size: square kilometers, default: 8
     The minimum size threshold in pixels for an object to be detected.
-* search_margin : meters, default: 250
+* search_margin: meters, default: 250
     The radius of the search box around the predicted object center.
-* flow_margin : meters, default: 750
+* flow_margin: meters, default: 750
     The margin size around the object extent on which to perform phase
     correlation.
-* max_disparity : float, default: 999
+* max_disparity: float, default: 999
     Maximum allowable disparity value. Larger disparity values are sent to a
     large number.
-* max_flow_mag : meters per second, default: 50
+* max_flow_mag: meters per second, default: 50
     Maximum allowable global shift magnitude. See get_global_shift in
     tint.phase_correlation.
-* max_shift_disp : meters per second, default: 15
+* max_shift_disp: meters per second, default: 15
     Maximum magnitude of difference in meters per second for two shifts to be
     considered in agreement. See correct_shift in tint.matching.
-* gs_alt : meters, default: 1500
+* gs_alt: meters, default: 1500
     Altitude in meters at which to perform phase correlation for global shift
     calculation. See correct_shift in tint.matching.
 
@@ -154,12 +154,13 @@ class set:
 
         Examples
         --------
-        >>> from tintx import config
-        >>> config.get('min_size')
-        8.0
+        .. execute_code::
+            :hide_headers:
 
-        >>> config.get('bar', default=123.)
-        123
+            from tintx import config
+            with config.set(field_thresh=5) as cfg:
+                print(cfg.get("field_thresh"))
+
         """
         return get(key, default)
 
