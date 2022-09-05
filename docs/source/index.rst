@@ -101,10 +101,24 @@ number CE170100023.
    :maxdepth: 2
    :caption: Documentation content:
 
+   QuickStart
    api
    I_Tracking_data_from_files
    II_Tracking_already_loaded_datasets
    III_Using_the_command_line_interface
+
+
+.. seealso::
+
+   Module :py:mod:`xarray`
+        How to work with `xarray <https://docs.xarray.dev/en/stable/user-guide/index.html>`_
+        datasets.
+   Module :py:mod:`pandas`
+        How to work with `pandas DataFrames <https://pandas.pydata.org/docs/user_guide/index.html>`_
+
+.. [1] `doi: 10.1175/JAMC-D-20-0119.1 <https://doi.org/10.1175/JAMC-D-20-0119.1>`_
+.. [2] `doi: 10.1002/qj.4360 <https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.4360>`_
+
 
 Indices and tables
 ==================
@@ -112,6 +126,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. [1] `doi: 10.1175/JAMC-D-20-0119.1 <https://doi.org/10.1175/JAMC-D-20-0119.1>`_
-.. [2] `doi: 10.1002/qj.4360 <https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.4360>`_
