@@ -59,7 +59,14 @@ one of the example notebooks.
 Installation
 ------------
 
-The ``tintX`` package can be installed using pip:
+The ``tintX`` package can bin installed using the ``conda-froge`` conda channel:
+
+.. code-block:: console
+
+    conda install -c conda-forge tintx
+
+
+Alternatively the package can be installed with pip:
 
 .. code-block:: console
 
