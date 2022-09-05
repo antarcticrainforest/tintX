@@ -28,6 +28,8 @@ models.
 How does the tint algorithm work?
 ---------------------------------
 
+The original tracking algorithm that has been developed by a team of
+researchers at Monash University `Raut et al. 2020 <http://dx.doi.org/10.1175/JAMC-D-20-0119.1>_`.
 The tracking algorithm is designed to track storm cells using `phase
 correlation <https://en.wikipedia.org/wiki/Phase_correlation>`_
 between two consecutive time steps which is followed by an application of the
@@ -44,7 +46,7 @@ The `original tint package <https://github.com/openradar/TINT>`_, which has
 been developed for radar data only, is adopted to be able to track model and
 radar based rainfall data alike.
 
-If you want to just test usage and play with tracking data you can follow
+If you just want to try the usage and play with tracking data you can follow
 `this link <https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb>`_
 to start a binder session and familiarise yourself with the tracking by executing
 one of the example notebooks.
