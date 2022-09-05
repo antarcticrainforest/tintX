@@ -19,9 +19,9 @@ Welcome to tintX's documentation!
  :target: https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb
 
 TintX is an adaptation of the tint `tracking algorithm <https://github.com/openradar/TINT>`_.
-Tint and ``tintX`` are easy-to-use storm cell tracking package based on the
-TITAN methodology by Dixon and Wiener. While Tint is meant to be applied to
-radar data using the `py-ART toolkit <http://arm-doe.github.io/pyart/>`_ tintX can
+Tint and tintX are easy-to-use storm cell tracking packages.
+While Tint is meant to be applied to radar data using the
+`py-ART toolkit <http://arm-doe.github.io/pyart/>`_, tintX can
 be applied with any data - for example output from numerical weather prediction
 models.
 
@@ -30,10 +30,10 @@ How does the tint algorithm work?
 
 The tracking algorithm is designed to track storm cells using `phase
 correlation <https://en.wikipedia.org/wiki/Phase_correlation>`_
-between two consecutive time steps and an application of the
+between two consecutive time steps which is followed by an application of the
 `Hungarian Maximum Matching Algorithm
 <https://en.wikipedia.org/wiki/Hungarian_algorithm>`_
-to identify cells that are connected in time and space. The algorithm assigns
+to identify cells that are connected in time. The algorithm assigns
 every identified storm cell a unique identifier (uid).
 The Hungarian Matching Algorithm decides whether a new uid
 (a new storm cell appears or splits from another system) or an existing uid
@@ -59,7 +59,7 @@ The ``tintX`` package can be installed using pip:
 
    python3 -m pip install tintx
 
-if you don't have root access add the ``--user`` flag for a local installation.
+if you don't have root, access add the ``--user`` flag for a local installation.
 
 
 
@@ -92,7 +92,7 @@ Energy, Atmospheric Systems Research (ASR) under Grant DE-SC0014063,
 systems - Data analysis in support of cumulus parametrization”
 
 The development of this software was funded by the Australian Research
-Council's Centre of Excellence for Climate Extremes under the fundering
+Council's Centre of Excellence for Climate Extremes under the funding
 number CE170100023.
 
 .. toctree::

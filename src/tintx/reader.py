@@ -26,8 +26,8 @@ class RunDirectory(Cell_tracks):
     """
     Create an :class:`RunDirecotry` object from a given xarray dataset.
 
-    The :class:`RunDirectory` object gathers all necessary information on the
-    data that is stored in the run directory. Once loaded the most
+    The :class:`RunDirectory` object gathers all necessary information of
+    data that is stored in a ``xarray`` dataset. Once loaded the most
     important meta data will be stored in the run directory for faster
     access the second time.
 
@@ -39,11 +39,10 @@ class RunDirectory(Cell_tracks):
         Name of the variable that is tracked
     x_coord: str, default: lon
         Name of the X coordinate array/vector
-    y_coord: st, default: lat
+    y_coord: str, default: lat
         Name of the Y coordinate array/vector
     time_coord: str, default: time
         Name of the time variable.
-    start:
 
     Example
     -------
@@ -77,10 +76,10 @@ class RunDirectory(Cell_tracks):
         **kwargs: Any,
     ) -> RunDirectory:
         """
-        Create an :class:`RunDirectory` object from given input file(s)/ directory.
+        Create a :class:`RunDirectory` object from input file(s)/directory.
 
-        The :class:`RunDirectory` object gathers all necessary information on the
-        data that is stored in the run directory. Once loaded the most
+        The :class:`RunDirectory` object gathers all necessary information of
+        the data that is stored in the run directory. Once loaded the most
         important meta data will be stored in the run directory for faster
         access the second time.
 
@@ -91,15 +90,15 @@ class RunDirectory(Cell_tracks):
         var_name: str
             Name of the variable that is tracked
         start: str, pandas.Timestamp, datetime.datetime (default: None)
-            first time step that is considered, if none given the first
-            of the dataset is considered.
+            first time step that is considered, if None given the first
+            time step in the data is considered.
         end: str, pandas.Timestamp, datetime.datetime (default: None)
-            last time step that is considered, if none given the last
-            of the dataset is considered.
+            last time step that is considered, if None given the last
+            time step in the data is considered.
         x_coord: str (default: lon)
-            The name of the longitude vector/array
+            The name of the longitude vector/array, can be 1D or 2D
         x_coord: str (default: lat)
-            The name of the latitude vector/array
+            The name of the latitude vector/array, can be 1D or 2D
         time_coord: str, default: time
             The name of the time variable
         kwargs:
@@ -176,9 +175,11 @@ class RunDirectory(Cell_tracks):
         flush: bool = True,
         **tracking_parameters: float,
     ) -> int:
-        """Obtains tracks given a list of data arrays. This is the
-            primary method of the tracks class. This method makes use of all of
-            the functions and helper classes defined above.
+        """Apply the ``tint`` tracking algorithm.
+
+        This is the primary method of the :class:`RunDirectory` class. This
+        methods applies the tracking algorithm to the data and saves
+        the tracked cells to a pandas ``DataFrame`` for analysis.
 
         Parameters
         ----------
@@ -187,7 +188,8 @@ class RunDirectory(Cell_tracks):
         leave_bar: bool, default: True
             Leave the progress bar after tracking is finished
         flush: bool, default: True
-            Flush old tracking data.
+            Flush old tracking data. If false, the tracks will be added
+            to the existing ::method::`tracks` DataFrame.
         **tracking_parameters: float
             Overwrite the tint tracking parameters with this values for this
             specific tracking. The defaults will be restored afterwards.
@@ -245,7 +247,7 @@ class RunDirectory(Cell_tracks):
 
     @property
     def tracks(self) -> pd.DataFrame:
-        """A pandas.DataFrame representation of the tracked cells."""
+        """Pandas ``DataFrame`` representation of the tracked cells."""
         return self._tracks
 
     def save_tracks(self, output: Union[str, Path]) -> None:
@@ -295,7 +297,7 @@ class RunDirectory(Cell_tracks):
     def from_dataframe(
         cls, track_file: Union[str, Path], dataset: Optional[xr.Dataset] = None
     ) -> RunDirectory:
-        """Create an instance of the RunDirectory class from tintx tracks.
+        """Create an instance of the :class:`RunDirectory` class from tintx tracks.
 
         Parameters
         ----------
@@ -307,10 +309,9 @@ class RunDirectory(Cell_tracks):
             Note: this only works if the previous instance of the tracking
             class was instanciated with the :class:`from_files` method.
 
-        Raises
-        ------
-        ValueError:
-            If the dataset can't be retrieved.
+        .. note::
+        If the dataset can't be opened an empty data set will be created
+        instead.
 
         Example
         -------
@@ -371,10 +372,8 @@ class RunDirectory(Cell_tracks):
         cls_instance.reset_tracks(tracks)
         return cls_instance
 
-    def get_parameters(
-        self, tracks: Optional[pd.DataFrame] = None
-    ) -> dict[str, float]:
-        """Get the parameters of given object tracks.
+    def get_parameters(self, tracks: Optional[pd.DataFrame] = None) -> dict[str, float]:
+        """Get the parameters of given cell tracks.
 
         Parameters
         ----------
@@ -384,12 +383,11 @@ class RunDirectory(Cell_tracks):
 
         Returns
         -------
-        dict: dictionary holding the parameter information for the
-              given track object.
+        dict: dictionary holding the tuning parameters for the given tracks.
 
         Raises
         ------
-        ValueError: if no parameters matching the input tracks ``DataFrame```
+        ValueError: if no parameters matching the input tracks ``DataFrame``
                     could be found.
 
         Example
@@ -414,7 +412,6 @@ class RunDirectory(Cell_tracks):
             from tintx import RunDirectory
             run = RunDirectory.from_dataframe("/tmp/output.hdf5")
             parameters = run.get_parameters()
-            print(parameters)
         """
 
         try:
@@ -501,8 +498,7 @@ class RunDirectory(Cell_tracks):
         vmax : float, default: 15.0
             Maximum values for the colormap.
         isolated_only: bool, default: False
-            If true, only annotates uids for isolated objects. Only used in 'full'
-            style.
+            If true, only annotates uids for isolated objects.
         cmap: str, default: Blues
             Colormap used for plotting the tracked fields.
         alt: float, default: None
@@ -511,7 +507,7 @@ class RunDirectory(Cell_tracks):
             Plot traces of animated cells
         dt: float, default: 0
             Time shift in hours that is applied to the data, this can be
-            useful if data time data in in utc but should be displayed in
+            useful if time data is in utc but should be displayed in
             another time zone.
         fps: int, default: 5
             Frames per second for output.
@@ -529,19 +525,6 @@ class RunDirectory(Cell_tracks):
 
         Example
         -------
-        .. execute_code::
-            :hide_code:
-            :hide_headers:
-
-            from pathlib import Path
-            if not Path("/tmp/output.hdf5").is_file():
-                from tintx import RunDirectory
-                run = RunDirectory.from_files(
-                    os.path.join(os.environ["FILE_PATH"], "CPOL*.nc"),
-                    "radar_estimated_rain_rate", x_coord="x", y_coord="y"
-                )
-                run.get_tracks(min_size=4, field_thresh=0.1)
-                run.save_tracks("/tmp/output.hdf5")
 
         .. execute_code::
             :hide_headers:
@@ -582,16 +565,16 @@ class RunDirectory(Cell_tracks):
         plot_style: Optional[dict[str, Union[float, int, str]]] = None,
     ) -> GeoAxesSubplot:
         """
-        Plot traces of trajectories for each particle.
+        Plot traces of trajectories for each cell track.
 
-        This code is a fork of plot_traj method in the plot module from the
+        This code is a fork of ``plot_traj`` method in the plot module from the
         trackpy project see http://soft-matter.github.io/trackpy for more
         details
 
         Parameters
         ----------
         label : boolean, default: False
-            Set to True to write particle ID numbers next to trajectories.
+            Set to True to write cell uids next to trajectories.
         cmap : colormap, Default matplotlib.colormap.winter
             Colormap used to color different tracks
         ax: cartopy.mpl.geoaxes.GeoAxesSubplot, default: None
