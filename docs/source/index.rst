@@ -15,6 +15,10 @@ Welcome to tintX's documentation!
    :target: https://github.com/antarcticrainforest/tintX/actions
 .. image:: https://badge.fury.io/py/tintx.svg
     :target: https://badge.fury.io/py/tintx
+.. image:: https://anaconda.org/conda-forge/tintx/badges/installer/conda.svg
+    :target: https://anaconda.org/conda-forge/tintx
+.. image:: https://anaconda.org/conda-forge/tintx/badges/latest_release_date.svg
+    :target: https://anaconda.org/conda-forge/tintx
 .. image:: https://mybinder.org/badge_logo.svg
  :target: https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb
 

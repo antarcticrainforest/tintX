@@ -5,6 +5,8 @@
 [![tests](https://github.com/antarcticrainforest/tintX/actions/workflows/tests.yml/badge.svg)](https://github.com/antarcticrainforest/tintX/actions)
 [![codecov](https://codecov.io/gh/antarcticrainforest/tintX/branch/main/graph/badge.svg)](https://codecov.io/gh/antarcticrainforest/tintX)
 [![PyPI version](https://badge.fury.io/py/tintx.svg)](https://badge.fury.io/py/tintx)
+[![Conda](https://anaconda.org/conda-forge/tintx/badges/installer/conda.svg)](https://anaconda.org/conda-forge/tintx)
+[![Latest](https://anaconda.org/conda-forge/tintx/badges/latest_release_date.svg)](https://anaconda.org/conda-forge/tintx)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/antarcticrainforest/tintX/main?labpath=Readme.ipynb)
 
 TintX is an adaptation of the tint [tracking algorithm](https://github.com/openradar/TINT).
