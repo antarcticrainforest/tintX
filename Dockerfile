@@ -15,7 +15,7 @@ RUN set -e && \
   groupadd -r --gid "$NB_GID" "$NB_GROUP" && \
   adduser --uid "$NB_UID" --gid "$NB_GID" --gecos "Default user" \
   --shell /bin/bash --disabled-password "$NB_USER" --home $HOME && \
-  mamba install -c conda-forge -y tintx ipykernel jupyterlab notebook bash_kernel &&\
+  mamba install -y tintx ipykernel jupyterlab notebook bash_kernel ffmpeg &&\
   cp -r /tmp/tint_clone/docs/source/_static/data $HOME/.data &&\
   for i in $(ls /tmp/tint_clone/docs/source/*.ipynb);do sed -i "s/\.html/\.ipynb/g" $i ;done &&\
   cp /tmp/tint_clone/docs/source/*.ipynb $HOME/ &&\
