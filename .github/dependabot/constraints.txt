@@ -8,4 +8,4 @@ numpy==1.23.4
 scipy==1.9.2
 tqdm==4.64.1
 tables==3.7.0
-xarray==2022.9.0
+xarray==2022.10.0
