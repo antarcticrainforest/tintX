@@ -59,7 +59,7 @@ one of the example notebooks.
 Installation
 ------------
 
-The ``tintX`` package can bin installed using the ``conda-froge`` conda channel:
+The ``tintX`` package can bin installed using the ``conda-forge`` conda channel:
 
 .. code-block:: console
 
@@ -72,7 +72,7 @@ Alternatively the package can be installed with pip:
 
    python3 -m pip install tintx
 
-if you don't have root, access add the ``--user`` flag for a local installation.
+if you don't have root-access add the ``--user`` flag for a local installation.
 
 
 
@@ -87,7 +87,7 @@ Raut, B. A., Jackson, R., Picel, M., Collis, S. M., Bergemann, M.,
 and Remote Sensing Data. Journal of Applied Meteorology and Climatology,
 60(4), 513-526. [1]_
 
-The TintX tracking package is introduces in:
+The TintX tracking package is introduced in:
 
 Bergemann, M. Lane T. P., Wales, S., Narsey, S., Louf, V. (2022), High
 Resolution Simulations of Tropical Island Thunderstorms: Does an Increase
