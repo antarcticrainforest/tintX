@@ -2,20 +2,20 @@ Quick usage reference
 ---------------------
 
 
-Below you can find a quick guide outlining the usage of the ``tintX`` library
+Below you can find a quick guide outlining the usage of the ``tintX`` library.
 
 The tintX user interface
 +++++++++++++++++++++++++
 
 The :class:`RunDirectory` class serves as the main user interface to interact
-with the tracking algorithm. To be able to track cells tint needs information
+with the tracking algorithm. To be able to track cells tintX needs information
 on the datasets. This datasets are usually saved to netCDF or grib files
 or xarray ``Datasets``. To make use of this interface an instance of the
 :class:`RunDirectory` class has to be created. This can be done in multiple
 ways:
 
-Using already opened to datasets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using already opened Datasets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -146,7 +146,7 @@ Visualising the tracked data
     ax = run.plot_trajectories(thresh=2, plot_style={"ms":25, "lw":1})
 
 
-- Creating an animation of the tracked tracked cells:
+- Creating an animation of the tracked cells:
 
 .. code-block:: python
 
