@@ -226,7 +226,10 @@ class RunDirectory(Cell_tracks):
         parameters = self._parameters.get(self._track_hash(), {})
         parameters.update(tracking_parameters)
         with tqdm(
-            self.grids, total=self.time.size - 1, desc="Tracking", leave=leave_bar
+            self.grids,
+            total=self.time.size - 1,
+            desc="Tracking",
+            leave=leave_bar,
         ) as pbar:
             with set_config(**parameters) as cfg:
                 num_tracks = self._get_tracks(self.grids, pbar, centre)
@@ -559,7 +562,7 @@ class RunDirectory(Cell_tracks):
         self,
         label: bool = False,
         ax: Optional[GeoAxesSubplot] = None,
-        uids: list[str] = None,
+        uids: Optional[list[str]] = None,
         mintrace: int = 2,
         size: int = 50,
         thresh: float = -1.0,

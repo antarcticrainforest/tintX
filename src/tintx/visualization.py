@@ -167,7 +167,7 @@ def plot_traj(
     Y: Union[np.ndarray, xr.DataArray],
     label: bool = False,
     ax: Optional[GeoAxesSubplot] = None,
-    uids: list[str] = None,
+    uids: Optional[list[str]] = None,
     mintrace: int = 2,
     size: int = 50,
     thresh: float = -1.0,
