@@ -10,6 +10,8 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+from rasterio import features, transform
+from shapely import geometry
 from scipy import ndimage
 from .grid_utils import get_filtered_frame
 from .helpers import Counter, Record
@@ -202,6 +204,7 @@ def get_object_prop(
     latitude: list[float] = []
     field_max: list[float] = []
     field_mean: list[float] = []
+    poly: list = []
     nobj = np.max(image1)
 
     unit_area = 1  # (unit_dim[1]*unit_dim[2])/(1000**2)
@@ -238,6 +241,36 @@ def get_object_prop(
             obj_slices = [raw3D[:, ind[0], ind[1]] for ind in obj_index]
             field_max.append(float(np.nanmax(obj_slices)))
             field_mean.append(float(np.nanmean(obj_slices)))
+
+            # create geometries and transform to POLYGON
+            xgrid = grid1.x
+            xdim = xgrid.dims[0]
+            ygrid = grid1.y
+            ydim = ygrid.dims[0]
+            xgrid_diff = xgrid.diff(xdim)[0]
+            ygrid_diff = ygrid.diff(ydim)[0]
+
+            # there might be another way of instantiating the Affine transform
+            geotransform = (
+                grid1.x.min().values,
+                xgrid_diff,
+                0.0,
+                grid1.y.min().values,
+                0.0,
+                ygrid_diff,
+            )
+            fwd = transform.Affine.from_gdal(*geotransform)
+            # use safe dtype in case of num_cells > 255
+            poly.append(
+                geometry.shape(
+                    next(
+                        features.shapes(
+                            (image1 == obj).astype("uint16"), transform=fwd
+                        )
+                    )[0]
+                )
+            )
+
             get_items.append(obj - 1)
         except IndexError:
             pass
@@ -255,6 +288,7 @@ def get_object_prop(
         "lat": latitude,
         "isolated": isolation,
         "ok_items": get_items,
+        "geometry": poly,
     }
     return objprop
 
@@ -284,6 +318,7 @@ def write_tracks(
             "max": obj_props["field_max"],
             "mean": obj_props["field_mean"],
             "isolated": obj_props["isolated"][gi_obj],
+            "geometry": obj_props["geometry"],
         }
     )
     new_tracks.set_index(["scan", "uid"], inplace=True)

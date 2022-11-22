@@ -34,6 +34,7 @@ ObjectPropType = TypedDict(
         "lat": List[float],
         "isolated": np.ndarray,
         "ok_items": List[bool],
+        "geometry": List[dict],
     },
 )
 
