@@ -11,6 +11,7 @@ instances of this :class:`RunDirectory` class.
 """
 
 from tintx import config  # noqa: F401
+
 from .reader import RunDirectory
 
 __all__ = ["RunDirectory"]

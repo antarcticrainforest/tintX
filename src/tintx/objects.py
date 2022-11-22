@@ -6,13 +6,15 @@ Functions for managing and recording object properties.
 
 """
 from __future__ import annotations
+
 from typing import Union
 
 import numpy as np
 import pandas as pd
 from rasterio import features, transform
-from shapely import geometry
 from scipy import ndimage
+from shapely import geometry
+
 from .grid_utils import get_filtered_frame
 from .helpers import Counter, Record
 from .types import ConfigType, GridType, ObjectPropType

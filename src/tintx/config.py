@@ -42,7 +42,9 @@ Getting the values of the currently set parameters can be done by the
 """
 
 from __future__ import annotations
-from typing import cast, Any, Optional
+
+from typing import Any, Optional, cast
+
 from typing_extensions import Literal
 
 config: dict[str, float] = dict(

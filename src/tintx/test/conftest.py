@@ -1,11 +1,12 @@
 """pytest definitions to run the unittests."""
 from __future__ import annotations
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Generator
 
-import pytest
 import numpy as np
+import pytest
 import xarray as xr
 
 

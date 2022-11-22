@@ -6,7 +6,7 @@ import xarray as xr
 def test_set_config(data_with_a_blob: xr.Dataset) -> None:
     """Test the set class."""
 
-    from tintx import config, RunDirectory
+    from tintx import RunDirectory, config
 
     with config.set(field_thresh=0.0, foo=2) as cfg:
         run_dir = RunDirectory(

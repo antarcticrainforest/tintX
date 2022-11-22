@@ -4,15 +4,17 @@ tint.helpers
 
 """
 from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import Iterator, Optional, Union, cast
 
 import cftime
-from dask import array as dask_array
 import numpy as np
 import pandas as pd
 import xarray as xr
-from .grid_utils import parse_grid_datetime, get_grid_size, GridType
+from dask import array as dask_array
+
+from .grid_utils import GridType, get_grid_size, parse_grid_datetime
 
 
 class MetaData:

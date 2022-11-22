@@ -1,11 +1,12 @@
 """Collection of all type definitions used for type hinting."""
 from __future__ import annotations
-from typing import Union, NamedTuple, List
-from typing_extensions import TypedDict
+
+from typing import List, NamedTuple, Union
 
 import cftime
 import numpy as np
 import xarray as xr
+from typing_extensions import TypedDict
 
 SearchPredictType = TypedDict(
     "SearchPredictType",
