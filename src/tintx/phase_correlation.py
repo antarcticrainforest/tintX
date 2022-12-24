@@ -7,11 +7,12 @@ between scans.
 
 """
 from __future__ import annotations
-from typing import Optional, overload, Union
-from typing_extensions import Literal
+
+from typing import Optional, Union, overload
 
 import numpy as np
 from scipy import ndimage
+from typing_extensions import Literal
 
 from .types import ConfigType
 

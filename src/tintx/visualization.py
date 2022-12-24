@@ -1,23 +1,24 @@
 """Visualization tools for tracks objects."""
 
 from __future__ import annotations
-from functools import partial
-from datetime import timedelta
-from typing import Any, Optional, Iterator, Union
 
+from datetime import timedelta
+from functools import partial
+from typing import Any, Iterator, Optional, Union
+
+import matplotlib as mpl
+import numpy as np
+import pandas as pd
+import xarray as xr
 from cartopy import crs
 from cartopy.mpl.geoaxes import GeoAxesSubplot
-import pandas as pd
-from matplotlib.animation import FuncAnimation
-import matplotlib as mpl
 from matplotlib import pyplot as plt
-import numpy as np
+from matplotlib.animation import FuncAnimation
 from tqdm.auto import tqdm
-import xarray as xr
 
+from .helpers import convert_to_cftime
 from .tracks import Cell_tracks
 from .types import GridType
-from .helpers import convert_to_cftime
 
 
 class Tracer:

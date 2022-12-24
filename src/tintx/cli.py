@@ -1,11 +1,12 @@
 """Command line interface for tintX tracking."""
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Iterator, Optional
 
 import click
-from tintx import __version__, RunDirectory, config
 
+from tintx import RunDirectory, __version__, config
 
 CONTEXT_SETTINGS = dict(
     help_option_names=["-h", "--help"],

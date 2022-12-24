@@ -7,20 +7,25 @@ Cell_tracks class.
 """
 
 from __future__ import annotations
-import copy
-from typing import cast, Dict, Iterator, Optional
 
-import pandas as pd
+import copy
+from typing import Dict, Iterator, Optional, cast
+
 import numpy as np
+import pandas as pd
 from tqdm.std import tqdm
 
-from .grid_utils import get_grid_size, get_radar_info, extract_grid_data
-from .helpers import Record, Counter, GridType
-from .phase_correlation import get_global_shift
-from .matching import get_pairs
-from .objects import init_current_objects, update_current_objects
-from .objects import get_object_prop, write_tracks
 from .config import config as tint_config
+from .grid_utils import extract_grid_data, get_grid_size, get_radar_info
+from .helpers import Counter, GridType, Record
+from .matching import get_pairs
+from .objects import (
+    get_object_prop,
+    init_current_objects,
+    update_current_objects,
+    write_tracks,
+)
+from .phase_correlation import get_global_shift
 from .types import ConfigType
 
 

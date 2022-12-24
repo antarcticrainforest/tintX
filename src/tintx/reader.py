@@ -1,23 +1,27 @@
 """The :class:`RunDirectory` class is a convenience class to  access and apply
-the tint tracking algoritm."""
+the tint tracking algorithm."""
 from __future__ import annotations
-from datetime import datetime
-import hashlib
-from pathlib import Path
-from typing import Any, Optional, Union, Iterator
-import warnings
 
+import hashlib
+import warnings
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Iterator, Optional, Union
+
+import geopandas as gpd
+import pandas as pd
+import xarray as xr
+from cartopy.crs import CRS, AzimuthalEquidistant
 from cartopy.mpl.geoaxes import GeoAxesSubplot
 from matplotlib import pyplot as plt
-import pandas as pd
+from shapely import wkt
 from tqdm.auto import tqdm
-import xarray as xr
 
-from .helpers import get_grids, convert_to_cftime, MetaData
-from .tracks import Cell_tracks
-from .visualization import full_domain, plot_traj
 from .config import set as set_config
+from .helpers import MetaData, convert_to_cftime, get_grids
+from .tracks import Cell_tracks
 from .types import GridType
+from .visualization import full_domain, plot_traj
 
 __all__ = ["RunDirectory"]
 
@@ -28,7 +32,7 @@ class RunDirectory(Cell_tracks):
 
     The :class:`RunDirectory` object gathers all necessary information of
     data that is stored in a ``xarray`` dataset. Once loaded the most
-    important meta data will be stored in the run directory for faster
+    important metadata will be stored in the run directory for faster
     access the second time.
 
     Parameters
@@ -73,6 +77,7 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         start: Optional[Union[str, datetime, pd.Timestamp]] = None,
         end: Optional[Union[str, datetime, pd.Timestamp]] = None,
+        crs: str = "epsg:3857",
         **kwargs: Any,
     ) -> RunDirectory:
         """
@@ -80,7 +85,7 @@ class RunDirectory(Cell_tracks):
 
         The :class:`RunDirectory` object gathers all necessary information of
         the data that is stored in the run directory. Once loaded the most
-        important meta data will be stored in the run directory for faster
+        important metadata will be stored in the run directory for faster
         access the second time.
 
         Parameters
@@ -101,6 +106,10 @@ class RunDirectory(Cell_tracks):
             The name of the latitude vector/array, can be 1D or 2D
         time_coord: str, default: time
             The name of the time variable
+        crs: str (default: "epsg:3857")
+            wkt-string or epsg-string of Coordinate Reference System (CRS). If "aeqd",
+            CRS will be computed as AzimuthalEquidistant Projection from the geodetic
+            radar site coordinates "longitude" and "latitude".
         kwargs:
             Additional keyword arguments that are passed to open the dataset
             with xarray
@@ -131,12 +140,21 @@ class RunDirectory(Cell_tracks):
         _dset = xr.open_mfdataset(_files, **kwargs)
         start_time = start or _dset[time_coord].isel({time_coord: 0})
         end_time = end or _dset[time_coord].isel({time_coord: -1})
+
+        # create AEQD CRS
+        if crs == "aeqd":
+            crs = AzimuthalEquidistant(
+                central_latitude=_dset.latitude.mean().values.item(),
+                central_longitude=_dset.longitude.mean().values.item(),
+            )
+
         return cls(
             _dset.sel({time_coord: slice(start_time, end_time)}),
             var_name,
             x_coord=x_coord,
             y_coord=y_coord,
             time_coord=time_coord,
+            crs=crs,
             _files=_files,
         )
 
@@ -148,6 +166,7 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         x_coord: str = "lon",
         y_coord: str = "lat",
+        crs: str = "epsg:3857",
         _files: Union[list[str], str] = "",
     ) -> None:
         if isinstance(dataset, xr.DataArray):
@@ -161,6 +180,8 @@ class RunDirectory(Cell_tracks):
         self.time = self.data[time_coord]
         self.start = convert_to_cftime(self.time.values[0])
         self.end = convert_to_cftime(self.time.values[-1])
+        # transform crs to wkt in any case
+        self.crs = CRS(crs).to_wkt()
         self._metadata_reader = MetaData(
             self.data,
             self.var_name,
@@ -178,7 +199,7 @@ class RunDirectory(Cell_tracks):
         """Apply the ``tint`` tracking algorithm.
 
         This is the primary method of the :class:`RunDirectory` class. This
-        methods applies the tracking algorithm to the data and saves
+        method applies the tracking algorithm to the data and saves
         the tracked cells to a pandas ``DataFrame`` for analysis.
 
         Parameters
@@ -191,7 +212,7 @@ class RunDirectory(Cell_tracks):
             Flush old tracking data. If false, the tracks will be added
             to the existing ::method::`tracks` DataFrame.
         **tracking_parameters: float
-            Overwrite the tint tracking parameters with this values for this
+            Overwrite the tint tracking parameters with these values for this
             specific tracking. The defaults will be restored afterwards.
             See :py:mod:`tintx.config` for details
 
@@ -251,7 +272,13 @@ class RunDirectory(Cell_tracks):
     @property
     def tracks(self) -> pd.DataFrame:
         """Pandas ``DataFrame`` representation of the tracked cells."""
-        return self._tracks
+        # todo: cache GeoDataFrame like the normal DataFrame
+        # only convert into GeoDataFrame if geometry-column is available
+        # for backwards compatibility reasons
+        if "geometry" in self._tracks.columns:
+            return gpd.GeoDataFrame(self._tracks.copy(), crs=CRS(self.crs))
+        else:
+            return self._tracks
 
     def save_tracks(self, output: Union[str, Path]) -> None:
         """Save tracked data to hdf5 table.
@@ -290,7 +317,13 @@ class RunDirectory(Cell_tracks):
                 warnings.simplefilter(
                     action="ignore", category=pd.errors.PerformanceWarning
                 )
-                hdf5.put("tintx_tracks", self.tracks)
+                tracks = self._tracks.copy()
+                # only save track geometries and crs as wkt strings if geometry-column
+                # is available for backwards compatibility reasons
+                if "geometry" in tracks.columns:
+                    tracks["geometry"] = self.tracks.geometry.map(str)
+                    metadata["crs"] = self.crs
+                hdf5.put("tintx_tracks", tracks)
                 self._metadata_reader.save(hdf5)
             table = hdf5.get_storer("tintx_tracks")
             table.attrs.track_meta = metadata
@@ -372,6 +405,12 @@ class RunDirectory(Cell_tracks):
             )
             cls_instance = cls(coord_dataset, var_name, **metadata)
         cls_instance._metadata[cls_instance._track_hash()] = parameters
+        # apply geometry conversion only if geometry-column is available
+        # for backwards compatibility reasons
+        if "geometry" in tracks.columns:
+            tracks["geometry"] = tracks["geometry"].apply(wkt.loads)
+            # add crs as wkt
+            cls_instance.crs = metadata["crs"]
         cls_instance.reset_tracks(tracks)
         return cls_instance
 
