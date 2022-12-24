@@ -6,48 +6,71 @@ on:
   pull_request:
 
 jobs:
-  tests:
-
+  lint:
+    name: lint and style checks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install micromamba environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-name: test
+          environment-file: environment_ci.yml
+          extra-specs: |
+            python=3.10
+      - name: Lint with flake8 run1
+        run: |
+          flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Lint with flake8 run2
+        run: |
+          flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+      - name: Black style check
+        run: |
+          black --check -t py310 -l 82 src/tintx
+      - name: Isort import check
+        run: |
+          isort --check --profile black -l 82 src/tintx
+      - name: mypy typechecks
+        run: |
+          mypy
+
+  tests:
+    name: tintX tests
+    runs-on: ubuntu-latest
+    needs: [lint]
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
         max-parallel: 5
         matrix:
-          python-version: [3.7, 3.8, 3.9, "3.10"]
-
+          python-version: ["3.7", "3.8", "3.9", "3.10"]
+        fail-fast: false
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version:  ${{ matrix.python-version }}
-
-    - name: Add conda to system path
-      run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-
-    - name: Creating conda environment for ${{ matrix.python-version }}
-      run: |
-        conda create -n test -y python=${{matrix.python-version}} ffmpeg pip cartopy make
-
-    - name: Install dependencies
-      run: |
-        conda run -n test python3 -m pip install -e .[docs,tests] #--constraint .github/dependabot/constraints.txt
-
-    - name: Linting
-      run: |
-       # stop the build if there are Python syntax errors or undefined names
-       conda run -n test flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
-       # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-       conda run -n test make lint
-
-    - name: Test with pytest
-      run: |
-        conda run -n test make test_coverage
-      env:
-        MPLBACKEND: agg
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install micromamba environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-name: test
+          environment-file: environment_ci.yml
+          extra-specs: |
+            python=${{ matrix.python-version }}  
+      - name: Test with pytest
+        env:
+          MPLBACKEND: agg
+          DATA_FILES: ./docs/source/_static/data
+        run: |
+          python -m pytest -n auto --verbose --nbval-lax --cov-report xml:report.xml --cov=tintx --pyargs src/tintx
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./report.xml

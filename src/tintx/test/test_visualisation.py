@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
 import pytest
 import xarray as xr
 
@@ -33,8 +34,9 @@ def test_plot_tracks(data_with_a_blob: xr.Dataset) -> None:
 
 def test_plot_real_data(real_data_files: Path) -> None:
     """Run the tracking with real data and plot it."""
-    from tintx import RunDirectory
     from cartopy.mpl.geoaxes import GeoAxesSubplot
+
+    from tintx import RunDirectory
 
     files = list(real_data_files.rglob("*CPOL*.nc"))
     first = "2006-11-16 03:00"

@@ -77,6 +77,9 @@ meta = dict(
         "xarray",
         "tqdm",
         "typing_extensions",
+        "rasterio",
+        "geopandas",
+        "shapely",
     ],
     extras_require={
         "tests": [
