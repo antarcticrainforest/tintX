@@ -7,5 +7,5 @@ netCDF4==1.6.2
 numpy==1.23.4
 scipy==1.9.3
 tqdm==4.64.1
-tables==3.7.0
+tables==3.8.0
 xarray==2022.12.0
