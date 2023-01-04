@@ -5,7 +5,7 @@ pandas<1.5.3
 matplotlib==3.6.2
 netCDF4==1.6.2
 numpy==1.23.5
-scipy==1.9.3
+scipy==1.10.0
 tqdm==4.64.1
 tables==3.8.0
 xarray==2022.12.0
