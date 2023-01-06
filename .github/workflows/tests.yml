@@ -61,25 +61,23 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Install micromamba environment
-        uses: mamba-org/provision-with-micromamba@main
-        with:
-          environment-name: test
-          environment-file: false
-          extra-specs: |
-            python=${{ matrix.python-version }}
-            cartopy
-            ffmpeg
-          channels: conda-forge
-      - name: Install packages with pip
+      - name: Add conda to system path
         run: |
-          mamba run -n test python -m pip install .[tests]
+         # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Creating conda environment for python ${{ matrix.python-version }}
+        run: |
+         conda create -n test -y python=${{matrix.python-version}} ffmpeg pip cartopy make
+      - name: Install dependencies
+        run: |
+          conda run -n test python3 -m pip install -e .[tests, docs]
       - name: Test with pytest
         env:
           MPLBACKEND: agg
           DATA_FILES: ./docs/source/_static/data
         run: |
-          mamba run -n test python -m pytest -n auto --verbose --nbval-lax --cov-report xml:report.xml --cov=tintx --pyargs src/tintx
+          # mamba run -n test python -m pytest -n auto --verbose --nbval-lax --cov-report xml:report.xml --cov=tintx --pyargs src/tintx
+          conda run -n test make test_coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
