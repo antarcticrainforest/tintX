@@ -92,7 +92,8 @@ meta = dict(
             "pytest",
             "pytest-env",
             "pytest-cov",
-            "pytest-xdist" "testpath",
+            "pytest-xdist",
+            "testpath",
         ],
         "docs": [
             "bash_kernel",
