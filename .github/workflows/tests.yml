@@ -25,6 +25,7 @@ jobs:
           extra-specs: |
             python=3.11
             geos
+          channels: conda-forge
       - name: Install packages with pip
         run: |
           python -m pip install .[tests]
@@ -70,6 +71,7 @@ jobs:
             python=${{ matrix.python-version }}
             geos
             ffmpeg
+          channels: conda-forge
       - name: Install packages with pip
         run: |
           python -m pip install .[tests]
