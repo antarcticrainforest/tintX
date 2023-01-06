@@ -21,9 +21,13 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-name: test
-          environment-file: environment_ci.yml
+          environment-file: false
           extra-specs: |
-            python=3.10
+            python=3.11
+            geos
+      - name: Install packages with pip
+        run: |
+          python -m pip install .[tests]
       - name: Lint with flake8 run1
         run: |
           flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -32,7 +36,7 @@ jobs:
           flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
       - name: Black style check
         run: |
-          black --check -t py310 -l 82 src/tintx
+          black --check -t py311 -l 82 src/tintx
       - name: Isort import check
         run: |
           isort --check --profile black -l 82 src/tintx
@@ -50,7 +54,7 @@ jobs:
     strategy:
         max-parallel: 5
         matrix:
-          python-version: ["3.7", "3.8", "3.9", "3.10"]
+          python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         fail-fast: false
     steps:
       - name: Checkout
@@ -61,9 +65,14 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-name: test
-          environment-file: environment_ci.yml
+          environment-file: false
           extra-specs: |
-            python=${{ matrix.python-version }}  
+            python=${{ matrix.python-version }}
+            geos
+            ffmpeg
+      - name: Install packages with pip
+        run: |
+          python -m pip install .[tests]
       - name: Test with pytest
         env:
           MPLBACKEND: agg
