@@ -73,13 +73,13 @@ jobs:
           channels: conda-forge
       - name: Install packages with pip
         run: |
-          python -m pip install .[tests]
+          mamba run -n test python -m pip install .[tests]
       - name: Test with pytest
         env:
           MPLBACKEND: agg
           DATA_FILES: ./docs/source/_static/data
         run: |
-          python -m pytest -n auto --verbose --nbval-lax --cov-report xml:report.xml --cov=tintx --pyargs src/tintx
+          mamba run -n test python -m pytest -n auto --verbose --nbval-lax --cov-report xml:report.xml --cov=tintx --pyargs src/tintx
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
