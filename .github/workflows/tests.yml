@@ -48,7 +48,6 @@ jobs:
   tests:
     name: tintX tests
     runs-on: ubuntu-latest
-    needs: [lint]
     defaults:
       run:
         shell: bash -l {0}
