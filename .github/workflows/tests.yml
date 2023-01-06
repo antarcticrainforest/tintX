@@ -24,7 +24,7 @@ jobs:
           environment-file: false
           extra-specs: |
             python=3.11
-            geos
+            cartopy
           channels: conda-forge
       - name: Install packages with pip
         run: |
@@ -68,7 +68,7 @@ jobs:
           environment-file: false
           extra-specs: |
             python=${{ matrix.python-version }}
-            geos
+            cartopy
             ffmpeg
           channels: conda-forge
       - name: Install packages with pip
