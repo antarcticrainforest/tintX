@@ -34,7 +34,7 @@ How does the tint algorithm work?
 
 The original tracking algorithm that has been developed by a team of
 researchers at Monash University `Raut et al. 2020 <http://dx.doi.org/10.1175/JAMC-D-20-0119.1>`_.
-The tracking algorithm is designed to track storm cells using `phase
+The algorithm is designed to track storm cells using `phase
 correlation <https://en.wikipedia.org/wiki/Phase_correlation>`_
 between two consecutive time steps which is followed by an application of the
 `Hungarian Maximum Matching Algorithm
@@ -71,8 +71,6 @@ Alternatively the package can be installed with pip:
 .. code-block:: console
 
    python3 -m pip install tintx
-
-if you don't have root-access add the ``--user`` flag for a local installation.
 
 
 
