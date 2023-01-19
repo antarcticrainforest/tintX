@@ -52,7 +52,7 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment for python ${{ matrix.python-version }}
         run: |
-         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make
+         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5
       - name: Install dependencies
         run: |
           conda run -n test python3 -m pip install -U -e .[tests,docs]
