@@ -2,9 +2,10 @@ name: tintx
 channels:
   - conda-forge
 dependencies:
-  - python=3.10
+  - python=3.11
   - ipython
   - tintx
+  - hdf5
   - pip
   - pip:
       - sphinx-execute-code-python3
