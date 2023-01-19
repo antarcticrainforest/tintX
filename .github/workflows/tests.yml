@@ -58,7 +58,6 @@ jobs:
           conda run -n test python3 -m pip install -U -e .[tests,docs]
       - name: Test with pytest
         env:
-          MPLBACKEND: agg
           DATA_FILES: ./docs/source/_static/data
         run: |
           conda run -n test make test_coverage
