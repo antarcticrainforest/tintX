@@ -26,7 +26,7 @@ jobs:
          conda create -n test -c conda-forge -y python=3.11 ffmpeg pip cartopy make
       - name: Install dependencies
         run: |
-          conda run -n test python3 -m pip install -e .[tests]
+          conda run -n test python3 -m pip install -U -e .[tests]
       - name: Linting the code
         run: |
           conda run -n test make lint
@@ -55,7 +55,7 @@ jobs:
          conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make
       - name: Install dependencies
         run: |
-          conda run -n test python3 -m pip install -e .[tests,docs]
+          conda run -n test python3 -m pip install -U -e .[tests,docs]
       - name: Test with pytest
         env:
           MPLBACKEND: agg
