@@ -45,7 +45,9 @@ def _get_file_names(input_paths: tuple[Path, ...]) -> Iterator[Path]:
 @click.argument(
     "input_file",
     nargs=1,
-    type=click.Path(resolve_path=True, path_type=Path, exists=True, dir_okay=False),
+    type=click.Path(
+        resolve_path=True, path_type=Path, exists=True, dir_okay=False
+    ),
 )
 @click.option(
     "-o",
@@ -318,7 +320,9 @@ def track(
             f'{run_d.start.strftime("%Y%m%dT%H%M")}-'
             f'{run_d.end.strftime("%Y%m%dT%H%M")}'
         )
-        outf = Path(".").absolute() / f"tintx_tracks_{variable}_{time_suffix}.hdf5"
+        outf = (
+            Path(".").absolute() / f"tintx_tracks_{variable}_{time_suffix}.hdf5"
+        )
         output = output or outf
         num_tracks = run_d.get_tracks()
         click.echo(f"Found and tracked {num_tracks} objects.")

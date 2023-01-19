@@ -36,12 +36,16 @@ def get_size_change(size1: float, size2: float) -> float:
 
 
 @overload
-def get_size_change(size1: Union[float, np.ndarray], size2: np.ndarray) -> np.ndarray:
+def get_size_change(
+    size1: Union[float, np.ndarray], size2: np.ndarray
+) -> np.ndarray:
     ...  # pragma: no cover
 
 
 @overload
-def get_size_change(size1: np.ndarray, size2: Union[float, np.ndarray]) -> np.ndarray:
+def get_size_change(
+    size1: np.ndarray, size2: Union[float, np.ndarray]
+) -> np.ndarray:
     ...  # pragma: no cover
 
 
@@ -79,7 +83,9 @@ def shifts_disagree(
     shift_1 = shift1 * record.grid_size[1:]
     shift_2 = shift2 * record.grid_size[1:]
     shift_disparity = euclidean_dist(shift_1, shift_2)
-    interval = get_interval(cast(Union[timedelta, np.timedelta64], record.interval))
+    interval = get_interval(
+        cast(Union[timedelta, np.timedelta64], record.interval)
+    )
     return shift_disparity / interval > params["MAX_SHIFT_DISP"]
 
 
@@ -87,7 +93,9 @@ def clip_shift(shift: float, record: Record, params: ConfigType) -> float:
     """Clips shift according to MAX_FLOW_MAG paramter."""
     shift_meters = shift * record.grid_size[1:]
     shift_mag = np.linalg.norm(shift_meters)
-    interval = get_interval(cast(Union[timedelta, np.timedelta64], record.interval))
+    interval = get_interval(
+        cast(Union[timedelta, np.timedelta64], record.interval)
+    )
     velocity = shift_mag / interval
 
     unit = shift_meters / shift_mag
@@ -146,7 +154,9 @@ def correct_shift(
     corrected_shift = np.round(corrected_shift, 2)
 
     record.count_case(case)
-    record.record_shift(corrected_shift, global_shift, last_heads, local_shift, case)
+    record.record_shift(
+        corrected_shift, global_shift, last_heads, local_shift, case
+    )
     return corrected_shift
 
 
@@ -276,7 +286,9 @@ def locate_all_objects(
 
     for obj_id1 in np.arange(nobj1) + 1:
         obj1_extent = get_obj_extent(image1, obj_id1)
-        shift = get_ambient_flow(obj1_extent, image1, image2, params, record.grid_size)
+        shift = get_ambient_flow(
+            obj1_extent, image1, image2, params, record.grid_size
+        )
         if shift is None:
             record.count_case(5)
             shift = global_shift
@@ -285,11 +297,15 @@ def locate_all_objects(
             shift, current_objects, obj_id1, global_shift, record, params
         )
 
-        search_box = predict_search_extent(obj1_extent, shift, params, record.grid_size)
+        search_box = predict_search_extent(
+            obj1_extent, shift, params, record.grid_size
+        )
         search_box = check_search_box(search_box, image2.shape)
         objs_found = find_objects(search_box, image2)
         disparity = get_disparity_all(objs_found, image2, search_box, obj1_extent)
-        obj_match = save_obj_match(obj_id1, objs_found, disparity, obj_match, params)
+        obj_match = save_obj_match(
+            obj_id1, objs_found, disparity, obj_match, params
+        )
     return obj_match
 
 
