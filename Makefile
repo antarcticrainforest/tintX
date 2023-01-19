@@ -16,7 +16,7 @@ test:
 test_coverage:
 	python3 -m pytest -vv \
 	    --cov=$(PWD)/src/tintx --cov-report html:coverage_report \
-		--nbval-lax --current-env --cov-report=xml --junitxml report.xml
+		--nbval-lax --current-env --cov-report xml --junitxml report.xml
 	rm -rf '='
 	python3 -m coverage report
 
