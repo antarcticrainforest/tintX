@@ -65,9 +65,7 @@ def test_save_dataset(save_dir: Path, netcdf_files_with_blob: Path) -> None:
     )
     _ = run_dir.get_tracks(field_thresh=0.0, iso_thresh=0)
     run_dir.save_tracks(save_dir / "test.h5")
-    assert len(run_dir.tracks) == len(
-        pd.read_hdf(save_dir / "test.h5", "tintx_tracks")
-    )
+    assert len(run_dir.tracks) == len(pd.read_hdf(save_dir / "test.h5", "tintx_tracks"))
 
 
 def test_load_dataset(save_dir: Path, netcdf_files_with_blob: Path) -> None:

@@ -264,9 +264,7 @@ def plot_traj(
     return ax
 
 
-def _normalize_kwargs(
-    kwargs: dict[str, Any], kind: str = "patch"
-) -> dict[str, Any]:
+def _normalize_kwargs(kwargs: dict[str, Any], kind: str = "patch") -> dict[str, Any]:
     """Convert matplotlib keywords from short to long form."""
     # Source:
     # github.com/tritemio/FRETBursts/blob/fit_experim/fretbursts/burst_plot.py

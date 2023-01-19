@@ -44,9 +44,7 @@ def get_grid_alt(
     return int(np.round(alt_meters / grid_size[0]))
 
 
-def get_vert_projection(
-    grid: np.ndarray, thresh: Union[float, int] = 40
-) -> np.ndarray:
+def get_vert_projection(grid: np.ndarray, thresh: Union[float, int] = 40) -> np.ndarray:
     """Returns boolean vertical projection from grid."""
     return np.any(grid > thresh, axis=0)
 

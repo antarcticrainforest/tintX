@@ -57,9 +57,7 @@ class MetaData:
     @property
     def time(self) -> np.ndarray:
         """Get a number representation of the time vector in."""
-        return np.array(
-            [self._to_num(t) for t in self.dataset[self._time].values]
-        )
+        return np.array([self._to_num(t) for t in self.dataset[self._time].values])
 
     def _to_num(self, time: Union[cftime.datetime, np.datetime64]) -> int:
         cf_time = convert_to_cftime(time)
@@ -112,9 +110,7 @@ class MetaData:
         x_coords_attrs = buffer.get_storer("x_coord").attrs.attrs.copy()
         y_coords_attrs = buffer.get_storer("y_coord").attrs.attrs.copy()
         var_attrs = storer_obj.attrs.var_attrs.copy()
-        var_attrs[
-            "history"
-        ] = f"{datetime.now().isoformat()}: Created empty dataset"
+        var_attrs["history"] = f"{datetime.now().isoformat()}: Created empty dataset"
         coord_attrs = storer_obj.attrs.dim_attrs.copy()
         time_coord = var_attrs.pop("time_coord")
         metadata = buffer.get_storer("tintx_tracks").attrs.track_meta.copy()
@@ -305,9 +301,7 @@ def get_interval(interval: Union[timedelta, np.timedelta64]) -> float:
     return interval.total_seconds()
 
 
-def convert_to_cftime(
-    time: Union[np.datetime64, cftime.datetime]
-) -> cftime.datetime:
+def convert_to_cftime(time: Union[np.datetime64, cftime.datetime]) -> cftime.datetime:
     """Convert a dateim to a cftime object."""
     if isinstance(time, np.datetime64):
         t = datetime.fromisoformat(str(time).partition(".")[0])

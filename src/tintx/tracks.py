@@ -195,9 +195,7 @@ class Cell_tracks:
                     cast(Dict[str, np.ndarray], self.current_objects),
                     cast(Counter, self.counter),
                 )
-            obj_props = get_object_prop(
-                frame1, grid_obj1, self.record, self.params
-            )
+            obj_props = get_object_prop(frame1, grid_obj1, self.record, self.params)
 
             self.record.add_uids(self.current_objects)
             self._tracks = write_tracks(

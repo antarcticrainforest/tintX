@@ -191,8 +191,7 @@ class RunDirectory(Cell_tracks):
             self.crs = pyproj.CRS(crs).to_wkt()
         else:
             raise TypeError(
-                "crs parameter must be a string or pyproj/cartopy "
-                "projection"
+                "crs parameter must be a string or pyproj/cartopy " "projection"
             )
         self._metadata_reader = MetaData(
             self.data,
@@ -288,9 +287,7 @@ class RunDirectory(Cell_tracks):
         # only convert into GeoDataFrame if geometry-column is available
         # for backwards compatibility reasons
         if "geometry" in self._tracks.columns:
-            return gpd.GeoDataFrame(
-                self._tracks.copy(), crs=pyproj.CRS(self.crs)
-            )
+            return gpd.GeoDataFrame(self._tracks.copy(), crs=pyproj.CRS(self.crs))
         else:
             return self._tracks
 
@@ -341,9 +338,7 @@ class RunDirectory(Cell_tracks):
                 self._metadata_reader.save(hdf5)
             table = hdf5.get_storer("tintx_tracks")
             table.attrs.track_meta = metadata
-            table.attrs.tracking_parameters = self._parameters[
-                self._track_hash()
-            ]
+            table.attrs.tracking_parameters = self._parameters[self._track_hash()]
 
     @classmethod
     def from_dataframe(
@@ -396,9 +391,7 @@ class RunDirectory(Cell_tracks):
         with pd.HDFStore(track_file) as hdf5:
             tracks = pd.read_hdf(hdf5, "tintx_tracks")
             metadata = hdf5.get_storer("tintx_tracks").attrs.track_meta.copy()
-            parameters = hdf5.get_storer(
-                "tintx_tracks"
-            ).attrs.tracking_parameters
+            parameters = hdf5.get_storer("tintx_tracks").attrs.tracking_parameters
             coord_dataset = MetaData.dataset_from_coords(hdf5)
 
         files = metadata.pop("files", "")
@@ -432,9 +425,7 @@ class RunDirectory(Cell_tracks):
         cls_instance.reset_tracks(tracks)
         return cls_instance
 
-    def get_parameters(
-        self, tracks: Optional[pd.DataFrame] = None
-    ) -> dict[str, float]:
+    def get_parameters(self, tracks: Optional[pd.DataFrame] = None) -> dict[str, float]:
         """Get the parameters of given cell tracks.
 
         Parameters

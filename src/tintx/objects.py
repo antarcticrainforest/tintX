@@ -20,9 +20,7 @@ from .helpers import Counter, Record
 from .types import ConfigType, GridType, ObjectPropType
 
 
-def get_object_center(
-    obj_id: Union[int, float, str], labeled_image: np.ndarray
-) -> int:
+def get_object_center(obj_id: Union[int, float, str], labeled_image: np.ndarray) -> int:
     """Returns index of center pixel of the given object id from labeled
     image. The center is calculated as the median pixel of the object extent;
     it is not a true centroid."""
@@ -77,9 +75,7 @@ def init_current_objects(
         "obs_num": obs_num,
         "origin": origin,
     }
-    current_objects = attach_last_heads(
-        first_frame, second_frame, current_objects
-    )
+    current_objects = attach_last_heads(first_frame, second_frame, current_objects)
     return current_objects, counter
 
 
@@ -127,9 +123,7 @@ def attach_last_heads(
     nobj = len(current_objects["uid"])
     heads = np.ma.empty((nobj, 2))
     for obj in range(nobj):
-        if (current_objects["id1"][obj] > 0) and (
-            current_objects["id2"][obj] > 0
-        ):
+        if (current_objects["id1"][obj] > 0) and (current_objects["id2"][obj] > 0):
             center1 = get_object_center(current_objects["id1"][obj], frame1)
             center2 = get_object_center(current_objects["id2"][obj], frame2)
             heads[obj, :] = center2 - center1
@@ -178,9 +172,7 @@ def single_max(
     for pixel in range(len(obj_ind[0])):
         ind_0 = obj_ind[0][pixel]
         ind_1 = obj_ind[1][pixel]
-        neighborhood = padded[
-            (ind_0 - 1) : (ind_0 + 2), (ind_1 - 1) : (ind_1 + 2)
-        ]
+        neighborhood = padded[(ind_0 - 1) : (ind_0 + 2), (ind_1 - 1) : (ind_1 + 2)]
         max_ind = np.unravel_index(neighborhood.argmax(), neighborhood.shape)
         if max_ind == (1, 1):
             maxima += 1
@@ -266,9 +258,7 @@ def get_object_prop(
             poly.append(
                 geometry.shape(
                     next(
-                        features.shapes(
-                            (image1 == obj).astype("uint16"), transform=fwd
-                        )
+                        features.shapes((image1 == obj).astype("uint16"), transform=fwd)
                     )[0]
                 )
             )
