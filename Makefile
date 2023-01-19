@@ -29,5 +29,5 @@ lint:
 	flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
 	flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
 	black --check -t py311 -l 82 src/tintx
-	isort --check --profile black -l 82 src/tintx
+	isort --check --profile black -t py311 -l 82 src/tintx
 	mypy
