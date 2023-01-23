@@ -16,7 +16,7 @@ test:
 test_coverage:
 	python3 -m pytest -vv \
 	    --cov=$(PWD)/src/tintx --cov-report html:coverage_report \
-		--nbval-lax --current-env --cov-report=xml --junitxml report.xml
+		--nbval-lax --current-env --cov-report xml --junitxml report.xml
 	rm -rf '='
 	python3 -m coverage report
 
@@ -26,6 +26,8 @@ docs:
 
 
 lint:
-	mypy
-	black --check -t py310 -l 82 src
+	flake8 src/tintx --count --select=E9,F63,F7,F82 --show-source --statistics
 	flake8 src/tintx --ignore E203 --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+	black --check -t py311 -l 82 src/tintx
+	isort --check --profile black -t py311 -l 82 src/tintx
+	mypy

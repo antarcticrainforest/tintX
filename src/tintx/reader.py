@@ -10,8 +10,9 @@ from typing import Any, Iterator, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
+import pyproj
 import xarray as xr
-from cartopy.crs import CRS, AzimuthalEquidistant
+from cartopy.crs import AzimuthalEquidistant, Projection
 from cartopy.mpl.geoaxes import GeoAxesSubplot
 from matplotlib import pyplot as plt
 from shapely import wkt
@@ -77,7 +78,7 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         start: Optional[Union[str, datetime, pd.Timestamp]] = None,
         end: Optional[Union[str, datetime, pd.Timestamp]] = None,
-        crs: str = "epsg:3857",
+        crs: Union[str, pyproj.CRS, Projection] = "epsg:4326",
         **kwargs: Any,
     ) -> RunDirectory:
         """
@@ -106,10 +107,11 @@ class RunDirectory(Cell_tracks):
             The name of the latitude vector/array, can be 1D or 2D
         time_coord: str, default: time
             The name of the time variable
-        crs: str (default: "epsg:3857")
-            wkt-string or epsg-string of Coordinate Reference System (CRS). If "aeqd",
-            CRS will be computed as AzimuthalEquidistant Projection from the geodetic
-            radar site coordinates "longitude" and "latitude".
+        crs: str, pyproj.Proj, cartopy.crs.Projection (default: "epsg:4326")
+            pyproj/cartopy projection object or string defining the Coordinate
+            Reference System (CRS). If "aeqd", CRS will be computed as
+            AzimuthalEquidistant Projection from the geodetic radar site
+            coordinates "longitude" and "latitude".
         kwargs:
             Additional keyword arguments that are passed to open the dataset
             with xarray
@@ -166,7 +168,7 @@ class RunDirectory(Cell_tracks):
         time_coord: str = "time",
         x_coord: str = "lon",
         y_coord: str = "lat",
-        crs: str = "epsg:3857",
+        crs: Union[str, pyproj.CRS, Projection] = "epsg:4326",
         _files: Union[list[str], str] = "",
     ) -> None:
         if isinstance(dataset, xr.DataArray):
@@ -181,7 +183,16 @@ class RunDirectory(Cell_tracks):
         self.start = convert_to_cftime(self.time.values[0])
         self.end = convert_to_cftime(self.time.values[-1])
         # transform crs to wkt in any case
-        self.crs = CRS(crs).to_wkt()
+        if isinstance(crs, Projection):
+            self.crs = pyproj.CRS(crs.proj4_init).to_wkt()
+        elif isinstance(crs, pyproj.CRS):
+            self.crs = crs.to_wkt()
+        elif isinstance(crs, str):
+            self.crs = pyproj.CRS(crs).to_wkt()
+        else:
+            raise TypeError(
+                "crs parameter must be a string or pyproj/cartopy " "projection"
+            )
         self._metadata_reader = MetaData(
             self.data,
             self.var_name,
@@ -276,7 +287,7 @@ class RunDirectory(Cell_tracks):
         # only convert into GeoDataFrame if geometry-column is available
         # for backwards compatibility reasons
         if "geometry" in self._tracks.columns:
-            return gpd.GeoDataFrame(self._tracks.copy(), crs=CRS(self.crs))
+            return gpd.GeoDataFrame(self._tracks.copy(), crs=pyproj.CRS(self.crs))
         else:
             return self._tracks
 
