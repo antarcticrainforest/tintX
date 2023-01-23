@@ -5,6 +5,7 @@ dependencies:
   - python=3.11
   - ipython
   - tintx
+  - geopandas
   - hdf5
   - pip
   - pip:
