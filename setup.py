@@ -10,7 +10,6 @@ def read(*parts):
 
 
 def find_version(*parts):
-
     vers_file = read(*parts).split("\n")
     old_path = sys.path.copy()
     with TemporaryDirectory() as td:
@@ -41,7 +40,6 @@ meta = dict(
     python_requires=">=3.7",
     project_urls={
         "Documentation": "https://tintx.readthedocs.io/en/latest/",
-        # 'Release notes': 'https://extra-data.readthedocs.io/en/latest/changelog.html',
         "Issues": "https://github.com/antarcticrainforest/tintX/issues",
         "Source": "https://github.com/antarcticrainforest/tintX",
     },
@@ -57,6 +55,7 @@ meta = dict(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering :: Physics",
         "Topic :: Scientific/Engineering :: Atmospheric Science",
     ],
@@ -100,6 +99,7 @@ meta = dict(
             "black",
             "ipython",
             "ipywidgets",
+            "furo",
             "h5netcdf",
             "mypy",
             "nbsphinx",
@@ -108,7 +108,6 @@ meta = dict(
             "sphinx",
             "sphinxcontrib_github_alt",
             "sphinx-execute-code-python3",
-            "sphinx-rtd-theme",
         ],
     },
 )

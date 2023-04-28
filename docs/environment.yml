@@ -9,8 +9,8 @@ dependencies:
   - hdf5
   - pip
   - pip:
+      - furo
       - sphinx-execute-code-python3
-      - sphinx-rtd-theme
       - sphinxcontrib_github_alt
       - nbsphinx
       - recommonmark
