@@ -1,9 +1,11 @@
 name: Tests
+run-name: ${{ github.actor }} is testing the code
 
 on:
   push:
     branches: [ master ]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -23,7 +25,7 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment for python 3.11
         run: |
-         conda create -n test -c conda-forge -y python=3.11 ffmpeg pip cartopy make
+         conda create -n test -c conda-forge -y python=3.11 pip cartopy make
       - name: Install dependencies
         run: |
           conda run -n test python3 -m pip install -U -e .[tests]
@@ -65,3 +67,13 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           file: ./report.xml
+  dependabot:
+    runs-on: ubuntu-latest
+    needs: [tests, lint]
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
+    steps:
+    # Specifically check that dependabot (or another trusted party) created this pull-request, and that it has been labelled correctly.
+      - name: Dependabot merge into main
+        uses: alexwilson/enable-github-automerge-action@main
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
