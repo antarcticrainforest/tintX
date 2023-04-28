@@ -2,7 +2,7 @@
 #
 #
 export DATA_FILES := $(PWD)/docs/source/_static/data
-all: install test_notebooks test_coverage
+all: test_notebooks test_coverage
 
 .PHONY: docs
 install:
