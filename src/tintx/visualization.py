@@ -154,6 +154,7 @@ def full_domain(
     animation = FuncAnimation(
         new_ax.get_figure(),
         partial(_update, title=title),
+        cache_frame_data=False,
         frames=frames,
         interval=1000 / fps,
     )
@@ -262,9 +263,7 @@ def plot_traj(
     return ax
 
 
-def _normalize_kwargs(
-    kwargs: dict[str, Any], kind: str = "patch"
-) -> dict[str, Any]:
+def _normalize_kwargs(kwargs: dict[str, Any], kind: str = "patch") -> dict[str, Any]:
     """Convert matplotlib keywords from short to long form."""
     # Source:
     # github.com/tritemio/FRETBursts/blob/fit_experim/fretbursts/burst_plot.py
