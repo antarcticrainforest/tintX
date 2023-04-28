@@ -60,7 +60,8 @@ jobs:
           conda run -n test python3 -m pip install -U -e .[tests,docs]
       - name: Setup jupyter kernel
         run: |
-          conda run -n test python -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
+          conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
+          conda run -n test python3 -m bash_kernel.install
       - name: Test with pytest
         env:
           DATA_FILES: ./docs/source/_static/data
