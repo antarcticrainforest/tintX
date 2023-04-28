@@ -85,6 +85,8 @@ meta = dict(
             "bash_kernel",
             "black",
             "flake8",
+            'ipython<8.13.0;python_version<="3.8"',  # # https://github.com/ipython/ipython/issues/14053
+            'ipython;python_version>"3.8"',
             "isort",
             "mypy",
             "nbval",
@@ -97,7 +99,8 @@ meta = dict(
         "docs": [
             "bash_kernel",
             "black",
-            "ipython",
+            'ipython<8.13.0;python_version<="3.8"',  # # https://github.com/ipython/ipython/issues/14053
+            'ipython;python_version>"3.8"',
             "ipywidgets",
             "furo",
             "h5netcdf",
