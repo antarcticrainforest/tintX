@@ -55,14 +55,11 @@ jobs:
       - name: Creating conda environment for python ${{ matrix.python-version }}
         run: |
          conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5
-      - name: Install dependencies
-        run: |
-          conda run -n test python3 -m pip install -U -e .[tests,docs]
       - name: Test with pytest
         env:
           DATA_FILES: ./docs/source/_static/data
         run: |
-          conda run -n test make test_coverage
+          conda run -n test make all
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
