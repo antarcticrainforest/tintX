@@ -28,7 +28,6 @@ class MetaData:
         variable: str,
         coords: dict[str, str],
     ) -> None:
-
         self._time = coords["time_coord"]
         self._x_coord = coords["x_coord"]
         self._y_coord = coords["y_coord"]
@@ -325,7 +324,6 @@ def get_grids(
     times: xr.DataArray,
     varname: str = "rain_rate",
 ) -> Iterator[GridType]:
-
     dims = group[varname].dims
     for s in range(slices[0], slices[-1]):
         time = convert_to_cftime(

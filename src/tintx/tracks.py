@@ -65,7 +65,6 @@ class Cell_tracks:
     """
 
     def __init__(self, field: str = "reflectivity"):
-
         self.field = field
         self.grid_size: Optional[np.ndarray] = None
         self.radar_info: Optional[dict[str, float]] = None
