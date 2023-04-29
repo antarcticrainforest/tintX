@@ -73,7 +73,6 @@ def _get_axes(
 def _gen_from_grids(
     total_num: int, grid_0: GridType, grids: Iterator[GridType]
 ) -> Iterator[GridType]:
-
     with tqdm(total=total_num, desc="Animating", leave=False) as pbar:
         pbar.update()
         yield grid_0
@@ -155,6 +154,7 @@ def full_domain(
     animation = FuncAnimation(
         new_ax.get_figure(),
         partial(_update, title=title),
+        cache_frame_data=False,
         frames=frames,
         interval=1000 / fps,
     )
@@ -175,7 +175,6 @@ def plot_traj(
     color: Optional[str] = None,
     plot_style: Optional[dict[str, Union[float, int, str]]] = None,
 ) -> GeoAxesSubplot:
-
     """This code is a fork of plot_traj method in the plot module from the
     trackpy project see http://soft-matter.github.io/trackpy fro more details
 

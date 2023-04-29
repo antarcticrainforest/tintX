@@ -26,7 +26,6 @@ def tintx(argv: Optional[list[str]] = None, standalone_mode: bool = True) -> Non
 
 
 def _get_file_names(input_paths: tuple[Path, ...]) -> Iterator[Path]:
-
     suffixes = (".nc", ".nc4", ".grb", ".grib")
     for input_path in input_paths:
         if input_path.is_file() and input_path.suffix in suffixes:

@@ -215,7 +215,6 @@ def get_object_prop(
     get_items = []
     for obj in np.arange(nobj) + 1:
         try:
-
             obj_index = np.argwhere(image1 == obj)
             this_centroid = np.round(np.mean(obj_index, axis=0), 3)
             rounded = np.round(this_centroid).astype("i")

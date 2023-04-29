@@ -2,21 +2,23 @@
 #
 #
 export DATA_FILES := $(PWD)/docs/source/_static/data
-all: install test
+all: test_notebooks test_coverage
 
 .PHONY: docs
 install:
-	python3 -m pip install -e .[tests,docs]
+	python3 -m pip install -U -e .[tests,docs]
 	python3 -m bash_kernel.install
 
 test:
 	python3 -m pytest -vv $(PWD)/src/tintx/test
 	rm -rf '='
 
+test_notebooks:
+	python3 -m pytest -vv --nbval-lax $(PWD)/docs/source
 test_coverage:
 	python3 -m pytest -vv \
-	    --cov=$(PWD)/src/tintx --cov-report html:coverage_report \
-		--nbval-lax --current-env --cov-report xml --junitxml report.xml
+		--cov=$(PWD)/src/tintx --cov-report html:coverage_report \
+		--cov-report xml --junitxml report.xml
 	rm -rf '='
 	python3 -m coverage report
 

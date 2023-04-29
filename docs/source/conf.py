@@ -8,6 +8,7 @@
 
 import os
 import sys
+from datetime import date
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 os.environ["FILE_PATH"] = os.path.abspath(os.path.join(".", "_static", "data"))
@@ -15,7 +16,7 @@ from tintx import __version__
 from recommonmark.parser import CommonMarkParser
 
 project = "tintX"
-copyright = "2022, Martin Bergemann"
+copyright = f"{date.today().year}, Martin Bergemann"
 author = "Martin Bergemann"
 release = __version__
 
@@ -42,7 +43,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 html_static_path = ["_static"]
 
 source_parsers = {

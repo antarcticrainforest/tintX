@@ -20,7 +20,6 @@ def test_set_config(data_with_a_blob: xr.Dataset) -> None:
 
 
 def test_get_config() -> None:
-
     from tintx import config
 
     assert config.get("FIELD_THRESH") == config.get("field_thresh") == 32.0
