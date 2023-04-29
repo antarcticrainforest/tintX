@@ -74,10 +74,11 @@ jobs:
   dependabot:
     runs-on: ubuntu-latest
     needs: [tests, lint]
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-    # Specifically check that dependabot (or another trusted party) created this pull-request, and that it has been labelled correctly.
       - name: Dependabot merge into main
+        # Specifically check that dependabot (or another trusted party) created this pull-request, and that it has been labelled correctly.
+        if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
         uses: alexwilson/enable-github-automerge-action@main
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - run: echo ${{ github.event.pull_request.user.login }}
