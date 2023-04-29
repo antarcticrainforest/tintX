@@ -72,6 +72,7 @@ jobs:
         with:
           file: ./report.xml
   dependabot:
+    name: Merge PR by dependabot
     runs-on: ubuntu-latest
     needs: [tests, lint]
     steps:
