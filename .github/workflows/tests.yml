@@ -5,6 +5,7 @@ run-name: ${{ github.actor }} is testing the code
 # Set the access for individual scopes, or use permissions: write-all
 permissions:
   pull-requests: write
+  repository-projects: write
 on:
   push:
     branches: [ master ]
