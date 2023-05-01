@@ -88,13 +88,13 @@ jobs:
         uses: dependabot/fetch-metadata@v1
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Approve dependabot's PR
-        run: gh pr review --approve "$PR_URL"
+      - name: Auto-merge for dependabot's PR
+        run: gh pr merge --auto "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Auto-merge for dependabot's PR
-        run: gh pr merge --auto --merge "$PR_URL"
+      - name: Approve dependabot's PR
+        run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
