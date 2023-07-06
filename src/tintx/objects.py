@@ -266,10 +266,9 @@ def get_object_prop(
             # we have the correct one (with num == 1)
             # see https://github.com/antarcticrainforest/tintX/issues/79
             def get_shape(shapes: Iterator[tuple]) -> Any:
-                shp, sid = next(shapes)
-                while not sid:
-                    shp, sid = next(shapes)
-                return geometry.shape(shp)
+                for shp, sid in shapes:
+                    if sid:
+                       return geometry.shape(shp)
 
             # use safe dtype (uint16) in case of num_cells > 255
             poly.append(
