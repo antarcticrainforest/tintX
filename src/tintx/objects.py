@@ -266,7 +266,9 @@ def get_object_prop(
             # use safe dtype (uint16) in case of num_cells > 255
             poly.append(
                 get_shape(
-                    features.shapes((image1 == obj).astype("uint16"), transform=fwd)
+                    features.shapes(
+                        (image1 == obj).astype("uint16"), transform=fwd
+                    )
                 )
             )
 
