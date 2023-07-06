@@ -268,7 +268,7 @@ def get_object_prop(
             def get_shape(shapes: Iterator[tuple]) -> Any:
                 for shp, sid in shapes:
                     if sid:
-                       return geometry.shape(shp)
+                        return geometry.shape(shp)
 
             # use safe dtype (uint16) in case of num_cells > 255
             poly.append(
