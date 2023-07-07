@@ -263,21 +263,16 @@ def get_object_prop(
             fwd = transform.Affine.from_gdal(*geotransform)
 
             # iterate over shapes (we have only two) until
-            # we have the correct one (with num == 1)
+            # we have the correct one (with sid == 1)
             # see https://github.com/antarcticrainforest/tintX/issues/79
-            def get_shape(shapes: Iterator[tuple]) -> Any:
-                for shp, sid in shapes:
-                    if sid:
-                        return geometry.shape(shp)
-
             # use safe dtype (uint16) in case of num_cells > 255
-            poly.append(
-                get_shape(
-                    features.shapes(
-                        (image1 == obj).astype("uint16"), transform=fwd
-                    )
+            poly += [
+                geometry.shape(shp)
+                for (shp, sid) in features.shapes(
+                    (image1 == obj).astype("uint16"), transform=fwd
                 )
-            )
+                if sid
+            ]
 
             get_items.append(obj - 1)
         except IndexError:
