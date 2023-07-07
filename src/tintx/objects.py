@@ -7,7 +7,7 @@ Functions for managing and recording object properties.
 """
 from __future__ import annotations
 
-from typing import Any, Iterator, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
