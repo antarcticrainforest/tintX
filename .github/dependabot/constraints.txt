@@ -4,7 +4,7 @@ click==8.1.6
 pandas<2.0.4
 matplotlib==3.7.2
 netCDF4==1.6.4
-numpy==1.25.1
+numpy==1.25.2
 scipy==1.11.1
 tqdm==4.66.0
 tables==3.8.0
