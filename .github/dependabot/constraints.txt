@@ -6,6 +6,6 @@ matplotlib==3.7.2
 netCDF4==1.6.4
 numpy==1.25.1
 scipy==1.11.1
-tqdm==4.65.0
+tqdm==4.66.0
 tables==3.8.0
 xarray==2023.7.0
