@@ -30,13 +30,19 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment for python 3.12
         run: |
-         conda create -n test -c conda-forge -y python=3.12 pip cartopy make
+         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5 pandoc tox
       - name: Install dependencies
         run: |
-          conda run -n test python3 -m pip install -U -e .[dev]
-      - name: Linting the code
+          conda run -n test python3 -m pip install -U -e .[tests]
+      - name: Setup jupyter kernel
         run: |
-          conda run -n test tox -e lint
+          conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
+          conda run -n test python3 -m bash_kernel.install
+      - name: Linting the code
+        env:
+          DATA_FILES: ./docs/source/_static/data
+        run: |
+          conda run -n test tox -p -e lint,docs
   tests:
     name: tintX tests
     runs-on: ubuntu-latest
@@ -71,7 +77,7 @@ jobs:
         env:
           DATA_FILES: ./docs/source/_static/data
         run: |
-          conda run -n test tox -p -e tests,docs
+          conda run -n test tox -e tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
