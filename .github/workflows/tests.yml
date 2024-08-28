@@ -59,10 +59,10 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment for python ${{ matrix.python-version }}
         run: |
-         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5 pandoc
+         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5 pandoc tox
       - name: Install dependencies
         run: |
-          conda run -n test python3 -m pip install -U -e .[dev]
+          conda run -n test python3 -m pip install -U -e .[tests]
       - name: Setup jupyter kernel
         run: |
           conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
