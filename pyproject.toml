@@ -133,13 +133,6 @@ select = "E9, F63, F7, F82"
 [tool.flake8.per-file-ignores]
 "tests/*.py" = "E501, F401"
 
-[tool.coverage.run]
-omit = ["tests/*", "*/__init__.py"]
-concurrency = ["multiprocessing"]
-
-[tool.coverage.report]
-exclude_lines = ["pragma: no cover"]
-
 
 [tool.tox]
 legacy_tox_ini = """

@@ -76,7 +76,6 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./report.xml
           verbose: true
   dependabot:
     name: Merge PR by dependabot

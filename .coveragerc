@@ -1,0 +1,39 @@
+# .coveragerc to control coverage.py
+[run]
+branch = False
+omit = .converage*
+       */tests/*
+       */__main__.py
+concurrency = multiprocessing
+[report]
+fail_under = 97
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
+    def _post_url(self)
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+    except KeyboardInterrupt:
+    except ImportError:
+    except RuntimeError
+    raise SystemExit
+
+    # Don't complain about the Completer class
+    class Completer
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if perf_file *:
+    p_col = *
+    f_col = *
+    q_col = *
+    if __name__ == .__main__.:
+
+ignore_errors = False
