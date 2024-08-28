@@ -14,6 +14,6 @@ from tintx import config  # noqa: F401
 
 from .reader import RunDirectory
 
-__all__ = ["RunDirectory"]
+__all__ = ["RunDirectory", "config"]
 
-__version__ = "2022.12.2"
+__version__ = "2024.08.1"
