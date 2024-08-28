@@ -33,7 +33,7 @@ jobs:
          conda create -n test -c conda-forge -y python=3.12 pip cartopy make
       - name: Install dependencies
         run: |
-          conda run -n test python3 -m pip install -U -e .[tests]
+          conda run -n test python3 -m pip install -U -e .[dev]
       - name: Linting the code
         run: |
           conda run -n test tox -e lint
@@ -46,7 +46,7 @@ jobs:
     strategy:
         max-parallel: 5
         matrix:
-          python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+          python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         fail-fast: false
     steps:
       - name: Checkout
@@ -62,7 +62,7 @@ jobs:
          conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5 pandoc
       - name: Install dependencies
         run: |
-          conda run -n test python3 -m pip install -U -e .[tests,docs]
+          conda run -n test python3 -m pip install -U -e .[dev]
       - name: Setup jupyter kernel
         run: |
           conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
