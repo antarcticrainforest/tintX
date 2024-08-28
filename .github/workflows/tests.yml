@@ -28,15 +28,15 @@ jobs:
         run: |
          # $CONDA is an environment variable pointing to the root of the miniconda directory
           echo $CONDA/bin >> $GITHUB_PATH
-      - name: Creating conda environment for python 3.11
+      - name: Creating conda environment for python 3.12
         run: |
-         conda create -n test -c conda-forge -y python=3.11 pip cartopy make
+         conda create -n test -c conda-forge -y python=3.12 pip cartopy make
       - name: Install dependencies
         run: |
           conda run -n test python3 -m pip install -U -e .[tests]
       - name: Linting the code
         run: |
-          conda run -n test make lint
+          conda run -n test tox -e lint
   tests:
     name: tintX tests
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
     strategy:
         max-parallel: 5
         matrix:
-          python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+          python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
         fail-fast: false
     steps:
       - name: Checkout
@@ -59,7 +59,7 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment for python ${{ matrix.python-version }}
         run: |
-         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5
+         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5 pandoc
       - name: Install dependencies
         run: |
           conda run -n test python3 -m pip install -U -e .[tests,docs]
@@ -71,11 +71,13 @@ jobs:
         env:
           DATA_FILES: ./docs/source/_static/data
         run: |
-          conda run -n test make all
+          conda run -n test tox -p -e tests,docs
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./report.xml
+          verbose: true
   dependabot:
     name: Merge PR by dependabot
     runs-on: ubuntu-latest
