@@ -10,7 +10,7 @@ install:
 	python3 -m bash_kernel.install
 
 test:
-	python3 -m pytest -vv $(PWD)/src/tintx/test
+	python3 -m pytest -vv $(PWD)/tests
 	rm -rf '='
 
 test_notebooks:

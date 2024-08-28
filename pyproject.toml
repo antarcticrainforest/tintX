@@ -34,7 +34,7 @@ dependencies = [
     "geopandas",
     "matplotlib",
     "netCDF4",
-    "numpy",
+    "numpy<2.0",
     "pandas",
     "rasterio",
     "scipy",
