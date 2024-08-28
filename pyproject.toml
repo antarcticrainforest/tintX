@@ -149,7 +149,7 @@ min_version = 4.0
 env_list = docs, lint, tests
 [testenv]
 passenv = *
-parallel_show_output = false
+parallel_show_output = true
 [testenv:tests]
 package = editable
 description = "Run unit tests."
