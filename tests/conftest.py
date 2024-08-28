@@ -1,4 +1,5 @@
 """pytest definitions to run the unittests."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -71,7 +72,7 @@ def data_with_a_blob() -> Generator[xr.Dataset, None, None]:
 def real_data_files() -> Generator[Path, None, None]:
     """Return the path where real data resides."""
     this_dir = Path(__file__).absolute().parent
-    data_dir = this_dir.parent.parent.parent
+    data_dir = this_dir.parent
     yield data_dir / "docs" / "source" / "_static" / "data"
 
 

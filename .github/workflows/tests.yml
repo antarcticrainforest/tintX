@@ -28,15 +28,18 @@ jobs:
         run: |
          # $CONDA is an environment variable pointing to the root of the miniconda directory
           echo $CONDA/bin >> $GITHUB_PATH
-      - name: Creating conda environment for python 3.11
+      - name: Creating conda environment
         run: |
-         conda create -n test -c conda-forge -y python=3.11 pip cartopy make
-      - name: Install dependencies
+         conda create -n test -c conda-forge -y ipykernel bash_kernel ffmpeg cartopy make pandoc tox
+      - name: Setup jupyter kernel
         run: |
-          conda run -n test python3 -m pip install -U -e .[tests]
+          conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
+          conda run -n test python3 -m bash_kernel.install
       - name: Linting the code
+        env:
+          DATA_FILES: ./docs/source/_static/data
         run: |
-          conda run -n test make lint
+          conda run -n test tox --parallel-no-spinner -p -e lint,docs
   tests:
     name: tintX tests
     runs-on: ubuntu-latest
@@ -46,7 +49,7 @@ jobs:
     strategy:
         max-parallel: 5
         matrix:
-          python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+          python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         fail-fast: false
     steps:
       - name: Checkout
@@ -59,10 +62,7 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment for python ${{ matrix.python-version }}
         run: |
-         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ffmpeg pip cartopy make hdf5
-      - name: Install dependencies
-        run: |
-          conda run -n test python3 -m pip install -U -e .[tests,docs]
+         conda create -n test -c conda-forge -y python=${{matrix.python-version}} ipykernel bash_kernel ffmpeg cartopy make pandoc tox
       - name: Setup jupyter kernel
         run: |
           conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
@@ -71,11 +71,12 @@ jobs:
         env:
           DATA_FILES: ./docs/source/_static/data
         run: |
-          conda run -n test make all
+          conda run -n test tox -e tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: ./report.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
   dependabot:
     name: Merge PR by dependabot
     runs-on: ubuntu-latest

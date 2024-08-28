@@ -2,11 +2,12 @@ name: tintx
 channels:
   - conda-forge
 dependencies:
-  - python=3.11
+  - python=3.12
   - ipython
   - tintx
   - geopandas
   - hdf5
+  - pandoc
   - pip
   - pip:
       - furo
