@@ -261,16 +261,18 @@ def get_object_prop(
                 ygrid_diff,
             )
             fwd = transform.Affine.from_gdal(*geotransform)
-            # use safe dtype in case of num_cells > 255
-            poly.append(
-                geometry.shape(
-                    next(
-                        features.shapes(
-                            (image1 == obj).astype("uint16"), transform=fwd
-                        )
-                    )[0]
+
+            # iterate over shapes (we have only two) until
+            # we have the correct one (with sid == 1)
+            # see https://github.com/antarcticrainforest/tintX/issues/79
+            # use safe dtype (uint16) in case of num_cells > 255
+            poly += [
+                geometry.shape(shp)
+                for (shp, sid) in features.shapes(
+                    (image1 == obj).astype("uint16"), transform=fwd
                 )
-            )
+                if sid
+            ]
 
             get_items.append(obj - 1)
         except IndexError:

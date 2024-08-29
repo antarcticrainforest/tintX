@@ -163,4 +163,4 @@ Visualising the tracked data
    Module :py:mod:`cartopy`
         How to visualise geo spatial data with `cartopy <https://scitools.org.uk/cartopy/docs/latest>`_
    Class :py:mod:`matplotlib.animation.FuncAnimation`
-        How to make use of the ojbect created by `FuncAnimation <https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.FuncAnimation.html>`_
+        How to make use of the object created by `FuncAnimation <https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.FuncAnimation.html>`_

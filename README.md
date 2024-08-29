@@ -48,12 +48,11 @@ possible to tintX:
 
 - [ ] Create a fork of [this repository](https://github.com/antarcticrainforest/tintX)
      and clone this fork (not the original code)
+- [ ] Install the code in development mode: `python3 -m pip install -e .[dev]`
 - [ ] Create a new branch in the forked repository `git checkout -b my-new-branch`
 - [ ] Add your changes
 - [ ] Make sure all tests are sill running. To do so run the following commands
-    - make lint
-    - make test
-    - make docs
+    - tox
 - [ ] Create a new pull request to the `main` branch of the
      [original repository](https://github.com/antarcticrainforest/tintX).
 ### Adding new Jupyter examples

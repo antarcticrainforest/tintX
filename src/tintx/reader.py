@@ -1,5 +1,6 @@
 """The :class:`RunDirectory` class is a convenience class to  access and apply
 the tint tracking algorithm."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Any, Iterator, Optional, Union
 
 import geopandas as gpd
+import matplotlib as mpl
 import pandas as pd
 import pyproj
 import xarray as xr
@@ -425,9 +427,7 @@ class RunDirectory(Cell_tracks):
         cls_instance.reset_tracks(tracks)
         return cls_instance
 
-    def get_parameters(
-        self, tracks: Optional[pd.DataFrame] = None
-    ) -> dict[str, float]:
+    def get_parameters(self, tracks: Optional[pd.DataFrame] = None) -> dict[str, float]:
         """Get the parameters of given cell tracks.
 
         Parameters
@@ -535,7 +535,7 @@ class RunDirectory(Cell_tracks):
         vmin: float = 0.01,
         vmax: float = 15,
         ax: Optional[GeoAxesSubplot] = None,
-        cmap: Union[str, plt.cm] = "Blues",
+        cmap: Union[str, mpl.colors.Colormap] = "Blues",
         alt: Optional[float] = None,
         fps: float = 5,
         isolated_only: bool = False,
@@ -590,7 +590,7 @@ class RunDirectory(Cell_tracks):
                 "radar_estimated_rain_rate", x_coord="x", y_coord="y"
             )
             run.get_tracks(min_size=4, field_thresh=2)
-            anim = run.animate(vmax=3, fps=2, plot_style={"res": "10m", "lw":1})
+            anim = run.animate(vmax=3, fps=2, plot_style={"lw":1})
 
         """
         return full_domain(
