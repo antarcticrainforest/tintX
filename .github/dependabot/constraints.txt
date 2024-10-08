@@ -1,4 +1,4 @@
-cartopy==0.23.0
+cartopy==0.24.0
 cftime==1.6.4
 click==8.1.7
 pandas<2.2.4
