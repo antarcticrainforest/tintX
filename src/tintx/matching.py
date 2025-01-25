@@ -5,6 +5,7 @@ tint.matching
 Functions for object matching between adjacent radar scans.
 
 """
+
 from __future__ import annotations
 
 from datetime import timedelta
@@ -31,22 +32,19 @@ def euclidean_dist(vec1: np.ndarray, vec2: np.ndarray) -> float:
 
 
 @overload
-def get_size_change(size1: float, size2: float) -> float:
-    ...  # pragma: no cover
+def get_size_change(size1: float, size2: float) -> float: ...  # pragma: no cover
 
 
 @overload
 def get_size_change(
     size1: Union[float, np.ndarray], size2: np.ndarray
-) -> np.ndarray:
-    ...  # pragma: no cover
+) -> np.ndarray: ...  # pragma: no cover
 
 
 @overload
 def get_size_change(
     size1: np.ndarray, size2: Union[float, np.ndarray]
-) -> np.ndarray:
-    ...  # pragma: no cover
+) -> np.ndarray: ...  # pragma: no cover
 
 
 def get_size_change(

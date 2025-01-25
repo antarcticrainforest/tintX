@@ -3,6 +3,7 @@ tint.helpers
 ============
 
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -111,9 +112,9 @@ class MetaData:
         x_coords_attrs = buffer.get_storer("x_coord").attrs.attrs.copy()
         y_coords_attrs = buffer.get_storer("y_coord").attrs.attrs.copy()
         var_attrs = storer_obj.attrs.var_attrs.copy()
-        var_attrs[
-            "history"
-        ] = f"{datetime.now().isoformat()}: Created empty dataset"
+        var_attrs["history"] = (
+            f"{datetime.now().isoformat()}: Created empty dataset"
+        )
         coord_attrs = storer_obj.attrs.dim_attrs.copy()
         time_coord = var_attrs.pop("time_coord")
         metadata = buffer.get_storer("tintx_tracks").attrs.track_meta.copy()

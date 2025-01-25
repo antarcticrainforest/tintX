@@ -5,6 +5,7 @@ tint.objects
 Functions for managing and recording object properties.
 
 """
+
 from __future__ import annotations
 
 from typing import Union

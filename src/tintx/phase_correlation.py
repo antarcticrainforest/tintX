@@ -6,12 +6,13 @@ Functions for performing phase correlation. Used to predict cell movement
 between scans.
 
 """
+
 from __future__ import annotations
 
 from typing import Optional, Union, overload
 
 import numpy as np
-from scipy import ndimage
+from scipy.ndimage import gaussian_filter
 from typing_extensions import Literal
 
 from .types import ConfigType
@@ -61,8 +62,8 @@ def fft_flowvectors(
         return None
 
     crosscov = fft_crosscov(im1, im2)
-    sigma = (1 / 8) * min(crosscov.shape)
-    cov_smooth = ndimage.gaussian_filter(crosscov, sigma)
+    sigma = (1.0 / 8.0) * min(crosscov.shape)
+    cov_smooth = gaussian_filter(crosscov, sigma)
     dims = np.array(im1.shape)
     pshift = np.argwhere(cov_smooth == np.max(cov_smooth))[0]
     pshift = (pshift + 1) - np.round(dims / 2, 0)
@@ -77,8 +78,7 @@ def fft_crosscov(im1: np.ndarray, im2: np.ndarray) -> np.ndarray:
     normalize[normalize == 0] = 1  # prevent divide by zero error
     cross_power_spectrum = (fft2 * fft1_conj) / normalize
     crosscov = np.fft.ifft2(cross_power_spectrum)
-    crosscov = np.real(crosscov)
-    return fft_shift(crosscov)
+    return fft_shift(np.real(crosscov))
 
 
 def fft_shift(fft_mat: np.ndarray) -> np.ndarray:
@@ -98,23 +98,27 @@ def fft_shift(fft_mat: np.ndarray) -> np.ndarray:
 
 
 @overload
-def get_global_shift(im1: Literal[None], im2: Literal[None]) -> None:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: Literal[None], im2: Literal[None]
+) -> None: ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: np.ndarray, im2: Literal[None]) -> None:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: np.ndarray, im2: Literal[None]
+) -> None: ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: Literal[None], im2: np.ndarray) -> None:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: Literal[None], im2: np.ndarray
+) -> None: ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: np.ndarray, im2: np.ndarray) -> float:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: np.ndarray, im2: np.ndarray
+) -> float: ...  # pragma: no cover
 
 
 def get_global_shift(
@@ -124,5 +128,4 @@ def get_global_shift(
     of raw DBZ values."""
     if im2 is None or im1 is None:
         return None
-    shift = fft_flowvectors(im1, im2, global_shift=True)
-    return shift
+    return fft_flowvectors(im1, im2, global_shift=True)

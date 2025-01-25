@@ -1,4 +1,5 @@
 """Collection of all type definitions used for type hinting."""
+
 from __future__ import annotations
 
 from typing import List, NamedTuple, Union
