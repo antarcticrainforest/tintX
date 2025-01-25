@@ -1,0 +1,30 @@
+[package]
+name = "tintx_core"
+version = "2025.1.1"
+edition = "2021"
+
+[dependencies]
+numpy = "0.23"
+libblur = "0.14"
+rayon = "1.7"
+thiserror = "2.0"
+ndarray = "0.16"
+rustfft = "6.2"
+fft2d = "0.1"
+
+pyo3 = { version = "0.23", features = ["extension-module"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[package.metadata.maturin]
+name = "tintx_core"
+
+[profile.release]
+lto = "thin"               # Link-Time Optimization for smaller, faster binaries
+codegen-units = 1         # Fewer codegen units for better optimization
+opt-level = 3             # Maximum optimization level
+debug = false             # Disable debug info for smaller binaries
+panic = "unwind"
+overflow-checks = true
+strip = "debuginfo"

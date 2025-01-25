@@ -12,3 +12,7 @@ coverage.xml
 dist
 !docs/build/.empty
 docs/build/*
+tintx_core/Cargo.lock
+tintx_core/benchmark_*
+tintx_core/target
+tintx_core/*.py
