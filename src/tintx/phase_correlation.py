@@ -6,6 +6,7 @@ Functions for performing phase correlation. Used to predict cell movement
 between scans.
 
 """
+
 from __future__ import annotations
 
 from typing import Optional, Union, overload
@@ -43,7 +44,7 @@ def get_ambient_flow(
     row_lb = np.max([row_lb, 0])
     row_ub = np.min([row_ub, dims[0]])
     col_lb = np.max([col_lb, 0])
-    col_ub = np.max([col_ub, dims[1]])
+    col_ub = np.min([col_ub, dims[1]])
 
     flow_region1 = np.copy(img1[row_lb : row_ub + 1, col_lb : col_ub + 1])
     flow_region2 = np.copy(img2[row_lb : row_ub + 1, col_lb : col_ub + 1])
@@ -98,23 +99,27 @@ def fft_shift(fft_mat: np.ndarray) -> np.ndarray:
 
 
 @overload
-def get_global_shift(im1: Literal[None], im2: Literal[None]) -> None:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: Literal[None], im2: Literal[None]
+) -> None: ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: np.ndarray, im2: Literal[None]) -> None:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: np.ndarray, im2: Literal[None]
+) -> None: ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: Literal[None], im2: np.ndarray) -> None:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: Literal[None], im2: np.ndarray
+) -> None: ...  # pragma: no cover
 
 
 @overload
-def get_global_shift(im1: np.ndarray, im2: np.ndarray) -> float:
-    ...  # pragma: no cover
+def get_global_shift(
+    im1: np.ndarray, im2: np.ndarray
+) -> float: ...  # pragma: no cover
 
 
 def get_global_shift(
