@@ -7,13 +7,20 @@ import pytest
 import xarray as xr
 
 
-def test_animation(data_with_a_blob: xr.Dataset) -> None:
+def test_animation(real_data_files: xr.Dataset) -> None:
     """Simple test for creating animations."""
 
     from tintx import RunDirectory
 
-    rd = RunDirectory(data_with_a_blob, "precip", x_coord="x", y_coord="y")
-    _ = rd.get_tracks(field_thresh=0)
+    rd = RunDirectory.from_files(
+        real_data_files / "CPOL_radar.nc",
+        "radar_estimated_rain_rate",
+        start="2006-11-16T03:00:00",
+        end="2006-11-16T11:00:00",
+        x_coord="longitude",
+        y_coord="latitude",
+    )
+    _ = rd.get_tracks(field_thresh=0.1)
     animation = rd.animate(tracers=True, plot_style={"title": "test"})
     with TemporaryDirectory() as temp_dir:
         animation.save(Path(temp_dir) / "test.gif")
