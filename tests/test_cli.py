@@ -15,7 +15,7 @@ def test_help() -> None:
         tintx()
 
 
-def test_tracking_and_plotting(netcdf_files_with_blob: Path) -> None:
+def test_tracking_and_plotting(real_data_files: Path) -> None:
     """Test plotting and tracking."""
 
     from tintx.cli import tintx
@@ -25,11 +25,13 @@ def test_tracking_and_plotting(netcdf_files_with_blob: Path) -> None:
         tintx(
             [
                 "track",
-                "precip",
-                str(netcdf_files_with_blob),
-                "--x-coord=x",
-                "--y-coord=y",
-                "--field-thresh=0",
+                "radar_estimated_rain_rate",
+                str(real_data_files / "CPOL_radar.nc"),
+                "--x-coord=longitude",
+                "--y-coord=latitude",
+                "--field-thresh=0.1",
+                "--start=2006-11-16T03:00:00",
+                "--end=2006-11-16T11:00:00",
                 f"--output={save_file}",
             ],
             standalone_mode=False,

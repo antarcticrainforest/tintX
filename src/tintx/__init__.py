@@ -16,4 +16,4 @@ from .reader import RunDirectory
 
 __all__ = ["RunDirectory", "config"]
 
-__version__ = "2024.08.1"
+__version__ = "2025.05.1"

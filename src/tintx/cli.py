@@ -1,10 +1,12 @@
 """Command line interface for tintX tracking."""
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Any, Iterator, Optional
 
 import click
+import xarray as xr
 
 from tintx import RunDirectory, __version__, config
 
@@ -304,6 +306,11 @@ def track(
         Filename(s) or Directory where the data is stored.
     """
     with config.set(**parameters):
+        kwargs: dict[str, Any] = {}
+        try:
+            kwargs["decode_times"] = xr.coders.CFDatetimeCoder(use_cftime=True)
+        except AttributeError:
+            kwargs["use_cftime"] = True
         run_d = RunDirectory.from_files(
             _get_file_names(input_files),
             variable,
@@ -312,8 +319,8 @@ def track(
             x_coord=x_coord,
             y_coord=y_coord,
             time_coord=time_coord,
-            use_cftime=True,
             combine="by_coords",
+            **kwargs,
         )
         time_suffix = (
             f'{run_d.start.strftime("%Y%m%dT%H%M")}-'
