@@ -30,7 +30,7 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Creating conda environment
         run: |
-         conda create -n test -c conda-forge -y ipykernel bash_kernel ffmpeg cartopy make pandoc tox gdal
+         conda create -n test -c conda-forge -y ipykernel bash_kernel ffmpeg cartopy make pandoc tox gdal hdf5
       - name: Setup jupyter kernel
         run: |
           conda run -n test python3 -m ipykernel install --name tintx --display-name "tintX kernel" --env DATA_FILES ${PWD}/docs/source/_static/data --user
