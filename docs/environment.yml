@@ -9,6 +9,7 @@ dependencies:
   - hdf5
   - pandoc
   - pip
+  - gdal
   - pip:
       - furo
       - sphinx-execute-code-python3
