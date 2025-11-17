@@ -1,6 +1,6 @@
 cartopy==0.25.0
 cftime==1.6.5
-click==8.3.0
+click==8.3.1
 pandas<2.3.4
 matplotlib==3.10.7
 netCDF4==1.7.3
